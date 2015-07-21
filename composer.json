@@ -1,0 +1,25 @@
+{
+    "name": "byjg/cache-engine",
+    "description": "A multi-purpose cache engine in PHP.",
+    "authors": [
+        {
+            "name": "João Gilberto Magalhães",
+            "email": "joao@byjg.com.br"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ByJG\\Cache\\": "src/"
+        }
+    },
+    "require": {
+		"php": ">=5.4.0", 
+        "monolog/monolog": "1.*", 
+        "byjg/singleton-pattern": "~1.0", 
+        "sheikhheera/iconfig": "dev-master"
+    }, 
+    "suggests": {
+		"ext-memcached": "*"
+	},
+    "license": "MIT"
+}
