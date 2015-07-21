@@ -45,7 +45,7 @@ class MemcachedEngine implements ICacheEngine
 
 	protected function __construct()
 	{
-        $config = HttpContext::getInstance()->getMemcachedConfig();
+        $config = CacheContext::getInstance()->getMemcachedConfig();
 
 		if (empty($config) || !isset($config['servers'])) {
 			throw new InvalidArgumentException("You have to configure the memcached servers in the file 'config/cacheconfig.php'");
@@ -75,13 +75,13 @@ class MemcachedEngine implements ICacheEngine
 	public function get($key, $ttl = 0)
 	{
 		$log = LogHandler::getInstance();
-		if (HttpContext::getInstance()->getReset())
+		if (CacheContext::getInstance()->getReset())
 		{
 			$log->info("[Cache] Get $key failed because RESET=true");
 			return false;
 		}
 
-		if (HttpContext::getInstance()->getNoCache())
+		if (CacheContext::getInstance()->getNoCache())
 		{
 			$log->info("[Cache] Failed to get $key because NOCACHE=true");
 			return false;
@@ -107,7 +107,7 @@ class MemcachedEngine implements ICacheEngine
 	{
 		$log = LogHandler::getInstance();
 
-		if (!HttpContext::getInstance()->getNoCache())
+		if (!CacheContext::getInstance()->getNoCache())
 		{
             $this->_memCached->set($key, $object, $ttl);
 			$log->info("[Cache] Set '$key' result " . $this->_memCached->getResultCode());
@@ -144,7 +144,7 @@ class MemcachedEngine implements ICacheEngine
 	{
 		$log = LogHandler::getInstance();
 
-		if (!HttpContext::getInstance()->getNoCache())
+		if (!CacheContext::getInstance()->getNoCache())
 		{
 			$log->info("[Cache] Append '$key' in Memcached");
 			return $this->_memCached->append($key, $str);

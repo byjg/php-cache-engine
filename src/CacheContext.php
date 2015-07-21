@@ -9,11 +9,11 @@
 namespace ByJG\Cache;
 
 /**
- * Description of HttpContext
+ * Description of CacheContext
  *
  * @author jg
  */
-class HttpContext
+class CacheContext
 {
     use \ByJG\DesignPattern\Singleton;
 

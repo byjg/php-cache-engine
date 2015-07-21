@@ -1,84 +1,68 @@
-# Web Request
-[![Build Status](https://travis-ci.org/byjg/webrequest.svg?branch=master)](https://travis-ci.org/byjg/webrequest)
-[![Build Status](https://drone.io/github.com/byjg/webrequest/status.png)](https://drone.io/github.com/byjg/webrequest/latest)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/7cfbd581-fdb6-405d-be0a-afee0f70d30c/mini.png)](https://insight.sensiolabs.com/projects/7cfbd581-fdb6-405d-be0a-afee0f70d30c)
+# Cache Engine
 
 ## Description
 
-A lightweight and highly customized CURL wrapper for making RESt calls and a wrapper for call dynamically SOAP requests.
-Just one class and no dependencies. 
+A multi-purpose cache engine in PHP.
 
 ## Examples
+
+### Using Factory
+
+This option will get the engine from the config file. See below.
+
+```php
+$cacheEngine = \ByJG\Cache\CacheContext::factory();
+```
+
+### Instantiate directly
+
+```php
+$cacheEngine = \ByJG\Cache\FileSystemCacheEngine::getInstace();
+```
 
 ### Basic Usage
 
 ```php
-$webRequest = new WebRequest('http://www.example.com/page');
-$result = $webRequest->get();
-//$result = $webRequest->post();
-//$result = $webRequest->delete();
-//$result = $webRequest->put();
+$result = $cacheEngine->get($key, 60);
+if ($result === false)
+{
+    // Do the operations will be cached
+    // ....
+    // And set variable result
+    $result = ...;
+
+    // Set the cache:
+    $cacheEngine->set($key, $result, 60);
+}
+return $result;
 ```
-
-### Passing arguments
-
-```php
-$webRequest = new WebRequest('http://www.example.com/page');
-$result = $webRequest->get(['param'=>'value']);
-//$result = $webRequest->post(['param'=>'value']);
-//$result = $webRequest->delete(['param'=>'value']);
-//$result = $webRequest->put(['param'=>'value']);
-```
-
-### Passing a string payload (JSON)
-
-```php
-$webRequest = new WebRequest('http://www.example.com/page');
-$result = $webRequest->postPayload('{teste: "value"}', 'application/json');
-//$result = $webRequest->putPayload('{teste: "value"}', 'application/json');
-//$result = $webRequest->deletePayload('{teste: "value"}', 'application/json');
-```
-
-### Setting Custom CURL PARAMETER
-
-```php
-$webRequest = new WebRequest('http://www.example.com/page');
-$webRequest->setCurlOption(CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)');
-$result = $webRequest->get();
-```
-
-### Calling Soap Classes
-
-```php
-$webRequest = new WebRequest('http://www.example.com/soap');
-$resutl = $webRequest->soapCall('soapMethod', ['arg1' => 'value']);
-```
-
 
 ## Install
 
-Just type: `composer install "byjg/webrequest=1.0.0"`
+Just type: `composer require "byjg/cache-engine~1.0"`
 
-## Running Tests
+## Setup the config
 
-### Starting the server
-
-```php
-cd tests
-php -S localhost:8080 -t server & 
-```
-
-**Note:** It is more assertive create a webserver with the server folder instead to use the PHP built-in webserver.
-
-### Running the integration tests
+You need to have a file named 'config/cacheconfig.php' with the follow contents:
 
 ```php
-cd tests
-phpunit --bootstrap bootstrap.php src/WebRequestTest.php 
+return [
+    'default' => '\\ByJG\\Cache\\NoCacheEngine',
+    'memcached' => [
+        'servers' => [
+            '127.0.0.1:11211'
+        ]
+    ]
+];
 ```
 
-### Stopping the server
 
-```php
-killall -9 php
-```
+## Avaible cache engines
+
+* \ByJG\Cache\NoCacheEngine: Do nothing. Use it for disable the cache without change your code;
+* \ByJG\Cache\ArrayCacheEngine: Local cache only using array. It does not persists between requests;
+* \ByJG\Cache\FileSystemCacheEngine: Save the cache result in the local file system;
+* \ByJG\Cache\MemcachedEngine: Uses the Memcached as the cache engine
+* \ByJG\Cache\ShmopCachedEngine: uses the shared memory area for cache;
+
+## 

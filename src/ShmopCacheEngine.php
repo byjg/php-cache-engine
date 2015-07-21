@@ -88,12 +88,12 @@ class ShmopCacheEngine implements ICacheEngine
 			return false;
 		}
 
-		if (HttpContext::getInstance()->getReset())
+		if (CacheContext::getInstance()->getReset())
 		{
 			$log->info("[Cache] Failed to get $key because RESET=true");
 			return false;
 		}
-		if (HttpContext::getInstance()->getNoCache())
+		if (CacheContext::getInstance()->getNoCache())
 		{
 			$log->info("[Cache] Failed to get $key because NOCACHE=true");
 			return false;

@@ -2,9 +2,9 @@
 
 require "vendor/autoload.php";
 
-$cacheEngine = \ByJG\Cache\HttpContext::factory();
+$cacheEngine = \ByJG\Cache\CacheContext::factory();
 
-var_dump(\ByJG\Cache\HttpContext::getInstance()->getMemcachedConfig());
+var_dump(\ByJG\Cache\CacheContext::getInstance()->getMemcachedConfig());
 
 // ------------------
 
