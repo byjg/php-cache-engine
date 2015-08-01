@@ -65,4 +65,7 @@ return [
 * \ByJG\Cache\MemcachedEngine: Uses the Memcached as the cache engine
 * \ByJG\Cache\ShmopCachedEngine: uses the shared memory area for cache;
 
-## 
+
+
+----
+[Open source ByJG](http://opensource.byjg.com)
