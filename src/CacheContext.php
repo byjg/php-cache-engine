@@ -66,12 +66,14 @@ class CacheContext
     {
         $result = $this->config->getCacheconfig("$key.instance");
         if (is_null($result)) {
-            throw new \Exception("The cache config 'default' was not found");
+            throw new \Exception("The cache config '$key' was not found");
         }
         $resultPrep = str_replace('.', '\\', $result);
 
-        return $resultPrep::getInstance();
+        $instance = $resultPrep::getInstance();
+        $instance->configKey = $key; // This is not in the interface;
 
+        return $instance;
     }
 
     public function getMemcachedConfig($key = "default")

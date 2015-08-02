@@ -45,27 +45,34 @@ class MemcachedEngine implements CacheEngineInterface
 
 	protected function __construct()
 	{
-        $config = CacheContext::getInstance()->getMemcachedConfig();
+	}
 
-		if (empty($config) || !isset($config['servers'])) {
-			throw new InvalidArgumentException("You have to configure the memcached servers in the file 'config/cacheconfig.php'");
-		}
-
-        $servers = $config['servers'];
-
-        $this->_memCached = new Memcached();
-        foreach ($servers as $server)
+    protected function lazyLoadMemCachedServers()
+    {
+        if (is_null($this->_memCached))
         {
-            $data = explode(":", $server);
-            $this->_memCached->addServer($data[0], $data[1]);
+            $config = CacheContext::getInstance()->getMemcachedConfig(isset($this->configKey) ? $this->configKey : 'default');
 
-            $stats = $this->_memCached->getStats();
-            if (!isset($stats[$server]) || $stats[$server]['pid'] === -1)
+            if (empty($config) || !isset($config['servers'])) {
+                throw new InvalidArgumentException("You have to configure the memcached servers in the file 'config/cacheconfig.php'");
+            }
+
+            $servers = $config['servers'];
+
+            $this->_memCached = new Memcached();
+            foreach ($servers as $server)
             {
-                throw new \Exception("Memcached server $server is down");
+                $data = explode(":", $server);
+                $this->_memCached->addServer($data[0], $data[1]);
+
+                $stats = $this->_memCached->getStats();
+                if (!isset($stats[$server]) || $stats[$server]['pid'] === -1)
+                {
+                    throw new \Exception("Memcached server $server is down");
+                }
             }
         }
-	}
+    }
 
 	/**
 	 * @param string $key The object KEY
@@ -74,6 +81,8 @@ class MemcachedEngine implements CacheEngineInterface
 	 */
 	public function get($key, $ttl = 0)
 	{
+        $this->lazyLoadMemCachedServers();
+
 		$log = LogHandler::getInstance();
 		if (CacheContext::getInstance()->getReset())
 		{
@@ -105,6 +114,8 @@ class MemcachedEngine implements CacheEngineInterface
 	 */
 	public function set($key, $object, $ttl = 0)
 	{
+        $this->lazyLoadMemCachedServers();
+
 		$log = LogHandler::getInstance();
 
 		if (!CacheContext::getInstance()->getNoCache())
@@ -131,6 +142,8 @@ class MemcachedEngine implements CacheEngineInterface
 	 */
 	public function release($key)
 	{
+        $this->lazyLoadMemCachedServers();
+
 		$this->_memCached->delete($key);
 	}
 
@@ -142,6 +155,8 @@ class MemcachedEngine implements CacheEngineInterface
 	 */
 	public function append($key, $str)
 	{
+        $this->lazyLoadMemCachedServers();
+
 		$log = LogHandler::getInstance();
 
 		if (!CacheContext::getInstance()->getNoCache())
@@ -162,6 +177,8 @@ class MemcachedEngine implements CacheEngineInterface
 	 */
 	public function lock($key)
 	{
+        $this->lazyLoadMemCachedServers();
+
 		return;
 	}
 
@@ -171,6 +188,8 @@ class MemcachedEngine implements CacheEngineInterface
 	 */
 	public function unlock($key)
 	{
+        $this->lazyLoadMemCachedServers();
+        
 		return;
 	}
 
