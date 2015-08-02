@@ -46,7 +46,7 @@ use InvalidArgumentException;
  *
  *
  */
-class ShmopCacheEngine implements ICacheEngine
+class ShmopCacheEngine implements CacheEngineInterface
 {
 	use \ByJG\DesignPattern\Singleton;
 

@@ -33,7 +33,7 @@ namespace ByJG\Cache;
 use InvalidArgumentException;
 use Memcached;
 
-class MemcachedEngine implements ICacheEngine
+class MemcachedEngine implements CacheEngineInterface
 {
 	use \ByJG\DesignPattern\Singleton;
 

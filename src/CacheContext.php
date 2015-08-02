@@ -55,17 +55,16 @@ class CacheContext
 
     /**
      *
-     * @return ICacheEngine
+     * @return CacheEngineInterface
      */
-    public static function factory()
+    public static function factory($key = "default")
     {
-        return self::getInstance()->factoryInternal();
+        return self::getInstance()->factoryInternal($key);
     }
 
-    protected function factoryInternal()
+    protected function factoryInternal($key)
     {
-        print_r($this->config->getAll());
-        $result = $this->config->getCacheconfig('default');
+        $result = $this->config->getCacheconfig("$key.instance");
         if (is_null($result)) {
             throw new \Exception("The cache config 'default' was not found");
         }
@@ -75,8 +74,8 @@ class CacheContext
 
     }
 
-    public function getMemcachedConfig()
+    public function getMemcachedConfig($key = "default")
     {
-        return $this->config->getCacheconfig('memcached');
+        return $this->config->getCacheconfig("$key.memcached");
     }
 }

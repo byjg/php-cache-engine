@@ -2,7 +2,7 @@
 
 namespace ByJG\Cache;
 
-class ArrayCacheEngine implements ICacheEngine
+class ArrayCacheEngine implements CacheEngineInterface
 {
 	use \ByJG\DesignPattern\Singleton;
 

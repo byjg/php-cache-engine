@@ -30,7 +30,7 @@
 namespace ByJG\Cache;
 
 
-interface ICacheEngine
+interface CacheEngineInterface
 {
 
 	/**

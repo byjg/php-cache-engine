@@ -4,7 +4,7 @@ namespace ByJG\Cache;
 
 use Exception;
 
-class  FileSystemCacheEngine implements ICacheEngine
+class  FileSystemCacheEngine implements CacheEngineInterface
 {
 	use \ByJG\DesignPattern\Singleton;
 

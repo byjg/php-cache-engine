@@ -29,7 +29,7 @@
 
 namespace ByJG\Cache;
 
-class  NoCacheEngine implements ICacheEngine
+class  NoCacheEngine implements CacheEngineInterface
 {
 	use \ByJG\DesignPattern\Singleton;
 
