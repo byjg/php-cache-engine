@@ -53,6 +53,8 @@ class CacheContext
         $this->noCache = $noCache;
     }
 
+    private static $instances = [];
+
     /**
      *
      * @return CacheEngineInterface
@@ -62,18 +64,22 @@ class CacheContext
         return self::getInstance()->factoryInternal($key);
     }
 
-    protected function factoryInternal($key)
+    private function factoryInternal($key)
     {
-        $result = $this->config->getCacheconfig("$key.instance");
-        if (is_null($result)) {
-            throw new \Exception("The cache config '$key' was not found");
+        if (!isset(self::$instances[$key])) {
+            $result = $this->config->getCacheconfig("$key.instance");
+            if (is_null($result)) {
+                throw new \Exception("The cache config '$key' was not found");
+            }
+            $resultPrep = str_replace('.', '\\', $result);
+
+            $instance = new $resultPrep();
+            $instance->configKey = $key; // This is not in the interface;
+            
+            self::$instances[$key] = $instance;
         }
-        $resultPrep = str_replace('.', '\\', $result);
 
-        $instance = $resultPrep::getInstance();
-        $instance->configKey = $key; // This is not in the interface;
-
-        return $instance;
+        return self::$instances[$key];
     }
 
     public function getMemcachedConfig($key = "default")

@@ -48,15 +48,8 @@ use InvalidArgumentException;
  */
 class ShmopCacheEngine implements CacheEngineInterface
 {
-	use \ByJG\DesignPattern\Singleton;
-
 	const DEFAULT_PERMISSION = "0700";
 	const MAX_SIZE = 524288;
-
-	protected function __construct()
-	{
-		// Nothing Here
-	}
 
 	protected function getFTok($key)
 	{

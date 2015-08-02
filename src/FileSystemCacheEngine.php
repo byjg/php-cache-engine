@@ -6,13 +6,6 @@ use Exception;
 
 class  FileSystemCacheEngine implements CacheEngineInterface
 {
-	use \ByJG\DesignPattern\Singleton;
-
-	protected function __construct()
-	{
-        // Nothing here
-	}
-
 	/**
 	 * @param string $key The object KEY
 	 * @param int $ttl IGNORED IN MEMCACHED.
@@ -210,6 +203,9 @@ class  FileSystemCacheEngine implements CacheEngineInterface
 
 	protected function fixKey($key)
 	{
-		return sys_get_temp_dir() . '/' . preg_replace("/[\/\\\]/", "#", $key) . '.cache';
+		return sys_get_temp_dir() . '/'
+                . (isset($this->configKey) ? $this->configKey : "default")
+                . '-' . preg_replace("/[\/\\\]/", "#", $key)
+                . '.cache';
 	}
 }

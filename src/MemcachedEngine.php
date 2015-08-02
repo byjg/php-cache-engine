@@ -35,17 +35,11 @@ use Memcached;
 
 class MemcachedEngine implements CacheEngineInterface
 {
-	use \ByJG\DesignPattern\Singleton;
-
 	/**
 	 *
 	 * @var Memcached
 	 */
 	protected $_memCached = null;
-
-	protected function __construct()
-	{
-	}
 
     protected function lazyLoadMemCachedServers()
     {

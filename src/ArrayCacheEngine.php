@@ -4,13 +4,7 @@ namespace ByJG\Cache;
 
 class ArrayCacheEngine implements CacheEngineInterface
 {
-	use \ByJG\DesignPattern\Singleton;
-
 	protected $_L1Cache = array();
-
-	protected function __construct()
-	{
-	}
 
 	/**
 	 * @param string $key The object KEY

@@ -59,11 +59,14 @@ return [
 
 ## Avaible cache engines
 
-* \ByJG\Cache\NoCacheEngine: Do nothing. Use it for disable the cache without change your code;
-* \ByJG\Cache\ArrayCacheEngine: Local cache only using array. It does not persists between requests;
-* \ByJG\Cache\FileSystemCacheEngine: Save the cache result in the local file system;
-* \ByJG\Cache\MemcachedEngine: Uses the Memcached as the cache engine
-* \ByJG\Cache\ShmopCachedEngine: uses the shared memory area for cache;
+| Class                             | Description                                                         |
+|:----------------------------------|:--------------------------------------------------------------------|
+| \ByJG\Cache\NoCacheEngine         | Do nothing. Use it for disable the cache without change your code   |
+| \ByJG\Cache\ArrayCacheEngine      | Local cache only using array. It does not persists between requests |
+| \ByJG\Cache\FileSystemCacheEngine | Save the cache result in the local file system                      |
+| \ByJG\Cache\MemcachedEngine       | Uses the Memcached as the cache engine                              |
+| \ByJG\Cache\SessionCachedEngine   | uses the PHP session as cache                                       |
+| \ByJG\Cache\ShmopCachedEngine     | uses the shared memory area for cache                               |
 
 
 

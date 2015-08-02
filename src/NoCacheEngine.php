@@ -31,12 +31,6 @@ namespace ByJG\Cache;
 
 class  NoCacheEngine implements CacheEngineInterface
 {
-	use \ByJG\DesignPattern\Singleton;
-
-	protected function __construct()
-	{
-
-	}
 
 	/**
 	 * @param string $key The object KEY
