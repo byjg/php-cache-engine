@@ -30,7 +30,12 @@ class CacheContext
     {
         $this->reset = isset($_REQUEST['reset']) ? strtolower($_REQUEST['reset']) === 'true' : false;
         $this->noCache = (isset($_REQUEST['nocache']) ? strtolower($_REQUEST['nocache']) === 'true' : false) || $this->reset;
-        $this->config = new \Iconfig\Config('config');
+
+        try {
+            $this->config = new \Iconfig\Config('config');
+        } catch (\RuntimeException $ex) {
+            throw new \RuntimeException("[Cache Engine]: There is no folder 'config' in root path");
+        }
     }
 
     public function getReset()
