@@ -1,11 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 namespace ByJG\Cache;
 
 /**
@@ -15,6 +9,7 @@ namespace ByJG\Cache;
  */
 class CacheContext
 {
+
     use \ByJG\DesignPattern\Singleton;
 
     private $reset;
@@ -80,7 +75,7 @@ class CacheContext
 
             $instance = new $resultPrep();
             $instance->configKey = $key; // This is not in the interface;
-            
+
             self::$instances[$key] = $instance;
         }
 

@@ -1,5 +1,4 @@
 <?php
-
 return [
     'default' => [
         'instance' => '\\ByJG\\Cache\\NoCacheEngine',

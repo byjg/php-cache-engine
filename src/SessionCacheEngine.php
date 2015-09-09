@@ -4,6 +4,7 @@ namespace ByJG\Cache;
 
 class SessionCacheEngine implements CacheEngineInterface
 {
+
     protected function checkSession()
     {
         if (session_status() == PHP_SESSION_NONE) {
@@ -15,7 +16,7 @@ class SessionCacheEngine implements CacheEngineInterface
     {
         return (isset($this->configKey) ? $this->configKey : "default") . '-' . $key;
     }
-    
+
     public function append($key, $str)
     {
         $this->checkSession();
@@ -48,7 +49,6 @@ class SessionCacheEngine implements CacheEngineInterface
         $this->checkSession();
 
         // Nothing to implement here;
-
     }
 
     public function release($key)

@@ -1,5 +1,4 @@
 <?php
-
 require "vendor/autoload.php";
 
 ob_start();
@@ -17,9 +16,10 @@ echo $sessionCache->get('key') . "\n";
 // Attach log to cache
 $cacheTest = new \ByJG\Cache\FileSystemCacheEngine();
 
-ByJG\Cache\LogHandler::getInstance()->pushLogHandler(new \Monolog\Handler\StreamHandler('php://stderr', Monolog\Logger::DEBUG));
+ByJG\Cache\LogHandler::getInstance()->pushLogHandler(new \Monolog\Handler\StreamHandler('php://stderr',
+    Monolog\Logger::DEBUG));
 
 $cacheTest->set('test', 'Message to be cached');
 
-echo 'Key test: ' . $cacheTest->get('test')  . "\n";
+echo 'Key test: ' . $cacheTest->get('test') . "\n";
 echo 'Key inexistent: ' . $cacheTest->get('non-existent') . "\n";
