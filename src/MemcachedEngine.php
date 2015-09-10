@@ -19,8 +19,11 @@ class MemcachedEngine implements CacheEngineInterface
         if (is_null($this->_memCached)) {
             $config = CacheContext::getInstance()->getMemcachedConfig(isset($this->configKey) ? $this->configKey : 'default');
 
-            if (empty($config) || !isset($config['servers'])) {
-                throw new InvalidArgumentException("You have to configure the memcached servers in the file 'config/cacheconfig.php'");
+            if (empty($config)) {
+                throw new InvalidArgumentException("Key '$configKey' does not exists in '" . getcwd() . "/config/cacheconfig.php'");
+            }
+            if (!isset($config['servers'])) {
+                throw new InvalidArgumentException("The config 'servers' is not set in 'config/cacheconfig.php'");
             }
 
             $servers = $config['servers'];
