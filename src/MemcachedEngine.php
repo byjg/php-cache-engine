@@ -17,7 +17,8 @@ class MemcachedEngine implements CacheEngineInterface
     protected function lazyLoadMemCachedServers()
     {
         if (is_null($this->_memCached)) {
-            $config = CacheContext::getInstance()->getMemcachedConfig(isset($this->configKey) ? $this->configKey : 'default');
+            $configKey = isset($this->configKey) ? $this->configKey : 'default';
+            $config = CacheContext::getInstance()->getMemcachedConfig($configKey);
 
             if (empty($config)) {
                 throw new InvalidArgumentException("Key '$configKey' does not exists in '" . getcwd() . "/config/cacheconfig.php'");
