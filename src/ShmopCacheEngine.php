@@ -147,7 +147,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         }
 
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);
-        $log->info("[Shmop Cache] set '$key' confirmed $shmKey bytes");
+        $log->info("[Shmop Cache] set '$key' confirmed write $shm_bytes_written bytes of $size bytes");
         if ($shm_bytes_written != $size) {
             warn("Couldn't write the entire length of data");
         }
