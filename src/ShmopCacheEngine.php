@@ -68,16 +68,16 @@ class ShmopCacheEngine implements CacheEngineInterface
         $log = LogHandler::getInstance();
 
         if ($ttl === false) {
-            $log->info("[Cache] Ignored  $key because TTL=FALSE");
+            $log->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
             return false;
         }
 
         if (CacheContext::getInstance()->getReset()) {
-            $log->info("[Cache] Failed to get $key because RESET=true");
+            $log->info("[Shmop Cache] Failed to get $key because RESET=true");
             return false;
         }
         if (CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Cache] Failed to get $key because NOCACHE=true");
+            $log->info("[Shmop Cache] Failed to get $key because NOCACHE=true");
             return false;
         }
 
@@ -86,7 +86,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         // Opened
         $shm_id = @shmop_open($fileKey, "a", 0, 0);
         if (!$shm_id) {
-            $log->info("[Cache] '$key' not exists");
+            $log->info("[Shmop Cache] '$key' not exists");
             return false;
         }
 
@@ -94,7 +94,7 @@ class ShmopCacheEngine implements CacheEngineInterface
 
         // Check
         if (($ttl > 0) && (intval(time() - $fileAge) > $ttl)) {
-            $log->info("[Cache] File too old. Ignoring '$key'");
+            $log->info("[Shmop Cache] File too old. Ignoring '$key'");
 
             // Close old descriptor
             shmop_close($shm_id);
@@ -106,7 +106,7 @@ class ShmopCacheEngine implements CacheEngineInterface
             return false;
         }
 
-        $log->info("[Cache] Get '$key'");
+        $log->info("[Shmop Cache] Get '$key'");
 
         $serialized = shmop_read($shm_id, 0, shmop_size($shm_id));
         shmop_close($shm_id);
@@ -124,7 +124,7 @@ class ShmopCacheEngine implements CacheEngineInterface
     {
         $log = LogHandler::getInstance();
 
-        $log->info("[Cache] set '$key'");
+        $log->info("[Shmop Cache] set '$key'");
 
         $this->release($key);
 
@@ -147,7 +147,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         }
 
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);
-        $log->info("[Cache] set '$key' confirmed $shmKey bytes");
+        $log->info("[Shmop Cache] set '$key' confirmed $shmKey bytes");
         if ($shm_bytes_written != $size) {
             warn("Couldn't write the entire length of data");
         }
@@ -203,10 +203,10 @@ class ShmopCacheEngine implements CacheEngineInterface
     {
         $log = LogHandler::getInstance();
 
-        $log->info("[Cache] release '$key'");
+        $log->info("[Shmop Cache] release '$key'");
 
         if ($this->get($key) === false) {
-            $log->info("[Cache] release '$key' does not exists.");
+            $log->info("[Shmop Cache] release '$key' does not exists.");
             return;
         }
 
@@ -225,6 +225,6 @@ class ShmopCacheEngine implements CacheEngineInterface
         shmop_delete($shm_id);
         shmop_close($shm_id);
 
-        $log->info("[Cache] release '$key' confirmed.");
+        $log->info("[Shmop Cache] release '$key' confirmed.");
     }
 }

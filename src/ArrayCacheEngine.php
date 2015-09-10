@@ -17,10 +17,10 @@ class ArrayCacheEngine implements CacheEngineInterface
         $log = LogHandler::getInstance();
 
         if (array_key_exists($key, $this->_L1Cache)) {
-            $log->info("[Cache] Get '$key' from L1 Cache");
+            $log->info("[Array cache] Get '$key' from L1 Cache");
             return $this->_L1Cache[$key];
         } else {
-            $log->info("[Cache] Not found '$key'");
+            $log->info("[Array cache] Not found '$key'");
             return false;
         }
     }
@@ -34,7 +34,7 @@ class ArrayCacheEngine implements CacheEngineInterface
     public function set($key, $object, $ttl = 0)
     {
         $log = LogHandler::getInstance();
-        $log->info("[Cache] Set '$key' in L1 Cache");
+        $log->info("[Array cache] Set '$key' in L1 Cache");
 
         $this->_L1Cache[$key] = $object;
 
@@ -50,7 +50,7 @@ class ArrayCacheEngine implements CacheEngineInterface
     public function append($key, $str)
     {
         $log = LogHandler::getInstance();
-        $log->info("[Cache] Append '$key' in L1 Cache");
+        $log->info("[Array cache] Append '$key' in L1 Cache");
 
         $this->_L1Cache[$key] = $this->_L1Cache[$key] . $str;
 

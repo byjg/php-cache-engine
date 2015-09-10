@@ -17,16 +17,16 @@ class FileSystemCacheEngine implements CacheEngineInterface
         $log = LogHandler::getInstance();
 
         if ($ttl === false) {
-            $log->info("[Cache] Ignored  $key because TTL=FALSE");
+            $log->info("[Filesystem cache] Ignored  $key because TTL=FALSE");
             return false;
         }
 
         if (CacheContext::getInstance()->getReset()) {
-            $log->info("[Cache] Failed to get $key because RESET=true");
+            $log->info("[Filesystem cache] Failed to get $key because RESET=true");
             return false;
         }
         if (CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Cache] Failed to get $key because NOCACHE=true");
+            $log->info("[Filesystem cache] Failed to get $key because NOCACHE=true");
             return false;
         }
 
@@ -34,16 +34,16 @@ class FileSystemCacheEngine implements CacheEngineInterface
         $fileKey = $this->fixKey($key);
         $lockFile = $fileKey . ".lock";
         if (file_exists($lockFile)) {
-            $log->info("[Cache] Locked! $key. Waiting...");
+            $log->info("[Filesystem cache] Locked! $key. Waiting...");
             $lockTime = filemtime($lockFile);
 
             while (true) {
                 if (!file_exists($lockFile)) {
-                    $log->info("[Cache] Lock released for '$key'");
+                    $log->info("[Filesystem cache] Lock released for '$key'");
                     break;
                 }
                 if (intval(time() - $lockTime) > 20) {  // Wait for 10 seconds
-                    $log->info("[Cache] Gave up to wait unlock. Release lock for '$key'");
+                    $log->info("[Filesystem cache] Gave up to wait unlock. Release lock for '$key'");
                     $this->unlock($key);
                     return false;
                 }
@@ -56,14 +56,14 @@ class FileSystemCacheEngine implements CacheEngineInterface
             $fileAge = filemtime($fileKey);
 
             if (($ttl > 0) && (intval(time() - $fileAge) > $ttl)) {
-                $log->info("[Cache] File too old. Ignoring '$key'");
+                $log->info("[Filesystem cache] File too old. Ignoring '$key'");
                 return false;
             } else {
-                $log->info("[Cache] Get '$key'");
+                $log->info("[Filesystem cache] Get '$key'");
                 return unserialize(file_get_contents($fileKey));
             }
         } else {
-            $log->info("[Cache] Not found '$key'");
+            $log->info("[Filesystem cache] Not found '$key'");
             return false;
         }
     }
@@ -81,7 +81,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
         $fileKey = $this->fixKey($key);
 
         if (!CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Cache] Set '$key' in FileSystem");
+            $log->info("[Filesystem cache] Set '$key' in FileSystem");
 
             try {
                 if (file_exists($fileKey)) {
@@ -101,7 +101,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
                 echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
             }
         } else {
-            $log->info("[Cache] Not Set '$key' because NOCACHE=true");
+            $log->info("[Filesystem cache] Not Set '$key' because NOCACHE=true");
         }
     }
 
@@ -127,7 +127,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
         $fileKey = $this->fixKey($key);
 
         if (!CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Cache] Append '$key' in FileSystem");
+            $log->info("[Filesystem cache] Append '$key' in FileSystem");
 
             try {
                 file_put_contents($fileKey, serialize($content), true);
@@ -135,7 +135,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
                 echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
             }
         } else {
-            $log->info("[Cache] Not Set '$key' because NOCACHE=true");
+            $log->info("[Filesystem cache] Not Set '$key' because NOCACHE=true");
         }
     }
 
@@ -146,7 +146,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
     public function lock($key)
     {
         $log = LogHandler::getInstance();
-        $log->info("[Cache] Lock '$key'");
+        $log->info("[Filesystem cache] Lock '$key'");
 
         $lockFile = $this->fixKey($key) . ".lock";
 
@@ -164,7 +164,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
     public function unlock($key)
     {
         $log = LogHandler::getInstance();
-        $log->info("[Cache] Unlock '$key'");
+        $log->info("[Filesystem cache] Unlock '$key'");
 
         $lockFile = $this->fixKey($key) . ".lock";
 

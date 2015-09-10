@@ -49,18 +49,18 @@ class MemcachedEngine implements CacheEngineInterface
 
         $log = LogHandler::getInstance();
         if (CacheContext::getInstance()->getReset()) {
-            $log->info("[Cache] Get $key failed because RESET=true");
+            $log->info("[Memcached] Get $key failed because RESET=true");
             return false;
         }
 
         if (CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Cache] Failed to get $key because NOCACHE=true");
+            $log->info("[Memcached] Failed to get $key because NOCACHE=true");
             return false;
         }
 
         $value = $this->_memCached->get($key);
         if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-            $log->info("[Cache] Cache '$key' missed with status " . $this->_memCached->getResultCode());
+            $log->info("[Memcached] Cache '$key' missed with status " . $this->_memCached->getResultCode());
             return false;
         }
 
@@ -81,14 +81,14 @@ class MemcachedEngine implements CacheEngineInterface
 
         if (!CacheContext::getInstance()->getNoCache()) {
             $this->_memCached->set($key, $object, $ttl);
-            $log->info("[Cache] Set '$key' result " . $this->_memCached->getResultCode());
+            $log->info("[Memcached] Set '$key' result " . $this->_memCached->getResultCode());
             if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-                $log->error("[Cache] Set '$key' failed with status " . $this->_memCached->getResultCode());
+                $log->error("[Memcached] Set '$key' failed with status " . $this->_memCached->getResultCode());
             }
 
             return $this->_memCached->getResultCode() === Memcached::RES_SUCCESS;
         } else {
-            $log->info("[Cache] Not Set '$key' because NOCACHE=true");
+            $log->info("[Memcached] Not Set '$key' because NOCACHE=true");
             return true;
         }
     }
@@ -117,10 +117,10 @@ class MemcachedEngine implements CacheEngineInterface
         $log = LogHandler::getInstance();
 
         if (!CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Cache] Append '$key' in Memcached");
+            $log->info("[Memcached] Append '$key' in Memcached");
             return $this->_memCached->append($key, $str);
         } else {
-            $log->info("[Cache] Not Set '$key' because NOCACHE=true");
+            $log->info("[Memcached] Not Set '$key' because NOCACHE=true");
         }
     }
 
