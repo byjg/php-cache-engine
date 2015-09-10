@@ -86,4 +86,9 @@ class CacheContext
     {
         return $this->config->getCacheconfig("$key.memcached");
     }
+
+    public function getShmopConfig($key = 'default')
+    {
+        return $this->config->getCacheconfig("$key.shmop");
+    }
 }

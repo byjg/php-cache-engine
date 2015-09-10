@@ -39,7 +39,7 @@ return $result;
 
 ## Install
 
-Just type: `composer require "byjg/cache-engine~1.0"`
+Just type: `composer require "byjg/cache-engine=~1.0"`
 
 ## Setup the config
 
@@ -47,14 +47,26 @@ You need to have a file named 'config/cacheconfig.php' with the follow contents:
 
 ```php
 return [
-    'default' => '\\ByJG\\Cache\\NoCacheEngine',
-    'memcached' => [
-        'servers' => [
-            '127.0.0.1:11211'
+    'default' => [
+        'instance' => '\\ByJG\\Cache\\NoCacheEngine',
+        'memcached' => [
+            'servers' => [
+                '127.0.0.1:11211'
+            ]
+        ],
+        'shmop' => [
+            'max-size' => 1048576,
+            'default-permission' => '0700'
         ]
     ]
 ];
 ```
+
+The parameters are described below:
+* 'default' is the name of the key used in the CacheContext::factory(key)
+* 'instance' is required if you use CacheContext::factory. Must have the full name space for the cache class;
+* 'memcached' have specific configuration for the MemcachedEngine class. 
+* 'shmop' have specific configuration for the ShmopCacheEngine class.
 
 
 ## Avaible cache engines
