@@ -18,7 +18,7 @@
         "byjg/singleton-pattern": "~1.0",
         "sheikhheera/iconfig": "dev-master"
     },
-    "suggests": {
+    "suggest": {
         "ext-memcached": "*"
     },
     "license": "MIT"
