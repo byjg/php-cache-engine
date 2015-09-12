@@ -16,7 +16,7 @@
         "php": ">=5.4.0",
         "monolog/monolog": "1.*",
         "byjg/singleton-pattern": "~1.0",
-        "sheikhheera/iconfig": "dev-master"
+        "sheikhheera/iconfig": "~1.0"
     },
     "suggest": {
         "ext-memcached": "*"
