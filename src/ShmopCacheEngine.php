@@ -214,7 +214,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         $shm_id = shmop_open($filekey, "w", 0, 0);
 
         $file = $this->getFTok($key);
-        if (!file_exists($file)) {
+        if (file_exists($file)) {
             unlink($file);
         }
 
