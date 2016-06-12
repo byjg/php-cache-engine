@@ -12,7 +12,7 @@ class NoCacheEngine implements CacheEngineInterface
      */
     public function get($key, $ttl = 0)
     {
-        return false;
+        return null;
     }
 
     /**

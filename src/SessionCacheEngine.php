@@ -40,7 +40,7 @@ class SessionCacheEngine implements CacheEngineInterface
         if (isset($_SESSION[$keyName])) {
             return $_SESSION[$keyName];
         } else {
-            return false;
+            return null;
         }
     }
 

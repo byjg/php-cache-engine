@@ -54,18 +54,18 @@ class MemcachedEngine implements CacheEngineInterface
         $log = LogHandler::getInstance();
         if (CacheContext::getInstance()->getReset()) {
             $log->info("[Memcached] Get $key failed because RESET=true");
-            return false;
+            return null;
         }
 
         if (CacheContext::getInstance()->getNoCache()) {
             $log->info("[Memcached] Failed to get $key because NOCACHE=true");
-            return false;
+            return null;
         }
 
         $value = $this->_memCached->get($key);
         if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $log->info("[Memcached] Cache '$key' missed with status " . $this->_memCached->getResultCode());
-            return false;
+            return null;
         }
 
         return $value;

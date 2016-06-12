@@ -1,6 +1,7 @@
 <?php
 
 namespace ByJG\Cache;
+use ByJG\Cache\Psr\CachePool;
 use ByJG\DesignPattern\Singleton;
 use Iconfig\Config;
 
@@ -66,7 +67,17 @@ class CacheContext
     {
         return self::getInstance()->factoryInternal($key);
     }
-
+    
+    /**
+     *
+     * @param string $key
+     * @return CachePool
+     */
+    public static function psrFactory($key = "default")
+    {
+        return new CachePool(self::getInstance()->factoryInternal($key));
+    }
+    
     private function factoryInternal($key)
     {
         if (!isset(self::$instances[$key])) {

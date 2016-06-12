@@ -69,16 +69,16 @@ class ShmopCacheEngine implements CacheEngineInterface
 
         if ($ttl === false) {
             $log->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
-            return false;
+            return null;
         }
 
         if (CacheContext::getInstance()->getReset()) {
             $log->info("[Shmop Cache] Failed to get $key because RESET=true");
-            return false;
+            return null;
         }
         if (CacheContext::getInstance()->getNoCache()) {
             $log->info("[Shmop Cache] Failed to get $key because NOCACHE=true");
-            return false;
+            return null;
         }
 
         $fileKey = $this->getKeyId($key);
@@ -87,7 +87,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         $shm_id = @shmop_open($fileKey, "a", 0, 0);
         if (!$shm_id) {
             $log->info("[Shmop Cache] '$key' not exists");
-            return false;
+            return null;
         }
 
         $fileAge = filemtime($this->getFTok($key));
@@ -103,7 +103,7 @@ class ShmopCacheEngine implements CacheEngineInterface
             $shm_id = shmop_open($fileKey, "w", $this->getDefaultPermission(), $this->getMaxSize());
             shmop_delete($shm_id);
             shmop_close($shm_id);
-            return false;
+            return null;
         }
 
         $log->info("[Shmop Cache] Get '$key'");
