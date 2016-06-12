@@ -126,6 +126,8 @@ class MemcachedEngine implements CacheEngineInterface
         } else {
             $log->info("[Memcached] Not Set '$key' because NOCACHE=true");
         }
+        
+        return true;
     }
 
     /**

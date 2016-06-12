@@ -1,6 +1,8 @@
 <?php
 
 namespace ByJG\Cache;
+use ByJG\DesignPattern\Singleton;
+use Iconfig\Config;
 
 /**
  * Description of CacheContext
@@ -10,14 +12,14 @@ namespace ByJG\Cache;
 class CacheContext
 {
 
-    use \ByJG\DesignPattern\Singleton;
+    use Singleton;
 
     private $reset;
     private $noCache;
 
     /**
      *
-     * @var \Iconfig\Config
+     * @var Config
      */
     private $config;
 
@@ -27,7 +29,7 @@ class CacheContext
         $this->noCache = (isset($_REQUEST['nocache']) ? strtolower($_REQUEST['nocache']) === 'true' : false) || $this->reset;
 
         try {
-            $this->config = new \Iconfig\Config('config');
+            $this->config = new Config('config');
         } catch (\RuntimeException $ex) {
             throw new \RuntimeException("[Cache Engine]: There is no folder 'config' in root path");
         }
@@ -57,6 +59,7 @@ class CacheContext
 
     /**
      *
+     * @param string $key
      * @return CacheEngineInterface
      */
     public static function factory($key = "default")

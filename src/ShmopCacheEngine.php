@@ -119,6 +119,7 @@ class ShmopCacheEngine implements CacheEngineInterface
      * @param object $object The object to be cached
      * @param int $ttl The time to live in seconds of the object. Depends on implementation.
      * @return bool If the object is successfully posted
+     * @throws \Exception
      */
     public function set($key, $object, $ttl = 0)
     {
@@ -149,7 +150,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);
         $log->info("[Shmop Cache] set '$key' confirmed write $shm_bytes_written bytes of $size bytes");
         if ($shm_bytes_written != $size) {
-            warn("Couldn't write the entire length of data");
+            $log->warning("Couldn't write the entire length of data");
         }
         shmop_close($shm_id);
     }
@@ -218,13 +219,11 @@ class ShmopCacheEngine implements CacheEngineInterface
             unlink($file);
         }
 
-        if (!$shm_id) {
-            return null;
+        if ($shm_id) {
+            shmop_delete($shm_id);
+            shmop_close($shm_id);
+
+            $log->info("[Shmop Cache] release '$key' confirmed.");
         }
-
-        shmop_delete($shm_id);
-        shmop_close($shm_id);
-
-        $log->info("[Shmop Cache] release '$key' confirmed.");
     }
 }

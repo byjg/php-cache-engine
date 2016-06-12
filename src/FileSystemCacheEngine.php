@@ -103,6 +103,8 @@ class FileSystemCacheEngine implements CacheEngineInterface
         } else {
             $log->info("[Filesystem cache] Not Set '$key' because NOCACHE=true");
         }
+        
+        return true;
     }
 
     /**
