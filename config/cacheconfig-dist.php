@@ -11,6 +11,15 @@ return [
     ],
 
     /**
+     * Defines the cache instance.
+     * 'default' is the basic usage and set CachePool buffer
+     */
+    'default2' => [
+        'instance' => '\\ByJG\\Cache\\NoCacheEngine',
+        'poolbuffer' => 10
+    ],
+
+    /**
      * Create a cache instance of MemcachedEngine and set some parameters to memcache:
      */
     'memcache-sample' => [

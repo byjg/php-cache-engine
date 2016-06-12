@@ -56,7 +56,7 @@ Just type: `composer require "byjg/cache-engine=2.0.*"`
 
 ## Setup the config
 
-You need to have a file named 'config/cacheconfig.php' with the follow contents:
+You need to have a file named `config/cacheconfig.php` with the follow contents:
 
 ### Basic Configuration
 
@@ -70,6 +70,21 @@ return [
 The parameters are described below:
 * 'default' is the name of the key used in the CacheContext::factory(key)
 * 'instance' is required if you use CacheContext::factory. Must have the full name space for the cache class;
+
+### Setting the Cache Pool Buffer
+
+CachePool implementation have a local buffer saving some elements locally for speedup the access.
+If you set to '0' the pool buffer will be disabled.
+
+```php
+return [
+    'default' => [
+        'instance' => '\\ByJG\\Cache\\MemcachedEngine',
+        'poolbuffer' => 10
+    ]
+];
+```
+
 
 ### Specific configuration for Memcached
 

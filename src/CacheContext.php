@@ -75,7 +75,7 @@ class CacheContext
      */
     public static function psrFactory($key = "default")
     {
-        return new CachePool(self::getInstance()->factoryInternal($key));
+        return new CachePool(self::getInstance()->factoryInternal($key), self::getInstance()->getPoolBuffer($key));
     }
     
     private function factoryInternal($key)
@@ -104,5 +104,15 @@ class CacheContext
     public function getShmopConfig($key = 'default')
     {
         return $this->config->getCacheconfig("$key.shmop");
+    }
+
+    public function getPoolBuffer($key = 'default')
+    {
+        $bufferSize = $this->config->getCacheconfig("$key.poolbuffer");
+        
+        if ($bufferSize === null) {
+            return 10;
+        }
+        return (int)$bufferSize;
     }
 }

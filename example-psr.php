@@ -20,3 +20,17 @@ if ($item2->isHit()) {
 }
 
 print_r($_SESSION);
+
+$pool->deleteItem($item->getKey());
+
+print_r($_SESSION);
+
+for ($i=0; $i<4; $i++) {
+    $item = $pool->getItem('key' . $i);
+    $item->set('value - ' . $i);
+    $pool->saveDeferred($item);
+}
+$pool->commit();
+
+print_r($_SESSION);
+
