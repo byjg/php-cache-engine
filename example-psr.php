@@ -14,9 +14,9 @@ if (!$item->isHit()) {
 
 $item2 = $pool->getItem('key');
 if ($item2->isHit()) {
-    echo "Atingiu";
+    echo "-- Hit --\n";
 } else {
-    echo 'Não achou!';
+    echo "-- Not Hit --\n";
 }
 
 print_r($_SESSION);

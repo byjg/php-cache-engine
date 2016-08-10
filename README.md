@@ -18,7 +18,7 @@ A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.
 
 ## Create new cache instance
 
-### Creating a PSR-6 compatible instance 
+### Creating a PSR-6 compatible instance (RECOMMENDED)
 
 You can set instance in the 'cacheconfig.php' setup (see below how to configure the factory)
 
@@ -67,7 +67,9 @@ return [
     ]
 ];
 ```
+
 The parameters are described below:
+
 * 'default' is the name of the key used in the CacheContext::factory(key)
 * 'instance' is required if you use CacheContext::factory. Must have the full name space for the cache class;
 
@@ -102,6 +104,7 @@ return [
 ```
 
 The parameters are described below:
+
 * 'memcached' have specific configuration for the MemcachedEngine class.
 
 ### Specific configuration for Shmop Cache
@@ -119,6 +122,7 @@ return [
 ```
 
 The parameters are described below:
+
 * 'shmop' have specific configuration for the ShmopCacheEngine class.
 
 
