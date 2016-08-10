@@ -159,8 +159,6 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr implementation of clear()
-     * 
-     * @todo Implement Clear Pool! 
      */
     public function clear()
     {

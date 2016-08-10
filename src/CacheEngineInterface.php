@@ -10,7 +10,7 @@ interface CacheEngineInterface
      * @param int $ttl The time to live in seconds of the object. Depends on implementation.
      * @return object The Object
      */
-    function get($key, $ttl = 0);
+    public function get($key, $ttl = 0);
 
     /**
      * @param string $key The object Key
@@ -18,7 +18,7 @@ interface CacheEngineInterface
      * @param int $ttl The time to live in seconds of the object. Depends on implementation.
      * @return bool If the object is successfully posted
      */
-    function set($key, $object, $ttl = 0);
+    public function set($key, $object, $ttl = 0);
 
     /**
      * Append only will work with strings.
@@ -27,23 +27,23 @@ interface CacheEngineInterface
      * @param string $str
      * @return bool
      */
-    function append($key, $str);
+    public function append($key, $str);
 
     /**
      * Lock resource before set it.
      * @param string $key
      */
-    function lock($key);
+    public function lock($key);
 
     /**
      * Unlock resource
      * @param string $key
      */
-    function unlock($key);
+    public function unlock($key);
 
     /**
      * Release the object
      * @param string $key
      */
-    function release($key);
+    public function release($key);
 }
