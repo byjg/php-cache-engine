@@ -18,9 +18,9 @@ A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.
 
 ## Create new cache instance
 
-### PSR-6 cache pool
+### Creating a PSR-6 compatible instance 
 
-You can set instance in the 'cacheconfig.php' setup (see below and use the factory)
+You can set instance in the 'cacheconfig.php' setup (see below how to configure the factory)
 
 ```php
 $cachePool = \ByJG\Cache\CacheContext::psrFactory();
@@ -33,7 +33,7 @@ $cachePool = new CachePool(new FileSystemCacheEngine());
 ```
 
 
-### Accessing the Cache Engine directory
+### Use the cache engine instance 
 
 You can create a instance from the Cache engine directly. This is not PSR-6 compliant, but implements
 features that the CachePool does not support and it is for backward compatibilty also.
@@ -54,7 +54,7 @@ $cacheEngine = new \ByJG\Cache\MemcachedEngine();
 
 Just type: `composer require "byjg/cache-engine=2.0.*"`
 
-## Setup the config
+## Setup the Factory Config
 
 You need to have a file named `config/cacheconfig.php` with the follow contents:
 
