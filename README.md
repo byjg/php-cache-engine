@@ -3,72 +3,7 @@
 
 ## Description
 
-A multi-purpose cache engine in PHP.
-
-## Examples
-
-### Using Factory
-
-This option will get the engine from the config file. See below.
-
-```php
-$cacheEngine = \ByJG\Cache\CacheContext::factory();
-```
-
-### Instantiate directly
-
-```php
-$cacheEngine = \ByJG\Cache\FileSystemCacheEngine::getInstace();
-```
-
-### Basic Usage
-
-```php
-$result = $cacheEngine->get($key, 60);
-if ($result === false)
-{
-    // Do the operations will be cached
-    // ....
-    // And set variable result
-    $result = ...;
-
-    // Set the cache:
-    $cacheEngine->set($key, $result, 60);
-}
-return $result;
-```
-
-## Install
-
-Just type: `composer require "byjg/cache-engine=~1.0"`
-
-## Setup the config
-
-You need to have a file named 'config/cacheconfig.php' with the follow contents:
-
-```php
-return [
-    'default' => [
-        'instance' => '\\ByJG\\Cache\\NoCacheEngine',
-        'memcached' => [
-            'servers' => [
-                '127.0.0.1:11211'
-            ]
-        ],
-        'shmop' => [
-            'max-size' => 1048576,
-            'default-permission' => '0700'
-        ]
-    ]
-];
-```
-
-The parameters are described below:
-* 'default' is the name of the key used in the CacheContext::factory(key)
-* 'instance' is required if you use CacheContext::factory. Must have the full name space for the cache class;
-* 'memcached' have specific configuration for the MemcachedEngine class. 
-* 'shmop' have specific configuration for the ShmopCacheEngine class.
-
+A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.
 
 ## Avaible cache engines
 
@@ -80,6 +15,116 @@ The parameters are described below:
 | \ByJG\Cache\MemcachedEngine       | Uses the Memcached as the cache engine                              |
 | \ByJG\Cache\SessionCachedEngine   | uses the PHP session as cache                                       |
 | \ByJG\Cache\ShmopCachedEngine     | uses the shared memory area for cache                               |
+
+## Create new cache instance
+
+### Creating a PSR-6 compatible instance (RECOMMENDED)
+
+You can set instance in the 'cacheconfig.php' setup (see below how to configure the factory)
+
+```php
+$cachePool = \ByJG\Cache\CacheContext::psrFactory();
+```
+
+or you can create the CachePool imediatelly:
+
+```php
+$cachePool = new CachePool(new FileSystemCacheEngine());
+```
+
+
+### Use the cache engine instance 
+
+You can create a instance from the Cache engine directly. This is not PSR-6 compliant, but implements
+features that the CachePool does not support and it is for backward compatibilty also.
+
+You can create from the factory and cacheconfig.php file:
+
+```php
+$cacheEngine = \ByJG\Cache\CacheContext::factory();
+```
+
+or instantiate directly
+
+```php
+$cacheEngine = new \ByJG\Cache\MemcachedEngine();
+```
+
+## Install
+
+Just type: `composer require "byjg/cache-engine=2.0.*"`
+
+## Setup the Factory Config
+
+You need to have a file named `config/cacheconfig.php` with the follow contents:
+
+### Basic Configuration
+
+```php
+return [
+    'default' => [
+        'instance' => '\\ByJG\\Cache\\NoCacheEngine'
+    ]
+];
+```
+
+The parameters are described below:
+
+* 'default' is the name of the key used in the CacheContext::factory(key)
+* 'instance' is required if you use CacheContext::factory. Must have the full name space for the cache class;
+
+### Setting the Cache Pool Buffer
+
+CachePool implementation have a local buffer saving some elements locally for speedup the access.
+If you set to '0' the pool buffer will be disabled.
+
+```php
+return [
+    'default' => [
+        'instance' => '\\ByJG\\Cache\\MemcachedEngine',
+        'poolbuffer' => 10
+    ]
+];
+```
+
+
+### Specific configuration for Memcached
+
+```php
+return [
+    'default' => [
+        'instance' => '\\ByJG\\Cache\\MemcachedEngine',
+        'memcached' => [
+            'servers' => [
+                '127.0.0.1:11211'
+            ]
+        ],
+    ]
+];
+```
+
+The parameters are described below:
+
+* 'memcached' have specific configuration for the MemcachedEngine class.
+
+### Specific configuration for Shmop Cache
+
+```php
+return [
+    'default' => [
+        'instance' => '\\ByJG\\Cache\\ShmopCacheEngine',
+        'shmop' => [
+            'max-size' => 1048576,
+            'default-permission' => '0700'
+        ]
+    ]
+];
+```
+
+The parameters are described below:
+
+* 'shmop' have specific configuration for the ShmopCacheEngine class.
+
 
 
 

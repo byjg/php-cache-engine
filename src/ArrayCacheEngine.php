@@ -21,7 +21,7 @@ class ArrayCacheEngine implements CacheEngineInterface
             return $this->_L1Cache[$key];
         } else {
             $log->info("[Array cache] Not found '$key'");
-            return false;
+            return null;
         }
     }
 

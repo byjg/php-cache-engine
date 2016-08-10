@@ -2,4 +2,5 @@ nbproject/private
 *~
 composer.lock
 vendor
-config
+config/cacheconfig.php
+.idea

@@ -18,16 +18,16 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
         if ($ttl === false) {
             $log->info("[Filesystem cache] Ignored  $key because TTL=FALSE");
-            return false;
+            return null;
         }
 
         if (CacheContext::getInstance()->getReset()) {
             $log->info("[Filesystem cache] Failed to get $key because RESET=true");
-            return false;
+            return null;
         }
         if (CacheContext::getInstance()->getNoCache()) {
             $log->info("[Filesystem cache] Failed to get $key because NOCACHE=true");
-            return false;
+            return null;
         }
 
         // Check if file is Locked
@@ -45,7 +45,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
                 if (intval(time() - $lockTime) > 20) {  // Wait for 10 seconds
                     $log->info("[Filesystem cache] Gave up to wait unlock. Release lock for '$key'");
                     $this->unlock($key);
-                    return false;
+                    return null;
                 }
                 sleep(1); // 1 second
             }
@@ -57,14 +57,14 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
             if (($ttl > 0) && (intval(time() - $fileAge) > $ttl)) {
                 $log->info("[Filesystem cache] File too old. Ignoring '$key'");
-                return false;
+                return null;
             } else {
                 $log->info("[Filesystem cache] Get '$key'");
                 return unserialize(file_get_contents($fileKey));
             }
         } else {
             $log->info("[Filesystem cache] Not found '$key'");
-            return false;
+            return null;
         }
     }
 
@@ -103,6 +103,8 @@ class FileSystemCacheEngine implements CacheEngineInterface
         } else {
             $log->info("[Filesystem cache] Not Set '$key' because NOCACHE=true");
         }
+        
+        return true;
     }
 
     /**

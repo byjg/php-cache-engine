@@ -69,16 +69,16 @@ class ShmopCacheEngine implements CacheEngineInterface
 
         if ($ttl === false) {
             $log->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
-            return false;
+            return null;
         }
 
         if (CacheContext::getInstance()->getReset()) {
             $log->info("[Shmop Cache] Failed to get $key because RESET=true");
-            return false;
+            return null;
         }
         if (CacheContext::getInstance()->getNoCache()) {
             $log->info("[Shmop Cache] Failed to get $key because NOCACHE=true");
-            return false;
+            return null;
         }
 
         $fileKey = $this->getKeyId($key);
@@ -87,7 +87,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         $shm_id = @shmop_open($fileKey, "a", 0, 0);
         if (!$shm_id) {
             $log->info("[Shmop Cache] '$key' not exists");
-            return false;
+            return null;
         }
 
         $fileAge = filemtime($this->getFTok($key));
@@ -103,7 +103,7 @@ class ShmopCacheEngine implements CacheEngineInterface
             $shm_id = shmop_open($fileKey, "w", $this->getDefaultPermission(), $this->getMaxSize());
             shmop_delete($shm_id);
             shmop_close($shm_id);
-            return false;
+            return null;
         }
 
         $log->info("[Shmop Cache] Get '$key'");
@@ -119,6 +119,7 @@ class ShmopCacheEngine implements CacheEngineInterface
      * @param object $object The object to be cached
      * @param int $ttl The time to live in seconds of the object. Depends on implementation.
      * @return bool If the object is successfully posted
+     * @throws \Exception
      */
     public function set($key, $object, $ttl = 0)
     {
@@ -149,7 +150,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);
         $log->info("[Shmop Cache] set '$key' confirmed write $shm_bytes_written bytes of $size bytes");
         if ($shm_bytes_written != $size) {
-            warn("Couldn't write the entire length of data");
+            $log->warning("Couldn't write the entire length of data");
         }
         shmop_close($shm_id);
     }
@@ -218,13 +219,11 @@ class ShmopCacheEngine implements CacheEngineInterface
             unlink($file);
         }
 
-        if (!$shm_id) {
-            return null;
+        if ($shm_id) {
+            shmop_delete($shm_id);
+            shmop_close($shm_id);
+
+            $log->info("[Shmop Cache] release '$key' confirmed.");
         }
-
-        shmop_delete($shm_id);
-        shmop_close($shm_id);
-
-        $log->info("[Shmop Cache] release '$key' confirmed.");
     }
 }
