@@ -24,6 +24,15 @@ class ShmopCacheEngine implements CacheEngineInterface
 
     private $config = null;
 
+    protected $logger = null;
+
+    public function __construct($logger = null)
+    {
+        if (is_null($logger)) {
+            $this->logger = new NullLogger();
+        }
+    }
+
     protected function getFTok($key)
     {
         return sys_get_temp_dir() . '/' . sha1($key);
@@ -65,19 +74,19 @@ class ShmopCacheEngine implements CacheEngineInterface
      */
     public function get($key, $ttl = 0)
     {
-        $log = LogHandler::getInstance();
+        
 
         if ($ttl === false) {
-            $log->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
+            $this->logger->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
             return null;
         }
 
         if (CacheContext::getInstance()->getReset()) {
-            $log->info("[Shmop Cache] Failed to get $key because RESET=true");
+            $this->logger->info("[Shmop Cache] Failed to get $key because RESET=true");
             return null;
         }
         if (CacheContext::getInstance()->getNoCache()) {
-            $log->info("[Shmop Cache] Failed to get $key because NOCACHE=true");
+            $this->logger->info("[Shmop Cache] Failed to get $key because NOCACHE=true");
             return null;
         }
 
@@ -86,7 +95,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         // Opened
         $shm_id = @shmop_open($fileKey, "a", 0, 0);
         if (!$shm_id) {
-            $log->info("[Shmop Cache] '$key' not exists");
+            $this->logger->info("[Shmop Cache] '$key' not exists");
             return null;
         }
 
@@ -94,7 +103,7 @@ class ShmopCacheEngine implements CacheEngineInterface
 
         // Check
         if (($ttl > 0) && (intval(time() - $fileAge) > $ttl)) {
-            $log->info("[Shmop Cache] File too old. Ignoring '$key'");
+            $this->logger->info("[Shmop Cache] File too old. Ignoring '$key'");
 
             // Close old descriptor
             shmop_close($shm_id);
@@ -106,7 +115,7 @@ class ShmopCacheEngine implements CacheEngineInterface
             return null;
         }
 
-        $log->info("[Shmop Cache] Get '$key'");
+        $this->logger->info("[Shmop Cache] Get '$key'");
 
         $serialized = shmop_read($shm_id, 0, shmop_size($shm_id));
         shmop_close($shm_id);
@@ -123,9 +132,9 @@ class ShmopCacheEngine implements CacheEngineInterface
      */
     public function set($key, $object, $ttl = 0)
     {
-        $log = LogHandler::getInstance();
+        
 
-        $log->info("[Shmop Cache] set '$key'");
+        $this->logger->info("[Shmop Cache] set '$key'");
 
         $this->release($key);
 
@@ -148,9 +157,9 @@ class ShmopCacheEngine implements CacheEngineInterface
         }
 
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);
-        $log->info("[Shmop Cache] set '$key' confirmed write $shm_bytes_written bytes of $size bytes");
+        $this->logger->info("[Shmop Cache] set '$key' confirmed write $shm_bytes_written bytes of $size bytes");
         if ($shm_bytes_written != $size) {
-            $log->warning("Couldn't write the entire length of data");
+            $this->logger->warning("Couldn't write the entire length of data");
         }
         shmop_close($shm_id);
     }
@@ -202,12 +211,12 @@ class ShmopCacheEngine implements CacheEngineInterface
      */
     public function release($key)
     {
-        $log = LogHandler::getInstance();
+        
 
-        $log->info("[Shmop Cache] release '$key'");
+        $this->logger->info("[Shmop Cache] release '$key'");
 
         if ($this->get($key) === false) {
-            $log->info("[Shmop Cache] release '$key' does not exists.");
+            $this->logger->info("[Shmop Cache] release '$key' does not exists.");
             return;
         }
 
@@ -223,7 +232,7 @@ class ShmopCacheEngine implements CacheEngineInterface
             shmop_delete($shm_id);
             shmop_close($shm_id);
 
-            $log->info("[Shmop Cache] release '$key' confirmed.");
+            $this->logger->info("[Shmop Cache] release '$key' confirmed.");
         }
     }
 }
