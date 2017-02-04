@@ -22,12 +22,22 @@ use InvalidArgumentException;
 class ShmopCacheEngine implements CacheEngineInterface
 {
 
-    private $config = null;
-
     protected $logger = null;
 
-    public function __construct($logger = null)
+    protected $config = [];
+
+    public function __construct($config = [], $logger = null)
     {
+        $this->config = $config;
+
+        if (!isset($this->config['max-size'])) {
+            $this->config['max-size'] = 524288;
+        }
+        if (!isset($this->config['default-permission'])) {
+            $this->config['default-permission'] = '0700';
+        }
+
+        $this->logger = $logger;
         if (is_null($logger)) {
             $this->logger = new NullLogger();
         }
@@ -38,24 +48,14 @@ class ShmopCacheEngine implements CacheEngineInterface
         return sys_get_temp_dir() . '/' . sha1($key);
     }
     
-    protected function getConfig()
-    {
-        if (is_null($this->config)) {
-            $this->config = CacheContext::getInstance()->getMemcachedConfig(isset($this->configKey) ? $this->configKey : 'default');
-        }
-        return $this->config;
-    }
-
     protected function getMaxSize()
     {
-        $config = $this->getConfig();
-        return isset($config['max-size']) ? $config['max-size'] : 524288;
+        return $this->config['max-size'];
     }
 
     protected function getDefaultPermission()
     {
-        $config = $this->getConfig();
-        return isset($config['default-permission']) ? $config['default-permission'] : '0700';
+        return $this->config['default-permission'];
     }
 
     protected function getKeyId($key)

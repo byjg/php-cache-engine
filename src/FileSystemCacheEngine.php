@@ -9,8 +9,13 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
     protected $logger = null;
 
-    public function __construct($logger = null)
+    protected $prefix = null;
+
+    public function __construct($prefix = 'cache', $logger = null)
     {
+        $this->prefix = $prefix;
+
+        $this->logger = $logger;
         if (is_null($logger)) {
             $this->logger = new NullLogger();
         }
@@ -23,8 +28,6 @@ class FileSystemCacheEngine implements CacheEngineInterface
      */
     public function get($key, $ttl = 0)
     {
-        
-
         if ($ttl === false) {
             $this->logger->info("[Filesystem cache] Ignored  $key because TTL=FALSE");
             return null;
@@ -76,8 +79,6 @@ class FileSystemCacheEngine implements CacheEngineInterface
      */
     public function set($key, $object, $ttl = 0)
     {
-        
-
         $fileKey = $this->fixKey($key);
 
         $this->logger->info("[Filesystem cache] Set '$key' in FileSystem");
@@ -120,8 +121,6 @@ class FileSystemCacheEngine implements CacheEngineInterface
      */
     public function append($key, $content, $ttl = 0)
     {
-        
-
         $fileKey = $this->fixKey($key);
 
         $this->logger->info("[Filesystem cache] Append '$key' in FileSystem");
@@ -139,7 +138,6 @@ class FileSystemCacheEngine implements CacheEngineInterface
      */
     public function lock($key)
     {
-        
         $this->logger->info("[Filesystem cache] Lock '$key'");
 
         $lockFile = $this->fixKey($key) . ".lock";
@@ -170,7 +168,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
     protected function fixKey($key)
     {
         return sys_get_temp_dir() . '/'
-            . (isset($this->configKey) ? $this->configKey : "default")
+            . $this->prefix
             . '-' . preg_replace("/[\/\\\]/", "#", $key)
             . '.cache';
     }

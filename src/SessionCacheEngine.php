@@ -5,6 +5,19 @@ namespace ByJG\Cache;
 class SessionCacheEngine implements CacheEngineInterface
 {
 
+    protected $prefix = null;
+
+    /**
+     * SessionCacheEngine constructor.
+     *
+     * @param string $prefix
+     */
+    public function __construct($prefix = 'cache')
+    {
+        $this->prefix = $prefix;
+    }
+
+
     protected function checkSession()
     {
         if (session_status() == PHP_SESSION_NONE) {
@@ -14,7 +27,7 @@ class SessionCacheEngine implements CacheEngineInterface
 
     protected function keyName($key)
     {
-        return (isset($this->configKey) ? $this->configKey : "default") . '-' . $key;
+        return $this->prefix . '-' . $key;
     }
 
     public function append($key, $str)

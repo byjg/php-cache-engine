@@ -13,6 +13,7 @@ class ArrayCacheEngine implements CacheEngineInterface
     
     public function __construct($logger = null)
     {
+        $this->logger = $logger;
         if (is_null($logger)) {
             $this->logger = new NullLogger();
         }

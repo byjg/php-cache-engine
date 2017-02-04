@@ -12,12 +12,22 @@ class MemcachedEngine implements CacheEngineInterface
      *
      * @var Memcached
      */
-    protected $_memCached = null;
+    protected $memCached = null;
 
     protected $logger = null;
 
-    public function __construct($logger = null)
+    protected $servers = null;
+
+    public function __construct($servers = null, $logger = null)
     {
+        $this->servers = (array)$servers;
+        if (is_null($servers)) {
+            $this->servers = [
+                '127.0.0.1:11211'
+            ];
+        }
+
+        $this->logger = $logger;
         if (is_null($logger)) {
             $this->logger = new NullLogger();
         }
@@ -25,25 +35,13 @@ class MemcachedEngine implements CacheEngineInterface
 
     protected function lazyLoadMemCachedServers()
     {
-        if (is_null($this->_memCached)) {
-            $configKey = isset($this->configKey) ? $this->configKey : 'default';
-            $config = CacheContext::getInstance()->getMemcachedConfig($configKey);
-
-            if (empty($config)) {
-                throw new InvalidArgumentException("Key '$configKey' does not exists in '" . getcwd() . "/config/cacheconfig.php'");
-            }
-            if (!isset($config['servers'])) {
-                throw new InvalidArgumentException("The config 'servers' is not set in 'config/cacheconfig.php'");
-            }
-
-            $servers = $config['servers'];
-
-            $this->_memCached = new Memcached();
-            foreach ($servers as $server) {
+        if (is_null($this->memCached)) {
+            $this->memCached = new Memcached();
+            foreach ($this->servers as $server) {
                 $data = explode(":", $server);
-                $this->_memCached->addServer($data[0], $data[1]);
+                $this->memCached->addServer($data[0], $data[1]);
 
-                $stats = $this->_memCached->getStats();
+                $stats = $this->memCached->getStats();
                 if (!isset($stats[$server]) || $stats[$server]['pid'] === -1) {
                     throw new \Exception("Memcached server $server is down");
                 }
@@ -61,9 +59,9 @@ class MemcachedEngine implements CacheEngineInterface
         $this->lazyLoadMemCachedServers();
 
         
-        $value = $this->_memCached->get($key);
-        if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-            $this->logger->info("[Memcached] Cache '$key' missed with status " . $this->_memCached->getResultCode());
+        $value = $this->memCached->get($key);
+        if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
+            $this->logger->info("[Memcached] Cache '$key' missed with status " . $this->memCached->getResultCode());
             return null;
         }
 
@@ -80,13 +78,13 @@ class MemcachedEngine implements CacheEngineInterface
     {
         $this->lazyLoadMemCachedServers();
 
-        $this->_memCached->set($key, $object, $ttl);
-        $this->logger->info("[Memcached] Set '$key' result " . $this->_memCached->getResultCode());
-        if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->_memCached->getResultCode());
+        $this->memCached->set($key, $object, $ttl);
+        $this->logger->info("[Memcached] Set '$key' result " . $this->memCached->getResultCode());
+        if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
+            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
         }
 
-        return $this->_memCached->getResultCode() === Memcached::RES_SUCCESS;
+        return $this->memCached->getResultCode() === Memcached::RES_SUCCESS;
     }
 
     /**
@@ -97,7 +95,7 @@ class MemcachedEngine implements CacheEngineInterface
     {
         $this->lazyLoadMemCachedServers();
 
-        $this->_memCached->delete($key);
+        $this->memCached->delete($key);
     }
 
     /**
@@ -111,7 +109,7 @@ class MemcachedEngine implements CacheEngineInterface
         $this->lazyLoadMemCachedServers();
 
         $this->logger->info("[Memcached] Append '$key' in Memcached");
-        return $this->_memCached->append($key, $str);
+        return $this->memCached->append($key, $str);
     }
 
     /**
