@@ -1,8 +1,10 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
 
+use ByJG\Cache\CacheEngineInterface;
 use Exception;
+use Psr\Log\NullLogger;
 
 class FileSystemCacheEngine implements CacheEngineInterface
 {
@@ -115,7 +117,7 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param string $content The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
@@ -163,6 +165,11 @@ class FileSystemCacheEngine implements CacheEngineInterface
         if (file_exists($lockFile)) {
             unlink($lockFile);
         }
+    }
+
+    public function isAvailable()
+    {
+        return is_writable(dirname($this->fixKey('test')));
     }
 
     protected function fixKey($key)

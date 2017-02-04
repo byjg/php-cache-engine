@@ -46,4 +46,10 @@ interface CacheEngineInterface
      * @param string $key
      */
     public function release($key);
+
+    /**
+     * Return if this CacheEngine is available for use
+     * @return bool
+     */
+    public function isAvailable();
 }

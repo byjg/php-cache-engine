@@ -1,8 +1,10 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
 
+use ByJG\Cache\CacheEngineInterface;
 use InvalidArgumentException;
+use Psr\Log\NullLogger;
 
 /**
  * Caching based on Unix Share Memory
@@ -225,5 +227,10 @@ class ShmopCacheEngine implements CacheEngineInterface
 
             $this->logger->info("[Shmop Cache] release '$key' confirmed.");
         }
+    }
+
+    public function isAvailable()
+    {
+        return function_exists('shmop_open');
     }
 }

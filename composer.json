@@ -14,8 +14,6 @@
   },
   "require": {
     "php": ">=5.4.0",
-    "byjg/singleton-pattern": "1.0.*",
-    "sheikhheera/iconfig": "1.0.*",
     "psr/cache": "1.0.*"
   },
   "suggest": {

@@ -1,6 +1,8 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
+
+use ByJG\Cache\CacheEngineInterface;
 
 class NoCacheEngine implements CacheEngineInterface
 {
@@ -63,4 +65,11 @@ class NoCacheEngine implements CacheEngineInterface
     {
         return;
     }
+
+    public function isAvailable()
+    {
+        return true;
+    }
+
+
 }

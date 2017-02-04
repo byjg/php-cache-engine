@@ -1,9 +1,10 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
 
-use InvalidArgumentException;
+use ByJG\Cache\CacheEngineInterface;
 use Memcached;
+use Psr\Log\NullLogger;
 
 class MemcachedEngine implements CacheEngineInterface
 {
@@ -132,5 +133,15 @@ class MemcachedEngine implements CacheEngineInterface
         $this->lazyLoadMemCachedServers();
 
         return;
+    }
+
+    public function isAvailable()
+    {
+        try {
+            $this->lazyLoadMemCachedServers();
+            return true;
+        } catch (\Exception $ex) {
+            return false;
+        }
     }
 }

@@ -1,7 +1,8 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
 
+use ByJG\Cache\CacheEngineInterface;
 use Psr\Log\NullLogger;
 
 class ArrayCacheEngine implements CacheEngineInterface
@@ -92,5 +93,10 @@ class ArrayCacheEngine implements CacheEngineInterface
     public function unlock($key)
     {
         return;
+    }
+
+    public function isAvailable()
+    {
+        return true;
     }
 }

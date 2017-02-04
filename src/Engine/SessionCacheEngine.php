@@ -1,6 +1,8 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
+
+use ByJG\Cache\CacheEngineInterface;
 
 class SessionCacheEngine implements CacheEngineInterface
 {
@@ -88,5 +90,15 @@ class SessionCacheEngine implements CacheEngineInterface
         $this->checkSession();
 
         // Nothing to implement here;
+    }
+
+    public function isAvailable()
+    {
+        try {
+            $this->checkSession();
+            return true;
+        } catch (\Exception $ex) {
+            return false;
+        }
     }
 }

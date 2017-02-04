@@ -241,4 +241,9 @@ class CachePool implements CacheItemPoolInterface
         
         $this->deferredItem = [];
     }
+
+    public function isAvailable()
+    {
+        return $this->_cacheEngine->isAvailable();
+    }
 }
