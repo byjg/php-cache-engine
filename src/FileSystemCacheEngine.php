@@ -30,15 +30,6 @@ class FileSystemCacheEngine implements CacheEngineInterface
             return null;
         }
 
-        if (CacheContext::getInstance()->getReset()) {
-            $this->logger->info("[Filesystem cache] Failed to get $key because RESET=true");
-            return null;
-        }
-        if (CacheContext::getInstance()->getNoCache()) {
-            $this->logger->info("[Filesystem cache] Failed to get $key because NOCACHE=true");
-            return null;
-        }
-
         // Check if file is Locked
         $fileKey = $this->fixKey($key);
         $lockFile = $fileKey . ".lock";
@@ -89,30 +80,26 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
         $fileKey = $this->fixKey($key);
 
-        if (!CacheContext::getInstance()->getNoCache()) {
-            $this->logger->info("[Filesystem cache] Set '$key' in FileSystem");
+        $this->logger->info("[Filesystem cache] Set '$key' in FileSystem");
 
-            try {
-                if (file_exists($fileKey)) {
-                    unlink($fileKey);
-                }
-
-                if (is_null($object)) {
-                    return false;
-                }
-
-                if (is_string($object) && (strlen($object) === 0)) {
-                    touch($fileKey);
-                } else {
-                    file_put_contents($fileKey, serialize($object));
-                }
-            } catch (Exception $ex) {
-                echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
+        try {
+            if (file_exists($fileKey)) {
+                unlink($fileKey);
             }
-        } else {
-            $this->logger->info("[Filesystem cache] Not Set '$key' because NOCACHE=true");
+
+            if (is_null($object)) {
+                return false;
+            }
+
+            if (is_string($object) && (strlen($object) === 0)) {
+                touch($fileKey);
+            } else {
+                file_put_contents($fileKey, serialize($object));
+            }
+        } catch (Exception $ex) {
+            echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
         }
-        
+
         return true;
     }
 
@@ -137,16 +124,12 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
         $fileKey = $this->fixKey($key);
 
-        if (!CacheContext::getInstance()->getNoCache()) {
-            $this->logger->info("[Filesystem cache] Append '$key' in FileSystem");
+        $this->logger->info("[Filesystem cache] Append '$key' in FileSystem");
 
-            try {
-                file_put_contents($fileKey, serialize($content), true);
-            } catch (Exception $ex) {
-                echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
-            }
-        } else {
-            $this->logger->info("[Filesystem cache] Not Set '$key' because NOCACHE=true");
+        try {
+            file_put_contents($fileKey, serialize($content), true);
+        } catch (Exception $ex) {
+            echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
         }
     }
 

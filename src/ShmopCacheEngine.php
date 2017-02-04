@@ -81,15 +81,6 @@ class ShmopCacheEngine implements CacheEngineInterface
             return null;
         }
 
-        if (CacheContext::getInstance()->getReset()) {
-            $this->logger->info("[Shmop Cache] Failed to get $key because RESET=true");
-            return null;
-        }
-        if (CacheContext::getInstance()->getNoCache()) {
-            $this->logger->info("[Shmop Cache] Failed to get $key because NOCACHE=true");
-            return null;
-        }
-
         $fileKey = $this->getKeyId($key);
 
         // Opened

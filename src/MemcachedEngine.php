@@ -61,16 +61,6 @@ class MemcachedEngine implements CacheEngineInterface
         $this->lazyLoadMemCachedServers();
 
         
-        if (CacheContext::getInstance()->getReset()) {
-            $this->logger->info("[Memcached] Get $key failed because RESET=true");
-            return null;
-        }
-
-        if (CacheContext::getInstance()->getNoCache()) {
-            $this->logger->info("[Memcached] Failed to get $key because NOCACHE=true");
-            return null;
-        }
-
         $value = $this->_memCached->get($key);
         if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->info("[Memcached] Cache '$key' missed with status " . $this->_memCached->getResultCode());
@@ -90,20 +80,13 @@ class MemcachedEngine implements CacheEngineInterface
     {
         $this->lazyLoadMemCachedServers();
 
-        
-
-        if (!CacheContext::getInstance()->getNoCache()) {
-            $this->_memCached->set($key, $object, $ttl);
-            $this->logger->info("[Memcached] Set '$key' result " . $this->_memCached->getResultCode());
-            if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-                $this->logger->error("[Memcached] Set '$key' failed with status " . $this->_memCached->getResultCode());
-            }
-
-            return $this->_memCached->getResultCode() === Memcached::RES_SUCCESS;
-        } else {
-            $this->logger->info("[Memcached] Not Set '$key' because NOCACHE=true");
-            return true;
+        $this->_memCached->set($key, $object, $ttl);
+        $this->logger->info("[Memcached] Set '$key' result " . $this->_memCached->getResultCode());
+        if ($this->_memCached->getResultCode() !== Memcached::RES_SUCCESS) {
+            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->_memCached->getResultCode());
         }
+
+        return $this->_memCached->getResultCode() === Memcached::RES_SUCCESS;
     }
 
     /**
@@ -127,16 +110,8 @@ class MemcachedEngine implements CacheEngineInterface
     {
         $this->lazyLoadMemCachedServers();
 
-        
-
-        if (!CacheContext::getInstance()->getNoCache()) {
-            $this->logger->info("[Memcached] Append '$key' in Memcached");
-            return $this->_memCached->append($key, $str);
-        } else {
-            $this->logger->info("[Memcached] Not Set '$key' because NOCACHE=true");
-        }
-        
-        return true;
+        $this->logger->info("[Memcached] Append '$key' in Memcached");
+        return $this->_memCached->append($key, $str);
     }
 
     /**

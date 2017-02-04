@@ -36,26 +36,6 @@ class CacheContext
         }
     }
 
-    public function getReset()
-    {
-        return $this->reset;
-    }
-
-    public function getNoCache()
-    {
-        return $this->noCache;
-    }
-
-    public function setReset($reset)
-    {
-        $this->reset = $reset;
-    }
-
-    public function setNoCache($noCache)
-    {
-        $this->noCache = $noCache;
-    }
-
     private static $instances = [];
 
     /**
