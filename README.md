@@ -23,7 +23,7 @@ A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.
 You can set instance in the 'cacheconfig.php' setup (see below how to configure the factory)
 
 ```php
-$cachePool = \ByJG\Cache\CacheContext::psrFactory();
+$cachePool = \ByJG\Cache\Factory
 ```
 
 or you can create the CachePool imediatelly:
