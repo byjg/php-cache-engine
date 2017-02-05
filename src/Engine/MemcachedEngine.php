@@ -59,7 +59,6 @@ class MemcachedEngine implements CacheEngineInterface
     {
         $this->lazyLoadMemCachedServers();
 
-        
         $value = $this->memCached->get($key);
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->info("[Memcached] Cache '$key' missed with status " . $this->memCached->getResultCode());
@@ -137,6 +136,10 @@ class MemcachedEngine implements CacheEngineInterface
 
     public function isAvailable()
     {
+        if (!class_exists('\Memcached')) {
+            return false;
+        }
+
         try {
             $this->lazyLoadMemCachedServers();
             return true;
