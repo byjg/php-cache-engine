@@ -204,7 +204,7 @@ class ShmopCacheEngine implements CacheEngineInterface
      */
     public function release($key)
     {
-        
+
 
         $this->logger->info("[Shmop Cache] release '$key'");
 
@@ -214,7 +214,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         }
 
         $filekey = $this->getKeyId($key);
-        $shm_id = shmop_open($filekey, "w", 0, 0);
+        $shm_id = @shmop_open($filekey, "w", 0, 0);
 
         $file = $this->getFTok($key);
         if (file_exists($file)) {
