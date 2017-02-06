@@ -3,6 +3,10 @@ language: php
 services:
   - memcached
 
+addons:
+  hosts:
+    - memcached-container
+
 php:
   - "7.0"
   - "5.6"
