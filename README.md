@@ -69,8 +69,10 @@ Just type: `composer require "byjg/cache-engine=3.0.*"`
 ## Running Unit Testes
 
 ```
-phpunit
+phpunit --stderr
 ```
+
+**Note:** the parameter `--stderr` after `phpunit` is to permit run the tests on SessionCacheEngine.  
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
