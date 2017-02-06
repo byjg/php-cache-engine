@@ -24,8 +24,7 @@ class CachePoolTest extends PHPUnit_Framework_TestCase
 
     public function CachePoolProvider()
     {
-        // $memcachedServer = ['192.168.1.181:11211'];
-        $memcachedServer = ['127.0.0.1:11211'];
+        $memcachedServer = ['memcached-container:11211'];
 
         return [
             [
