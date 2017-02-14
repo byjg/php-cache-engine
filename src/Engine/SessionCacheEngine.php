@@ -1,9 +1,24 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
+
+use ByJG\Cache\CacheEngineInterface;
 
 class SessionCacheEngine implements CacheEngineInterface
 {
+
+    protected $prefix = null;
+
+    /**
+     * SessionCacheEngine constructor.
+     *
+     * @param string $prefix
+     */
+    public function __construct($prefix = 'cache')
+    {
+        $this->prefix = $prefix;
+    }
+
 
     protected function checkSession()
     {
@@ -14,7 +29,7 @@ class SessionCacheEngine implements CacheEngineInterface
 
     protected function keyName($key)
     {
-        return (isset($this->configKey) ? $this->configKey : "default") . '-' . $key;
+        return $this->prefix . '-' . $key;
     }
 
     public function append($key, $str)
@@ -75,5 +90,15 @@ class SessionCacheEngine implements CacheEngineInterface
         $this->checkSession();
 
         // Nothing to implement here;
+    }
+
+    public function isAvailable()
+    {
+        try {
+            $this->checkSession();
+            return true;
+        } catch (\Exception $ex) {
+            return false;
+        }
     }
 }

@@ -1,11 +1,24 @@
 <?php
 
-namespace ByJG\Cache;
+namespace ByJG\Cache\Engine;
+
+use ByJG\Cache\CacheEngineInterface;
+use Psr\Log\NullLogger;
 
 class ArrayCacheEngine implements CacheEngineInterface
 {
 
     protected $_L1Cache = array();
+    
+    protected $logger = null;
+    
+    public function __construct($logger = null)
+    {
+        $this->logger = $logger;
+        if (is_null($logger)) {
+            $this->logger = new NullLogger();
+        }
+    }
 
     /**
      * @param string $key The object KEY
@@ -14,13 +27,13 @@ class ArrayCacheEngine implements CacheEngineInterface
      */
     public function get($key, $ttl = 0)
     {
-        $log = LogHandler::getInstance();
+        
 
         if (array_key_exists($key, $this->_L1Cache)) {
-            $log->info("[Array cache] Get '$key' from L1 Cache");
+            $this->logger->info("[Array cache] Get '$key' from L1 Cache");
             return $this->_L1Cache[$key];
         } else {
-            $log->info("[Array cache] Not found '$key'");
+            $this->logger->info("[Array cache] Not found '$key'");
             return null;
         }
     }
@@ -33,8 +46,7 @@ class ArrayCacheEngine implements CacheEngineInterface
      */
     public function set($key, $object, $ttl = 0)
     {
-        $log = LogHandler::getInstance();
-        $log->info("[Array cache] Set '$key' in L1 Cache");
+        $this->logger->info("[Array cache] Set '$key' in L1 Cache");
 
         $this->_L1Cache[$key] = $object;
 
@@ -49,8 +61,7 @@ class ArrayCacheEngine implements CacheEngineInterface
      */
     public function append($key, $str)
     {
-        $log = LogHandler::getInstance();
-        $log->info("[Array cache] Append '$key' in L1 Cache");
+        $this->logger->info("[Array cache] Append '$key' in L1 Cache");
 
         $this->_L1Cache[$key] = $this->_L1Cache[$key] . $str;
 
@@ -82,5 +93,10 @@ class ArrayCacheEngine implements CacheEngineInterface
     public function unlock($key)
     {
         return;
+    }
+
+    public function isAvailable()
+    {
+        return true;
     }
 }

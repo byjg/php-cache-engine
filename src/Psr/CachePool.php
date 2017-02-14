@@ -170,7 +170,7 @@ class CachePool implements CacheItemPoolInterface
      * Psr implementation of deleteItem()
      *
      * @param string $key
-     * @return bool|void
+     * @return bool
      */
     public function deleteItem($key)
     {
@@ -181,7 +181,7 @@ class CachePool implements CacheItemPoolInterface
      * Psr Implementation of deleteItems()
      * 
      * @param array $keys
-     * @return bool|void
+     * @return bool
      */
     public function deleteItems(array $keys)
     {
@@ -195,7 +195,7 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * @param CacheItemInterface $item
-     * @return bool|void
+     * @return bool
      */
     public function save(CacheItemInterface $item)
     {
@@ -222,7 +222,7 @@ class CachePool implements CacheItemPoolInterface
      * Psr Implementation of saveDeferred()
      * 
      * @param CacheItemInterface $item
-     * @return bool|void
+     * @return bool
      */
     public function saveDeferred(CacheItemInterface $item)
     {
@@ -240,5 +240,10 @@ class CachePool implements CacheItemPoolInterface
         }
         
         $this->deferredItem = [];
+    }
+
+    public function isAvailable()
+    {
+        return $this->_cacheEngine->isAvailable();
     }
 }

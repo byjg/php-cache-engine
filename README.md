@@ -1,5 +1,8 @@
 # Cache Engine
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/cache-engine-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/cache-engine-php/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/f643fd22-8ab1-4f41-9bef-f9f9e127ec0d/mini.png)](https://insight.sensiolabs.com/projects/f643fd22-8ab1-4f41-9bef-f9f9e127ec0d)
+[![Build Status](https://travis-ci.org/byjg/cache-engine-php.svg?branch=master)](https://travis-ci.org/byjg/cache-engine-php)
+
 
 ## Description
 
@@ -18,12 +21,12 @@ A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.
 
 ## Create new cache instance
 
-### Creating a PSR-6 compatible instance (RECOMMENDED)
+### Creating a PSR-6 compatible instance 
 
 You can set instance in the 'cacheconfig.php' setup (see below how to configure the factory)
 
 ```php
-$cachePool = \ByJG\Cache\CacheContext::psrFactory();
+$cachePool = \ByJG\Cache\Factory::createFilePool();
 ```
 
 or you can create the CachePool imediatelly:
@@ -32,101 +35,45 @@ or you can create the CachePool imediatelly:
 $cachePool = new CachePool(new FileSystemCacheEngine());
 ```
 
+### Logging cache commands
+ 
+You can add a PSR Log compatible to the constructor in order to get Log of the operations
 
-### Use the cache engine instance 
 
-You can create a instance from the Cache engine directly. This is not PSR-6 compliant, but implements
-features that the CachePool does not support and it is for backward compatibilty also.
+### List of Avaiable Factory Commands
 
-You can create from the factory and cacheconfig.php file:
+**Note: All parameters are optional**
 
-```php
-$cacheEngine = \ByJG\Cache\CacheContext::factory();
-```
+| Engine           | Factory Command                                                       |
+|:-----------------|:----------------------------------------------------------------------|
+| No Cache         | Factory::createNullPool($prefix, $bufferSize, $logger);               |
+| Array            | Factory::createArrayPool($bufferSize, $logger);                       |
+| File System      | Factory::createFilePool($prefix, $bufferSize, $logger);               |
+| Memcached        | Factory::createMemcachedPool($servers[], $bufferSize, $logger);       |
+| Session          | Factory::createSessionPool($prefix, $bufferSize, $logger);            |
+| Redis            | Factory::createRedisCacheEngine($server, $pwd, $bufferSize, $logger); |
+| Shmop            | Factory::createShmopPool($config[], $bufferSize, $logger);            |
 
-or instantiate directly
+The Commom parameters are:
 
-```php
-$cacheEngine = new \ByJG\Cache\MemcachedEngine();
-```
+- logger: A valid instance that implement the LoggerInterface defined by the PSR/LOG
+- bufferSize: the Buffer of CachePool
+- prefix: A prefix name to compose the KEY physically 
+- servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]` 
+- config: Specific setup for shmop. E.g.: `[ 'max-size' => 524288, 'default-permission' => '0700' ]`
 
 ## Install
 
-Just type: `composer require "byjg/cache-engine=2.0.*"`
+Just type: `composer require "byjg/cache-engine=3.0.*"`
 
-## Setup the Factory Config
 
-You need to have a file named `config/cacheconfig.php` with the follow contents:
+## Running Unit Testes
 
-### Basic Configuration
-
-```php
-return [
-    'default' => [
-        'instance' => '\\ByJG\\Cache\\NoCacheEngine'
-    ]
-];
+```
+phpunit --stderr
 ```
 
-The parameters are described below:
-
-* 'default' is the name of the key used in the CacheContext::factory(key)
-* 'instance' is required if you use CacheContext::factory. Must have the full name space for the cache class;
-
-### Setting the Cache Pool Buffer
-
-CachePool implementation have a local buffer saving some elements locally for speedup the access.
-If you set to '0' the pool buffer will be disabled.
-
-```php
-return [
-    'default' => [
-        'instance' => '\\ByJG\\Cache\\MemcachedEngine',
-        'poolbuffer' => 10
-    ]
-];
-```
-
-
-### Specific configuration for Memcached
-
-```php
-return [
-    'default' => [
-        'instance' => '\\ByJG\\Cache\\MemcachedEngine',
-        'memcached' => [
-            'servers' => [
-                '127.0.0.1:11211'
-            ]
-        ],
-    ]
-];
-```
-
-The parameters are described below:
-
-* 'memcached' have specific configuration for the MemcachedEngine class.
-
-### Specific configuration for Shmop Cache
-
-```php
-return [
-    'default' => [
-        'instance' => '\\ByJG\\Cache\\ShmopCacheEngine',
-        'shmop' => [
-            'max-size' => 1048576,
-            'default-permission' => '0700'
-        ]
-    ]
-];
-```
-
-The parameters are described below:
-
-* 'shmop' have specific configuration for the ShmopCacheEngine class.
-
-
-
+**Note:** the parameter `--stderr` after `phpunit` is to permit run the tests on SessionCacheEngine.  
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
