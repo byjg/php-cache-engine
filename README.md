@@ -44,21 +44,22 @@ You can add a PSR Log compatible to the constructor in order to get Log of the o
 
 **Note: All parameters are optional**
 
-| Engine           | Factory Command                                                     |
-|:-----------------|:--------------------------------------------------------------------|
-| No Cache         | Factory::createNullPool($prefix, $bufferSize, $logger);             |
-| Array            | Factory::createArrayPool($bufferSize, $logger);                     |
-| File System      | Factory::createFilePool($prefix, $bufferSize, $logger);             |
-| Memcached        | Factory::createMemcachedPool($servers[], $bufferSize, $logger);     |
-| Session          | Factory::createSessionPool($prefix, $bufferSize, $logger);          |
-| Shmop            | Factory::createShmopPool($config[], $bufferSize, $logger);          |
+| Engine           | Factory Command                                                       |
+|:-----------------|:----------------------------------------------------------------------|
+| No Cache         | Factory::createNullPool($prefix, $bufferSize, $logger);               |
+| Array            | Factory::createArrayPool($bufferSize, $logger);                       |
+| File System      | Factory::createFilePool($prefix, $bufferSize, $logger);               |
+| Memcached        | Factory::createMemcachedPool($servers[], $bufferSize, $logger);       |
+| Session          | Factory::createSessionPool($prefix, $bufferSize, $logger);            |
+| Redis            | Factory::createRedisCacheEngine($server, $pwd, $bufferSize, $logger); |
+| Shmop            | Factory::createShmopPool($config[], $bufferSize, $logger);            |
 
 The Commom parameters are:
 
 - logger: A valid instance that implement the LoggerInterface defined by the PSR/LOG
 - bufferSize: the Buffer of CachePool
 - prefix: A prefix name to compose the KEY physically 
-- servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]`
+- servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]` 
 - config: Specific setup for shmop. E.g.: `[ 'max-size' => 524288, 'default-permission' => '0700' ]`
 
 ## Install
