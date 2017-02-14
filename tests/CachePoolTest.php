@@ -25,6 +25,8 @@ class CachePoolTest extends PHPUnit_Framework_TestCase
     public function CachePoolProvider()
     {
         $memcachedServer = ['memcached-container:11211'];
+        $redisCacheServer = 'redis-container:6379';
+        $redisPassword = '';
 
         return [
             [
@@ -44,6 +46,9 @@ class CachePoolTest extends PHPUnit_Framework_TestCase
             ],
             [
                 new CachePool(new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer))
+            ],
+            [
+                new CachePool(new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword))
             ]
         ];
     }

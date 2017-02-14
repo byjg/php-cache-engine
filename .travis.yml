@@ -2,10 +2,12 @@ language: php
 
 services:
   - memcached
+  - redis-server
 
 addons:
   hosts:
     - memcached-container
+    - redis-container
 
 php:
   - "7.0"

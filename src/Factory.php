@@ -6,6 +6,7 @@ use ByJG\Cache\Engine\ArrayCacheEngine;
 use ByJG\Cache\Engine\FileSystemCacheEngine;
 use ByJG\Cache\Engine\MemcachedEngine;
 use ByJG\Cache\Engine\NoCacheEngine;
+use ByJG\Cache\Engine\RedisCacheEngine;
 use ByJG\Cache\Engine\SessionCacheEngine;
 use ByJG\Cache\Engine\ShmopCacheEngine;
 use ByJG\Cache\Psr\CachePool;
@@ -55,6 +56,14 @@ class Factory
     {
         return new CachePool(
             new MemcachedEngine($servers, $logger),
+            $bufferSize
+        );
+    }
+
+    public static function createRedisCacheEngine($servers = null, $password = null, $bufferSize = null, $logger = null)
+    {
+        return new CachePool(
+            new RedisCacheEngine($servers, $password, $logger),
             $bufferSize
         );
     }
