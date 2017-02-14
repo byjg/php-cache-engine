@@ -100,7 +100,8 @@ class FileSystemCacheEngine implements CacheEngineInterface
                 file_put_contents($fileKey, serialize($object));
             }
         } catch (Exception $ex) {
-            echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
+            $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
+            return false;
         }
 
         return true;
@@ -130,8 +131,11 @@ class FileSystemCacheEngine implements CacheEngineInterface
         try {
             file_put_contents($fileKey, serialize($content), true);
         } catch (Exception $ex) {
-            echo "<br/><b>Warning:</b> I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode. <br/>";
+            $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
+            return false;
         }
+
+        return true;
     }
 
     /**

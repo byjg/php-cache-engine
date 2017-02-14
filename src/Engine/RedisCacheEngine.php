@@ -3,7 +3,6 @@
 namespace ByJG\Cache\Engine;
 
 use ByJG\Cache\CacheEngineInterface;
-use Memcached;
 use Psr\Log\NullLogger;
 
 class RedisCacheEngine implements CacheEngineInterface

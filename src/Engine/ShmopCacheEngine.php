@@ -125,8 +125,6 @@ class ShmopCacheEngine implements CacheEngineInterface
      */
     public function set($key, $object, $ttl = 0)
     {
-        
-
         $this->logger->info("[Shmop Cache] set '$key'");
 
         $this->release($key);
@@ -155,6 +153,8 @@ class ShmopCacheEngine implements CacheEngineInterface
             $this->logger->warning("Couldn't write the entire length of data");
         }
         shmop_close($shm_id);
+
+        return true;
     }
 
     /**
@@ -178,6 +178,8 @@ class ShmopCacheEngine implements CacheEngineInterface
                 throw new InvalidArgumentException('Only is possible append string types');
             }
         }
+
+        return true;
     }
 
     /**
