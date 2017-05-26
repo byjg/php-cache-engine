@@ -6,7 +6,7 @@
  */
 
 
-use ByJG\Cache\Psr\CachePool;
+use ByJG\Cache\Psr6\CachePool;
 
 
 class CachePoolTest extends PHPUnit_Framework_TestCase

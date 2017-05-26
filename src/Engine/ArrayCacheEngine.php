@@ -2,13 +2,14 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheEngineInterface;
+use ByJG\Cache\CacheAvailabilityInterface;
 use Psr\Log\NullLogger;
+use Psr\SimpleCache\DateInterval;
 
-class ArrayCacheEngine implements CacheEngineInterface
+class ArrayCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface
 {
 
-    protected $_L1Cache = array();
+    protected $cache = array();
     
     protected $logger = null;
     
@@ -21,78 +22,60 @@ class ArrayCacheEngine implements CacheEngineInterface
     }
 
     /**
+     * @param string $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        return isset($this->cache[$key]);
+    }
+
+    /**
      * @param string $key The object KEY
-     * @param int $ttl IGNORED IN MEMCACHED.
+     * @param int $default IGNORED IN MEMCACHED.
      * @return object Description
      */
-    public function get($key, $ttl = 0)
+    public function get($key, $default = null)
     {
-        
-
-        if (array_key_exists($key, $this->_L1Cache)) {
+        if ($this->has($key)) {
             $this->logger->info("[Array cache] Get '$key' from L1 Cache");
-            return $this->_L1Cache[$key];
+            return $this->cache[$key];
         } else {
             $this->logger->info("[Array cache] Not found '$key'");
-            return null;
+            return $default;
         }
     }
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         $this->logger->info("[Array cache] Set '$key' in L1 Cache");
 
-        $this->_L1Cache[$key] = $object;
+        $this->cache[$key] = $value;
 
         return true;
     }
 
-    /**
-     *
-     * @param string $key
-     * @param string $str
-     * @return bool
-     */
-    public function append($key, $str)
+    public function clear()
     {
-        $this->logger->info("[Array cache] Append '$key' in L1 Cache");
-
-        $this->_L1Cache[$key] = $this->_L1Cache[$key] . $str;
-
-        return true;
+        $this->cache = [];
     }
 
     /**
      * Unlock resource
+     *
      * @param string $key
+     * @return bool|void
      */
-    public function release($key)
+    public function delete($key)
     {
-        unset($this->_L1Cache[$key]);
-    }
-
-    /**
-     * Lock resource before set it.
-     * @param string $key
-     */
-    public function lock($key)
-    {
-        return;
-    }
-
-    /**
-     * UnLock resource after set it
-     * @param string $key
-     */
-    public function unlock($key)
-    {
-        return;
+        unset($this->cache[$key]);
+        return true;
     }
 
     public function isAvailable()

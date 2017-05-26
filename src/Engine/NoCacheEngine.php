@@ -2,28 +2,28 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheEngineInterface;
+use ByJG\Cache\CacheAvailabilityInterface;
+use ByJG\Cache\CacheLockInterface;
 
-class NoCacheEngine implements CacheEngineInterface
+class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface, CacheAvailabilityInterface
 {
-
     /**
      * @param string $key The object KEY
-     * @param int $ttl IGNORED IN MEMCACHED.
-     * @return object Description
+     * @param int $default IGNORED IN MEMCACHED.
+     * @return mixed Description
      */
-    public function get($key, $ttl = 0)
+    public function get($key, $default = null)
     {
-        return null;
+        return $default;
     }
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         return true;
     }
@@ -32,18 +32,7 @@ class NoCacheEngine implements CacheEngineInterface
      * Unlock resource
      * @param string $key
      */
-    public function release($key)
-    {
-        return;
-    }
-
-    /**
-     *
-     * @param string $key
-     * @param string $str
-     * @return bool
-     */
-    public function append($key, $str)
+    public function delete($key)
     {
         return true;
     }
@@ -71,5 +60,30 @@ class NoCacheEngine implements CacheEngineInterface
         return true;
     }
 
+    /**
+     * Wipes clean the entire cache's keys.
+     *
+     * @return bool True on success and false on failure.
+     */
+    public function clear()
+    {
+        return true;
+    }
 
+    /**
+     * Determines whether an item is present in the cache.
+     * NOTE: It is recommended that has() is only to be used for cache warming type purposes
+     * and not to be used within your live applications operations for get/set, as this method
+     * is subject to a race condition where your has() will return true and immediately after,
+     * another script can remove it making the state of your app out of date.
+     *
+     * @param string $key The cache item key.
+     * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *   MUST be thrown if the $key string is not a legal value.
+    */
+    public function has($key)
+    {
+        return false;
+    }
 }

@@ -1,12 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jg
- * Date: 12/06/16
- * Time: 11:32
- */
 
-namespace ByJG\Cache\Psr;
+namespace ByJG\Cache\Psr6;
 
 use Psr\Cache\CacheItemInterface;
 

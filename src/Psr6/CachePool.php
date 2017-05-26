@@ -1,16 +1,17 @@
 <?php
 
-namespace ByJG\Cache\Psr;
+namespace ByJG\Cache\Psr6;
 
 use ByJG\Cache\CacheEngineInterface;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\InvalidArgumentException;
+use Psr\SimpleCache\CacheInterface;
 
 class CachePool implements CacheItemPoolInterface
 {
     /**
-     * @var CacheEngineInterface
+     * @var \Psr\SimpleCache\CacheInterface
      */
     protected $_cacheEngine;
 
@@ -37,10 +38,10 @@ class CachePool implements CacheItemPoolInterface
     /**
      * CachePool constructor.
      * 
-     * @param CacheEngineInterface $_cacheEngine
+     * @param CacheInterface $_cacheEngine
      * @param int $bufferSize
      */
-    public function __construct(CacheEngineInterface $_cacheEngine, $bufferSize = 10)
+    public function __construct(CacheInterface $_cacheEngine, $bufferSize = 10)
     {
         $this->_cacheEngine = $_cacheEngine;
         $this->bufferSize = intval($bufferSize);
@@ -186,7 +187,7 @@ class CachePool implements CacheItemPoolInterface
     public function deleteItems(array $keys)
     {
         foreach ($keys as $key) {
-            $this->_cacheEngine->release($key);
+            $this->_cacheEngine->delete($key);
             $this->removeElementFromBuffer($key);
         }
         
