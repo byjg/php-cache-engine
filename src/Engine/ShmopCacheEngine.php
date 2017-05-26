@@ -2,6 +2,7 @@
 
 namespace ByJG\Cache\Engine;
 
+use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\CacheEngineInterface;
 use InvalidArgumentException;
 use Psr\Log\NullLogger;
@@ -21,9 +22,8 @@ use Psr\Log\NullLogger;
  *
  *
  */
-class ShmopCacheEngine implements CacheEngineInterface
+class ShmopCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface
 {
-
     protected $logger = null;
 
     protected $config = [];
@@ -71,14 +71,12 @@ class ShmopCacheEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object KEY
-     * @param int $ttl The time to live in seconds of the object. Depends on implementation.
+     * @param int $default The time to live in seconds of the object. Depends on implementation.
      * @return object The Object
      */
-    public function get($key, $ttl = 0)
+    public function get($key, $default = null)
     {
-        
-
-        if ($ttl === false) {
+       if ($default === false) {
             $this->logger->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
             return null;
         }
@@ -95,7 +93,7 @@ class ShmopCacheEngine implements CacheEngineInterface
         $fileAge = filemtime($this->getFTok($key));
 
         // Check
-        if (($ttl > 0) && (intval(time() - $fileAge) > $ttl)) {
+        if (($default > 0) && (intval(time() - $fileAge) > $default)) {
             $this->logger->info("[Shmop Cache] File too old. Ignoring '$key'");
 
             // Close old descriptor
@@ -118,18 +116,18 @@ class ShmopCacheEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of the object. Depends on implementation.
      * @return bool If the object is successfully posted
      * @throws \Exception
      */
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         $this->logger->info("[Shmop Cache] set '$key'");
 
-        $this->release($key);
+        $this->delete($key);
 
-        $serialized = serialize($object);
+        $serialized = serialize($value);
         $size = strlen($serialized);
 
         if ($size > $this->getMaxSize()) {
@@ -158,56 +156,11 @@ class ShmopCacheEngine implements CacheEngineInterface
     }
 
     /**
-     * Append only will work with strings.
-     *
-     * @param string $key
-     * @param string $str
-     * @return bool
-     */
-    public function append($key, $str)
-    {
-        $old = $this->get($key);
-        if ($old === false) {
-            $this->set($key, $str);
-        } else {
-            $oldUn = unserialize($old);
-            if (is_string($oldUn)) {
-                $this->release($key);
-                $this->set($key, $oldUn . $str);
-            } else {
-                throw new InvalidArgumentException('Only is possible append string types');
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Lock resource before set it.
-     * @param string $key
-     */
-    public function lock($key)
-    {
-        
-    }
-
-    /**
-     * Unlock resource
-     * @param string $key
-     */
-    public function unlock($key)
-    {
-        
-    }
-
-    /**
      * Release the object
      * @param string $key
      */
-    public function release($key)
+    public function delete($key)
     {
-
-
         $this->logger->info("[Shmop Cache] release '$key'");
 
         if ($this->get($key) === false) {
@@ -230,6 +183,28 @@ class ShmopCacheEngine implements CacheEngineInterface
             $this->logger->info("[Shmop Cache] release '$key' confirmed.");
         }
     }
+
+    public function clear()
+    {
+
+    }
+
+    public function has($key)
+    {
+        $fileKey = $this->getKeyId($key);
+
+        // Opened
+        $shm_id = @shmop_open($fileKey, "a", 0, 0);
+
+        $exists = !(!$shm_id);
+
+        if ($exists) {
+            shmop_close($shm_id);
+        }
+
+        return $exists;
+    }
+
 
     public function isAvailable()
     {

@@ -2,11 +2,12 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheEngineInterface;
+use ByJG\Cache\CacheAvailabilityInterface;
+use ByJG\Cache\CacheLockInterface;
 use Exception;
 use Psr\Log\NullLogger;
 
-class FileSystemCacheEngine implements CacheEngineInterface
+class FileSystemCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface, CacheLockInterface
 {
 
     protected $logger = null;
@@ -25,16 +26,11 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object KEY
-     * @param int $ttl IGNORED IN MEMCACHED.
+     * @param int $default IGNORED IN MEMCACHED.
      * @return object Description
      */
-    public function get($key, $ttl = 0)
+    public function get($key, $default = null)
     {
-        if ($ttl === false) {
-            $this->logger->info("[Filesystem cache] Ignored  $key because TTL=FALSE");
-            return null;
-        }
-
         // Check if file is Locked
         $fileKey = $this->fixKey($key);
         $lockFile = $fileKey . ".lock";
@@ -57,10 +53,10 @@ class FileSystemCacheEngine implements CacheEngineInterface
         }
 
         // Check if file exists
-        if (file_exists($fileKey)) {
+        if ($this->has($key)) {
             $fileAge = filemtime($fileKey);
 
-            if (($ttl > 0) && (intval(time() - $fileAge) > $ttl)) {
+            if (($default > 0) && (intval(time() - $fileAge) > $default)) {
                 $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
                 return null;
             } else {
@@ -75,11 +71,11 @@ class FileSystemCacheEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         $fileKey = $this->fixKey($key);
 
@@ -90,14 +86,14 @@ class FileSystemCacheEngine implements CacheEngineInterface
                 unlink($fileKey);
             }
 
-            if (is_null($object)) {
+            if (is_null($value)) {
                 return false;
             }
 
-            if (is_string($object) && (strlen($object) === 0)) {
+            if (is_string($value) && (strlen($value) === 0)) {
                 touch($fileKey);
             } else {
-                file_put_contents($fileKey, serialize($object));
+                file_put_contents($fileKey, serialize($value));
             }
         } catch (Exception $ex) {
             $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
@@ -111,31 +107,9 @@ class FileSystemCacheEngine implements CacheEngineInterface
      * Unlock resource
      * @param string $key
      */
-    public function release($key)
+    public function delete($key)
     {
         $this->set($key, null);
-    }
-
-    /**
-     * @param string $key The object Key
-     * @param string $content The object to be cached
-     * @param int $ttl The time to live in seconds of this objects
-     * @return bool If the object is successfully posted
-     */
-    public function append($key, $content, $ttl = 0)
-    {
-        $fileKey = $this->fixKey($key);
-
-        $this->logger->info("[Filesystem cache] Append '$key' in FileSystem");
-
-        try {
-            file_put_contents($fileKey, serialize($content), true);
-        } catch (Exception $ex) {
-            $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
-            return false;
-        }
-
-        return true;
     }
 
     /**
@@ -182,5 +156,33 @@ class FileSystemCacheEngine implements CacheEngineInterface
             . $this->prefix
             . '-' . preg_replace("/[\/\\\]/", "#", $key)
             . '.cache';
+    }
+
+    /**
+     * Wipes clean the entire cache's keys.
+     *
+     * @return bool True on success and false on failure.
+     */
+    public function clear()
+    {
+        // TODO: Implement clear() method.
+    }
+
+    /**
+     * Determines whether an item is present in the cache.
+     * NOTE: It is recommended that has() is only to be used for cache warming type purposes
+     * and not to be used within your live applications operations for get/set, as this method
+     * is subject to a race condition where your has() will return true and immediately after,
+     * another script can remove it making the state of your app out of date.
+     *
+     * @param string $key The cache item key.
+     * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *   MUST be thrown if the $key string is not a legal value.
+     */
+    public function has($key)
+    {
+        $fileKey = $this->fixKey($key);
+        return file_exists($fileKey);
     }
 }

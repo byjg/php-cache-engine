@@ -52,10 +52,10 @@ class MemcachedEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object KEY
-     * @param int $ttl IGNORED IN MEMCACHED.
+     * @param int $default IGNORED IN MEMCACHED.
      * @return object Description
      */
-    public function get($key, $ttl = 0)
+    public function get($key, $default = 0)
     {
         $this->lazyLoadMemCachedServers();
 
@@ -70,15 +70,15 @@ class MemcachedEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         $this->lazyLoadMemCachedServers();
 
-        $this->memCached->set($key, $object, $ttl);
+        $this->memCached->set($key, $value, $ttl);
         $this->logger->info("[Memcached] Set '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
@@ -91,7 +91,7 @@ class MemcachedEngine implements CacheEngineInterface
      * Unlock resource
      * @param string $key
      */
-    public function release($key)
+    public function delete($key)
     {
         $this->lazyLoadMemCachedServers();
 

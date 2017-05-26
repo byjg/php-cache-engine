@@ -3,6 +3,7 @@
 namespace ByJG\Cache\Psr6;
 
 use ByJG\Cache\CacheEngineInterface;
+use ByJG\Cache\Engine\BaseCacheEngine;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\InvalidArgumentException;
@@ -38,10 +39,10 @@ class CachePool implements CacheItemPoolInterface
     /**
      * CachePool constructor.
      * 
-     * @param CacheInterface $_cacheEngine
+     * @param BaseCacheEngine $_cacheEngine
      * @param int $bufferSize
      */
-    public function __construct(CacheInterface $_cacheEngine, $bufferSize = 10)
+    public function __construct(BaseCacheEngine $_cacheEngine, $bufferSize = 10)
     {
         $this->_cacheEngine = $_cacheEngine;
         $this->bufferSize = intval($bufferSize);

@@ -1,15 +1,14 @@
 <?php
-/**
- * User: jg
- * Date: 04/02/17
- * Time: 18:21
- */
-
 
 use ByJG\Cache\Psr6\CachePool;
 
 
-class CachePoolTest extends PHPUnit_Framework_TestCase
+// backward compatibility
+if (!class_exists('\PHPUnit\Framework\TestCase')) {
+    class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
+}
+
+class CachePoolTest extends \PHPUnit\Framework\TestCase
 {
 
     protected function setUp()
@@ -44,12 +43,12 @@ class CachePoolTest extends PHPUnit_Framework_TestCase
             [
                 new CachePool(new \ByJG\Cache\Engine\NoCacheEngine())
             ],
-            [
-                new CachePool(new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer))
-            ],
-            [
-                new CachePool(new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword))
-            ]
+            // [
+            //     new CachePool(new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer))
+            // ],
+            // [
+            //     new CachePool(new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword))
+            // ]
         ];
     }
 

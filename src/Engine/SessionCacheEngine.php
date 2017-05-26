@@ -2,9 +2,10 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheEngineInterface;
+use ByJG\Cache\CacheAvailabilityInterface;
+use ByJG\Cache\CacheLockInterface;
 
-class SessionCacheEngine implements CacheEngineInterface
+class SessionCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface
 {
 
     protected $prefix = null;
@@ -32,21 +33,7 @@ class SessionCacheEngine implements CacheEngineInterface
         return $this->prefix . '-' . $key;
     }
 
-    public function append($key, $str)
-    {
-        $this->checkSession();
-
-        $keyName = $this->keyName($key);
-
-        $current = $this->get($keyName);
-        if ($current === false) {
-            $this->set($keyName, $str);
-        } else {
-            $this->set($keyName, $current . $str);
-        }
-    }
-
-    public function get($key, $ttl = 0)
+    public function get($key, $default = null)
     {
         $this->checkSession();
 
@@ -55,18 +42,11 @@ class SessionCacheEngine implements CacheEngineInterface
         if (isset($_SESSION[$keyName])) {
             return $_SESSION[$keyName];
         } else {
-            return null;
+            return $default;
         }
     }
 
-    public function lock($key)
-    {
-        $this->checkSession();
-
-        // Nothing to implement here;
-    }
-
-    public function release($key)
+    public function delete($key)
     {
         $this->checkSession();
 
@@ -77,19 +57,24 @@ class SessionCacheEngine implements CacheEngineInterface
         }
     }
 
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         $this->checkSession();
 
         $keyName = $this->keyName($key);
-        $_SESSION[$keyName] = $object;
+        $_SESSION[$keyName] = $value;
     }
 
-    public function unlock($key)
+    public function clear()
     {
-        $this->checkSession();
+        session_destroy();
+    }
 
-        // Nothing to implement here;
+    public function has($key)
+    {
+        $keyName = $this->keyName($key);
+
+        return (isset($_SESSION[$keyName]));
     }
 
     public function isAvailable()
