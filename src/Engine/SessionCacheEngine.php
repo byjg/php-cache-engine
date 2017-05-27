@@ -36,7 +36,7 @@ class SessionCacheEngine extends BaseCacheEngine
 
         $keyName = $this->keyName($key);
 
-        if (isset($_SESSION[$keyName])) {
+        if ($this->has($key)) {
             return $_SESSION[$keyName];
         } else {
             return $default;
@@ -52,14 +52,20 @@ class SessionCacheEngine extends BaseCacheEngine
         if (isset($_SESSION[$keyName])) {
             unset($_SESSION[$keyName]);
         }
+        if (isset($_SESSION["$keyName.ttl"])) {
+            unset($_SESSION["$keyName.ttl"]);
+        }
     }
 
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $value, $ttl = null)
     {
         $this->checkSession();
 
         $keyName = $this->keyName($key);
         $_SESSION[$keyName] = $value;
+        if (!empty($ttl)) {
+            $_SESSION["$keyName.ttl"] = $this->addToNow($ttl);
+        }
     }
 
     public function clear()
@@ -71,7 +77,16 @@ class SessionCacheEngine extends BaseCacheEngine
     {
         $keyName = $this->keyName($key);
 
-        return (isset($_SESSION[$keyName]));
+        if (isset($_SESSION[$keyName])) {
+            if (isset($_SESSION["$keyName.ttl"]) && time() >= $_SESSION["$keyName.ttl"]) {
+                $this->delete($key);
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public function isAvailable()
