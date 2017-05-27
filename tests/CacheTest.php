@@ -227,17 +227,24 @@ class CacheTest extends \PHPUnit\Framework\TestCase
             // First time
             $item = $cacheEngine->get('chave');
             $this->assertEquals(null, $item);
+            $this->assertFalse($cacheEngine->has('chave'));
+            $item2 = $cacheEngine->get('chave2');
+            $this->assertEquals(null, $item2);
+            $this->assertFalse($cacheEngine->has('chave2'));
 
             // Set object
             $cacheEngine->set('chave', 'valor', 2);
+            $cacheEngine->set('chave2', 'valor2', 2);
 
             // Get Object
             if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave');
                 $this->assertEquals('valor', $item2);
+                $this->assertTrue($cacheEngine->has('chave2'));
                 sleep(3);
                 $item2 = $cacheEngine->get('chave');
                 $this->assertEquals(null, $item2);
+                $this->assertFalse($cacheEngine->has('chave2'));
             }
         } else {
             $this->markTestIncomplete('Object is not fully functional');

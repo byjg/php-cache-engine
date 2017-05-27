@@ -2,7 +2,7 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheEngineInterface;
+use Psr\Cache\InvalidArgumentException;
 use Psr\Log\NullLogger;
 
 /**
@@ -43,7 +43,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         }
     }
 
-    protected function getFTok($key)
+    protected function getFilenameToken($key)
     {
         return sys_get_temp_dir() . '/shmop-' . sha1($key) . '.cache';
     }
@@ -58,7 +58,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         return $this->config['default-permission'];
     }
 
-    protected function getKeyId($file)
+    protected function getFTok($file)
     {
         if (!file_exists($file)) {
             touch($file);
@@ -78,8 +78,8 @@ class ShmopCacheEngine extends BaseCacheEngine
             return $default;
         }
 
-        $file = $this->getFTok($key);
-        $fileKey = $this->getKeyId($file);
+        $file = $this->getFilenameToken($key);
+        $fileKey = $this->getFTok($file);
 
         // Opened
         $shm_id = @shmop_open($fileKey, "a", 0, 0);
@@ -88,21 +88,9 @@ class ShmopCacheEngine extends BaseCacheEngine
             return $default;
         }
 
-        // $fileAge = filemtime($this->getFTok($key));
-
-        // Check @todo TTL
-        // if (($default > 0) && (intval(time() - $fileAge) > $default)) {
-        //     $this->logger->info("[Shmop Cache] File too old. Ignoring '$key'");
-        //
-        //     // Close old descriptor
-        //     shmop_close($shm_id);
-        //
-        //     // delete old memory segment
-        //     $shm_id = shmop_open($fileKey, "w", $this->getDefaultPermission(), $this->getMaxSize());
-        //     shmop_delete($shm_id);
-        //     shmop_close($shm_id);
-        //     return $default;
-        // }
+        if (!$this->isValidAge($file)) {
+            return $default;
+        }
 
         $this->logger->info("[Shmop Cache] Get '$key'");
 
@@ -112,14 +100,33 @@ class ShmopCacheEngine extends BaseCacheEngine
         return unserialize($serialized);
     }
 
+    protected function isValidAge($file)
+    {
+        if (file_exists("$file.ttl")) {
+            $fileTtl = intval(file_get_contents("$file.ttl"));
+        }
+
+        if (!empty($fileTtl) && time() >= $fileTtl) {
+            $this->logger->info("[Shmop Cache] File too old. Ignoring");
+            $this->deleteFromFilenameToken($file);
+            return false;
+        }
+
+        return true;
+    }
+
     /**
-     * @param string $key The object Key
-     * @param object $value The object to be cached
-     * @param int $ttl The time to live in seconds of the object. Depends on implementation.
-     * @return bool If the object is successfully posted
-     * @throws \Exception
+     * Persists data in the cache, uniquely referenced by a key with an optional expiration TTL time.
+     *
+     * @param string $key The key of the item to store.
+     * @param mixed $value The value of the item to store, must be serializable.
+     * @param null|int|DateInterval $ttl Optional. The TTL value of this item. If no value is sent and
+     *                                     the driver supports TTL then the library may set a default value
+     *                                     for it or let the driver take care of that.
+     * @return bool True on success and false on failure.
+     * @throws InvalidArgumentException
      */
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $value, $ttl = null)
     {
         $this->logger->info("[Shmop Cache] set '$key'");
 
@@ -129,11 +136,11 @@ class ShmopCacheEngine extends BaseCacheEngine
         $size = strlen($serialized);
 
         if ($size > $this->getMaxSize()) {
-            throw new \Exception('Object is greater than the max size allowed: ' . $this->getMaxSize());
+            throw new \ByJG\Cache\InvalidArgumentException('Object is greater than the max size allowed: ' . $this->getMaxSize());
         }
 
-        $file = $this->getFTok($key);
-        $shmKey = $this->getKeyId($file);
+        $file = $this->getFilenameToken($key);
+        $shmKey = $this->getFTok($file);
         $shm_id = shmop_open($shmKey, "c", 0777, $size);
         if (!$shm_id) {
             $message = "Couldn't create shared memory segment";
@@ -141,7 +148,7 @@ class ShmopCacheEngine extends BaseCacheEngine
             if (isset($lastError['message'])) {
                 $message = $lastError['message'];
             }
-            throw new \Exception($message);
+            throw new \ByJG\Cache\InvalidArgumentException($message);
         }
 
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);
@@ -151,12 +158,17 @@ class ShmopCacheEngine extends BaseCacheEngine
         }
         shmop_close($shm_id);
 
+        $validUntil = $this->addToNow($ttl);
+        if (!empty($validUntil)) {
+            file_put_contents("$file.ttl", $validUntil);
+        }
+
         return true;
     }
 
     /**
-     * Release the object
      * @param string $key
+     * @return bool
      */
     public function delete($key)
     {
@@ -164,20 +176,25 @@ class ShmopCacheEngine extends BaseCacheEngine
 
         if ($this->get($key) === false) {
             $this->logger->info("[Shmop Cache] release '$key' does not exists.");
-            return;
+            return false;
         }
 
-        $file = $this->getFTok($key);
-        $this->deleteFromFTok($file);
+        $file = $this->getFilenameToken($key);
+        $this->deleteFromFilenameToken($file);
+        return true;
     }
 
-    private function deleteFromFTok($file)
+    private function deleteFromFilenameToken($file)
     {
-        $filekey = $this->getKeyId($file);
+        $filekey = $this->getFTok($file);
         $shm_id = @shmop_open($filekey, "w", 0, 0);
 
         if (file_exists($file)) {
             unlink($file);
+        }
+
+        if (file_exists("$file.ttl")) {
+            unlink("$file.ttl");
         }
 
         if ($shm_id) {
@@ -193,14 +210,14 @@ class ShmopCacheEngine extends BaseCacheEngine
         $patternKey = sys_get_temp_dir() . '/shmop-*.cache';
         $list = glob($patternKey);
         foreach ($list as $file) {
-            $this->deleteFromFTok($file);
+            $this->deleteFromFilenameToken($file);
         }
     }
 
     public function has($key)
     {
-        $file = $this->getFTok($key);
-        $fileKey = $this->getKeyId($file);
+        $file = $this->getFilenameToken($key);
+        $fileKey = $this->getFTok($file);
 
         // Opened
         $shm_id = @shmop_open($fileKey, "a", 0, 0);
@@ -209,6 +226,7 @@ class ShmopCacheEngine extends BaseCacheEngine
 
         if ($exists) {
             shmop_close($shm_id);
+            return $this->isValidAge($file);
         }
 
         return $exists;

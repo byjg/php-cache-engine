@@ -53,18 +53,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
 
         // Check if file exists
         if ($this->has($key)) {
-            if (file_exists("$fileKey.ttl")) {
-                $fileTtl = intval(file_get_contents("$fileKey.ttl"));
-            }
-
-            if (!empty($fileTtl) && time() >= $fileTtl) {
-                $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
-                $this->delete($key);
-                return $default;
-            } else {
-                $this->logger->info("[Filesystem cache] Get '$key'");
-                return unserialize(file_get_contents($fileKey));
-            }
+            $this->logger->info("[Filesystem cache] Get '$key'");
+            return unserialize(file_get_contents($fileKey));
         } else {
             $this->logger->info("[Filesystem cache] Not found '$key'");
             return $default;
@@ -204,6 +194,21 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     public function has($key)
     {
         $fileKey = $this->fixKey($key);
-        return file_exists($fileKey);
+        if (file_exists($fileKey)) {
+            if (file_exists("$fileKey.ttl")) {
+                $fileTtl = intval(file_get_contents("$fileKey.ttl"));
+            }
+
+            if (!empty($fileTtl) && time() >= $fileTtl) {
+                $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
+                $this->delete($key);
+
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }
