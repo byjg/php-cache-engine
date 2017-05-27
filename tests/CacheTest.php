@@ -51,10 +51,10 @@ class CacheTest extends \PHPUnit\Framework\TestCase
             'NoCacheEngine' => [
                 new \ByJG\Cache\Engine\NoCacheEngine()
             ],
-            // [
-            //     new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer)
-            // ],
-            // [
+            'Memcached' => [
+                new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer)
+            ],
+            // 'Redis' => [
             //     new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword)
             // ]
         ];
