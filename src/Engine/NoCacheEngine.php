@@ -2,10 +2,9 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\CacheLockInterface;
 
-class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface, CacheAvailabilityInterface
+class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
 {
     /**
      * @param string $key The object KEY

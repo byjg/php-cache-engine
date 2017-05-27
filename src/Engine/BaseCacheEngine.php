@@ -2,9 +2,10 @@
 
 namespace ByJG\Cache\Engine;
 
+use ByJG\Cache\CacheAvailabilityInterface;
 use Psr\SimpleCache\CacheInterface;
 
-abstract class BaseCacheEngine implements CacheInterface
+abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
 {
     public function getMultiple($keys, $default = null)
     {
@@ -28,4 +29,6 @@ abstract class BaseCacheEngine implements CacheInterface
             $this->delete($key);
         }
     }
+
+    abstract public function isAvailable();
 }

@@ -2,10 +2,7 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheAvailabilityInterface;
-use ByJG\Cache\CacheLockInterface;
-
-class SessionCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface
+class SessionCacheEngine extends BaseCacheEngine
 {
 
     protected $prefix = null;

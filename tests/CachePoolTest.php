@@ -10,6 +10,10 @@ if (!class_exists('\PHPUnit\Framework\TestCase')) {
 
 class CachePoolTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * @var \ByJG\Cache\Engine\BaseCacheEngine
+     */
+    private $cacheEngine = null;
 
     protected function setUp()
     {
@@ -18,7 +22,8 @@ class CachePoolTest extends \PHPUnit\Framework\TestCase
 
     protected function tearDown()
     {
-
+        $this->cacheEngine->clear();
+        $this->cacheEngine = null;
     }
 
     public function CachePoolProvider()
@@ -28,36 +33,40 @@ class CachePoolTest extends \PHPUnit\Framework\TestCase
         $redisPassword = '';
 
         return [
-            [
-                new CachePool(new \ByJG\Cache\Engine\ArrayCacheEngine())
+            'Array' => [
+                new \ByJG\Cache\Engine\ArrayCacheEngine()
             ],
-            [
-                new CachePool(new \ByJG\Cache\Engine\FileSystemCacheEngine())
+            'FileSystem' => [
+                new \ByJG\Cache\Engine\FileSystemCacheEngine()
             ],
-            [
-                new CachePool(new \ByJG\Cache\Engine\ShmopCacheEngine())
+            'ShmopCache' => [
+                new \ByJG\Cache\Engine\ShmopCacheEngine()
             ],
-            [
-                new CachePool(new \ByJG\Cache\Engine\SessionCacheEngine())
+            'SessionCache' => [
+                new \ByJG\Cache\Engine\SessionCacheEngine()
             ],
-            [
-                new CachePool(new \ByJG\Cache\Engine\NoCacheEngine())
+            'NoCacheEngine' => [
+                new \ByJG\Cache\Engine\NoCacheEngine()
             ],
             // [
-            //     new CachePool(new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer))
+            //     new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer)
             // ],
             // [
-            //     new CachePool(new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword))
+            //     new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword)
             // ]
         ];
     }
 
     /**
      * @dataProvider CachePoolProvider
-     * @param CachePool $object
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
      */
-    public function testGetOneItem($object)
+    public function testGetOneItemPsr6(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
     {
+        $this->cacheEngine = $cacheEngine;
+
+        // PSR-6 Test
+        $object = new CachePool($cacheEngine);
         if ($object->isAvailable()) {
             // First time
             $item = $object->getItem('chave');
@@ -86,12 +95,15 @@ class CachePoolTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider CachePoolProvider
-     * @param CachePool $object
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
      */
-    public function testGetMultipleItems($object)
+    public function testGetMultipleItemsPsr6(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
     {
-        if ($object->isAvailable()) {
+        $this->cacheEngine = $cacheEngine;
 
+        // PSR-6 Test
+        $object = new CachePool($cacheEngine);
+        if ($object->isAvailable()) {
             // First time
             $items = $object->getItems(['chave1', 'chave2']);
             $this->assertFalse($items[0]->isHit());
@@ -125,4 +137,80 @@ class CachePoolTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    /**
+     * @dataProvider CachePoolProvider
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     */
+    public function testGetOneItemPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        // PSR-6 Test
+        if ($cacheEngine->isAvailable()) {
+            // First time
+            $item = $cacheEngine->get('chave', null);
+            $this->assertEquals(null, $item);
+            $item = $cacheEngine->get('chave', 'default');
+            $this->assertEquals('default', $item);
+
+            // Set object
+            $cacheEngine->set('chave', 'valor');
+
+            // Get Object
+            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+                $item2 = $cacheEngine->get('chave', 'default');
+                $this->assertEquals('valor', $item2);
+            }
+
+            // Remove
+            $cacheEngine->delete('chave');
+
+            // Check Removed
+            $item = $cacheEngine->get('chave');
+            $this->assertEquals(null, $item);
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     */
+    public function testGetMultipleItemsPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        // PSR-6 Test
+        if ($cacheEngine->isAvailable()) {
+            // First time
+            $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
+            $this->assertEquals(null, $items['chave1']);
+            $this->assertEquals(null, $items['chave2']);
+            $items = $cacheEngine->getMultiple(['chave1', 'chave2'], 'default');
+            $this->assertEquals('default', $items['chave1']);
+            $this->assertEquals('default', $items['chave2']);
+
+            // Set object
+            $cacheEngine->set('chave1', 'valor1');
+            $cacheEngine->set('chave2', 'valor2');
+
+            // Get Object
+            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+                $item2 = $cacheEngine->getMultiple(['chave1', 'chave2']);
+                $this->assertEquals('valor1', $item2['chave1']);
+                $this->assertEquals('valor2', $item2['chave2']);
+            }
+
+            // Remove
+            $cacheEngine->deleteMultiple(['chave1', 'chave2']);
+
+            // Check Removed
+            $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
+            $this->assertEquals(null, $items['chave1']);
+            $this->assertEquals(null, $items['chave2']);
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
 }

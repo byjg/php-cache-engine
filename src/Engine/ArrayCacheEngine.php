@@ -2,11 +2,10 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheAvailabilityInterface;
 use Psr\Log\NullLogger;
 use Psr\SimpleCache\DateInterval;
 
-class ArrayCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface
+class ArrayCacheEngine extends BaseCacheEngine
 {
 
     protected $cache = array();
@@ -32,8 +31,8 @@ class ArrayCacheEngine extends BaseCacheEngine implements CacheAvailabilityInter
 
     /**
      * @param string $key The object KEY
-     * @param int $default IGNORED IN MEMCACHED.
-     * @return object Description
+     * @param mixed $default IGNORED IN MEMCACHED.
+     * @return mixed Description
      */
     public function get($key, $default = null)
     {

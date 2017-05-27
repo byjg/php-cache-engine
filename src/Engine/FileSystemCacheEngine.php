@@ -2,12 +2,11 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\CacheLockInterface;
 use Exception;
 use Psr\Log\NullLogger;
 
-class FileSystemCacheEngine extends BaseCacheEngine implements CacheAvailabilityInterface, CacheLockInterface
+class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterface
 {
 
     protected $logger = null;
@@ -26,8 +25,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheAvailability
 
     /**
      * @param string $key The object KEY
-     * @param int $default IGNORED IN MEMCACHED.
-     * @return object Description
+     * @param mixed $default IGNORED IN MEMCACHED.
+     * @return mixed Description
      */
     public function get($key, $default = null)
     {
@@ -46,7 +45,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheAvailability
                 if (intval(time() - $lockTime) > 20) {  // Wait for 10 seconds
                     $this->logger->info("[Filesystem cache] Gave up to wait unlock. Release lock for '$key'");
                     $this->unlock($key);
-                    return null;
+                    return $default;
                 }
                 sleep(1); // 1 second
             }
@@ -56,16 +55,17 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheAvailability
         if ($this->has($key)) {
             $fileAge = filemtime($fileKey);
 
-            if (($default > 0) && (intval(time() - $fileAge) > $default)) {
-                $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
-                return null;
-            } else {
+            // @todo Resolve TTL!
+            // if (($default > 0) && (intval(time() - $fileAge) > $default)) {
+            //     $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
+            //     return $default;
+            // } else {
                 $this->logger->info("[Filesystem cache] Get '$key'");
                 return unserialize(file_get_contents($fileKey));
-            }
+            // }
         } else {
             $this->logger->info("[Filesystem cache] Not found '$key'");
-            return null;
+            return $default;
         }
     }
 
@@ -165,7 +165,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheAvailability
      */
     public function clear()
     {
-        // TODO: Implement clear() method.
+        $patternKey = $this->fixKey('*');
+        $list = glob($patternKey);
+        foreach ($list as $file) {
+            unlink($file);
+        }
     }
 
     /**
