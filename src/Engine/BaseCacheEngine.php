@@ -31,4 +31,17 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
     }
 
     abstract public function isAvailable();
+
+    protected function addToNow($ttl)
+    {
+        if (is_numeric($ttl)) {
+            return strtotime("+$ttl second");
+        }
+
+        if ($ttl instanceof \DateInterval) {
+            $now = new \DateTime();
+            $now->add($ttl);
+            return $now->getTimestamp();
+        }
+    }
 }

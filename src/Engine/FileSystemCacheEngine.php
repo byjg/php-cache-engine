@@ -53,16 +53,18 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
 
         // Check if file exists
         if ($this->has($key)) {
-            $fileAge = filemtime($fileKey);
+            if (file_exists("$fileKey.ttl")) {
+                $fileTtl = intval(file_get_contents("$fileKey.ttl"));
+            }
 
-            // @todo Resolve TTL!
-            // if (($default > 0) && (intval(time() - $fileAge) > $default)) {
-            //     $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
-            //     return $default;
-            // } else {
+            if (!empty($fileTtl) && time() >= $fileTtl) {
+                $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
+                $this->delete($key);
+                return $default;
+            } else {
                 $this->logger->info("[Filesystem cache] Get '$key'");
                 return unserialize(file_get_contents($fileKey));
-            // }
+            }
         } else {
             $this->logger->info("[Filesystem cache] Not found '$key'");
             return $default;
@@ -70,12 +72,20 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     }
 
     /**
-     * @param string $key The object Key
-     * @param object $value The object to be cached
-     * @param int $ttl The time to live in seconds of this objects
-     * @return bool If the object is successfully posted
+     * Persists data in the cache, uniquely referenced by a key with an optional expiration TTL time.
+     *
+     * @param string                $key   The key of the item to store.
+     * @param mixed                 $value The value of the item to store, must be serializable.
+     * @param null|int|DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
+     *                                     the driver supports TTL then the library may set a default value
+     *                                     for it or let the driver take care of that.
+     *
+     * @return bool True on success and false on failure.
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $value, $ttl = null)
     {
         $fileKey = $this->fixKey($key);
 
@@ -84,6 +94,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
         try {
             if (file_exists($fileKey)) {
                 unlink($fileKey);
+                unlink("$fileKey.ttl");
             }
 
             if (is_null($value)) {
@@ -95,6 +106,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
             } else {
                 file_put_contents($fileKey, serialize($value));
             }
+
+            $validUntil = $this->addToNow($ttl);
+            if (!empty($validUntil)) {
+                file_put_contents($fileKey . ".ttl", $validUntil);
+            }
         } catch (Exception $ex) {
             $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
             return false;
@@ -104,12 +120,13 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     }
 
     /**
-     * Unlock resource
      * @param string $key
+     * @return bool
      */
     public function delete($key)
     {
         $this->set($key, null);
+        return true;
     }
 
     /**

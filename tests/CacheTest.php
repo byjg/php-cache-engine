@@ -8,7 +8,7 @@ if (!class_exists('\PHPUnit\Framework\TestCase')) {
     class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
 }
 
-class CachePoolTest extends \PHPUnit\Framework\TestCase
+class CacheTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \ByJG\Cache\Engine\BaseCacheEngine
@@ -209,6 +209,36 @@ class CachePoolTest extends \PHPUnit\Framework\TestCase
             $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
             $this->assertEquals(null, $items['chave1']);
             $this->assertEquals(null, $items['chave2']);
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     */
+    public function testTtlPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        // PSR-6 Test
+        if ($cacheEngine->isAvailable()) {
+            // First time
+            $item = $cacheEngine->get('chave');
+            $this->assertEquals(null, $item);
+
+            // Set object
+            $cacheEngine->set('chave', 'valor', 2);
+
+            // Get Object
+            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+                $item2 = $cacheEngine->get('chave');
+                $this->assertEquals('valor', $item2);
+                sleep(3);
+                $item2 = $cacheEngine->get('chave');
+                $this->assertEquals(null, $item2);
+            }
         } else {
             $this->markTestIncomplete('Object is not fully functional');
         }
