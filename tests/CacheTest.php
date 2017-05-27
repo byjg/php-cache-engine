@@ -1,7 +1,10 @@
 <?php
 
+namespace Test;
+
 use ByJG\Cache\Psr6\CachePool;
 
+require_once 'Model.php';
 
 // backward compatibility
 if (!class_exists('\PHPUnit\Framework\TestCase')) {
@@ -250,4 +253,38 @@ class CacheTest extends \PHPUnit\Framework\TestCase
             $this->markTestIncomplete('Object is not fully functional');
         }
     }
+
+    /**
+     * @dataProvider CachePoolProvider
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     */
+    public function testCacheObjectPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        // PSR-6 Test
+        if ($cacheEngine->isAvailable()) {
+            // First time
+            $item = $cacheEngine->get('chave');
+            $this->assertEquals(null, $item);
+
+            // Set object
+            $model = new Model(10, 20);
+            $cacheEngine->set('chave', $model);
+
+            // Get Object
+            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+                $item2 = $cacheEngine->get('chave');
+                $this->assertEquals($model, $item2);
+            }
+
+            // Delete
+            $cacheEngine->delete('chave');
+            $item = $cacheEngine->get('chave');
+            $this->assertEquals(null, $item);
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
 }
