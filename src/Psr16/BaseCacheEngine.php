@@ -47,5 +47,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
             $now->add($ttl);
             return $now->getTimestamp();
         }
+
+        return null;
     }
 }

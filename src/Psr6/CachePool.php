@@ -2,12 +2,10 @@
 
 namespace ByJG\Cache\Psr6;
 
-use ByJG\Cache\CacheEngineInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\InvalidArgumentException;
-use Psr\SimpleCache\CacheInterface;
 
 class CachePool implements CacheItemPoolInterface
 {

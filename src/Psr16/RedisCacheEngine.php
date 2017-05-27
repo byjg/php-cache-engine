@@ -57,7 +57,7 @@ class RedisCacheEngine extends BaseCacheEngine
     /**
      * @param string $key The object KEY
      * @param int $default IGNORED IN MEMCACHED.
-     * @return object Description
+     * @return mixed Description
      */
     public function get($key, $default = null)
     {

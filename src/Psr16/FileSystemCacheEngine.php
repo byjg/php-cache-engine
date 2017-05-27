@@ -66,7 +66,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      *
      * @param string                $key   The key of the item to store.
      * @param mixed                 $value The value of the item to store, must be serializable.
-     * @param null|int|DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
+     * @param null|int|\DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
      *                                     the driver supports TTL then the library may set a default value
      *                                     for it or let the driver take care of that.
      *
@@ -177,6 +177,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
         foreach ($list as $file) {
             unlink($file);
         }
+        return true;
     }
 
     /**

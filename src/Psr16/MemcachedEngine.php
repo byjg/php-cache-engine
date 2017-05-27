@@ -2,7 +2,6 @@
 
 namespace ByJG\Cache\Psr16;
 
-use ByJG\Cache\CacheEngineInterface;
 use Memcached;
 use Psr\Log\NullLogger;
 

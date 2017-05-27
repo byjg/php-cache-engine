@@ -9,7 +9,7 @@ use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Cache\Psr16\RedisCacheEngine;
 use ByJG\Cache\Psr16\SessionCacheEngine;
 use ByJG\Cache\Psr16\ShmopCacheEngine;
-use ByJG\Cache\Psr\CachePool;
+use ByJG\Cache\Psr6\CachePool;
 
 class Factory
 {

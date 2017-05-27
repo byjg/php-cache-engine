@@ -28,8 +28,8 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
     }
 
     /**
-     * Unlock resource
      * @param string $key
+     * @return bool
      */
     public function delete($key)
     {

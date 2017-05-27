@@ -3,7 +3,6 @@
 namespace ByJG\Cache\Psr16;
 
 use Psr\Log\NullLogger;
-use Psr\SimpleCache\DateInterval;
 
 class ArrayCacheEngine extends BaseCacheEngine
 {
@@ -67,7 +66,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      *
      * @param string                $key   The key of the item to store.
      * @param mixed                 $value The value of the item to store, must be serializable.
-     * @param null|int|DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
+     * @param null|int|\DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
      *                                     the driver supports TTL then the library may set a default value
      *                                     for it or let the driver take care of that.
      *
@@ -97,7 +96,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * Unlock resource
      *
      * @param string $key
-     * @return bool|void
+     * @return bool
      */
     public function delete($key)
     {
