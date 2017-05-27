@@ -221,6 +221,47 @@ class CacheTest extends \PHPUnit\Framework\TestCase
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
      */
+    public function testTtlPsr6(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        // PSR-6 Test
+        $object = new CachePool($cacheEngine);
+        if ($object->isAvailable()) {
+            // First time
+            $item = $object->getItem('chave');
+            $this->assertFalse($item->isHit());
+
+            // Set object
+            $item->set('valor');
+            $item->expiresAfter(2);
+            $object->save($item);
+            $this->assertTrue($item->isHit());
+
+            // Get Object
+            $item2 = $object->getItem('chave');
+            $this->assertTrue($item2->isHit());
+            $this->assertEquals('valor', $item2->get());
+            sleep(3);
+            $item3 = $object->getItem('chave');
+            $this->assertFalse($item3->isHit());
+            $this->assertEquals(null, $item3->get());
+
+            // Remove
+            $object->deleteItem('chave');
+
+            // Check Removed
+            $item = $object->getItem('chave');
+            $this->assertFalse($item->isHit());
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     */
     public function testTtlPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
