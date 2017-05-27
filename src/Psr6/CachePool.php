@@ -3,7 +3,7 @@
 namespace ByJG\Cache\Psr6;
 
 use ByJG\Cache\CacheEngineInterface;
-use ByJG\Cache\Engine\BaseCacheEngine;
+use ByJG\Cache\Psr16\BaseCacheEngine;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\InvalidArgumentException;

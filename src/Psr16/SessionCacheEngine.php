@@ -1,6 +1,6 @@
 <?php
 
-namespace ByJG\Cache\Engine;
+namespace ByJG\Cache\Psr16;
 
 class SessionCacheEngine extends BaseCacheEngine
 {

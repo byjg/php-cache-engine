@@ -13,20 +13,20 @@ A multi-purpose cache engine PSR-6 and PSR-16 implementation with several driver
 PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
 of engines available in this library that is PSR-16 compliant:
 
-| Class                             | Description                                                         |
-|:----------------------------------|:--------------------------------------------------------------------|
-| \ByJG\Cache\NoCacheEngine         | Do nothing. Use it for disable the cache without change your code   |
-| \ByJG\Cache\ArrayCacheEngine      | Local cache only using array. It does not persists between requests |
-| \ByJG\Cache\FileSystemCacheEngine | Save the cache result in the local file system                      |
-| \ByJG\Cache\MemcachedEngine       | Uses the Memcached as the cache engine                              |
-| \ByJG\Cache\SessionCachedEngine   | uses the PHP session as cache                                       |
-| \ByJG\Cache\ShmopCachedEngine     | uses the shared memory area for cache                               |
+| Class                                   | Description                                                         |
+|:----------------------------------------|:--------------------------------------------------------------------|
+| \ByJG\Cache\Psr16\NoCacheEngine         | Do nothing. Use it for disable the cache without change your code   |
+| \ByJG\Cache\Psr16\ArrayCacheEngine      | Local cache only using array. It does not persists between requests |
+| \ByJG\Cache\Psr16\FileSystemCacheEngine | Save the cache result in the local file system                      |
+| \ByJG\Cache\Psr16\MemcachedEngine       | Uses the Memcached as the cache engine                              |
+| \ByJG\Cache\Psr16\SessionCachedEngine   | uses the PHP session as cache                                       |
+| \ByJG\Cache\Psr16\ShmopCachedEngine     | uses the shared memory area for cache                               |
 
 To create a new Cache Instance just create the proper cache engine and use it:
 
 ```php
 <?php
-$cache = new \ByJG\Cache\Engine\FileSystemCacheEngine();
+$cache = new \ByJG\Cache\Psr16\FileSystemCacheEngine();
 
 // And use it:
 $object = $cache->get('key');

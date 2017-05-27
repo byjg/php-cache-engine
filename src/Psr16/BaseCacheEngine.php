@@ -1,6 +1,6 @@
 <?php
 
-namespace ByJG\Cache\Engine;
+namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\InvalidArgumentException;

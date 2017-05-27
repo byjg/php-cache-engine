@@ -14,7 +14,7 @@ if (!class_exists('\PHPUnit\Framework\TestCase')) {
 abstract class BaseCacheTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var \ByJG\Cache\Engine\BaseCacheEngine
+     * @var \ByJG\Cache\Psr16\BaseCacheEngine
      */
     protected $cacheEngine = null;
 
@@ -37,25 +37,25 @@ abstract class BaseCacheTest extends \PHPUnit\Framework\TestCase
 
         return [
             'Array'         => [
-                new \ByJG\Cache\Engine\ArrayCacheEngine()
+                new \ByJG\Cache\Psr16\ArrayCacheEngine()
             ],
             'FileSystem'    => [
-                new \ByJG\Cache\Engine\FileSystemCacheEngine()
+                new \ByJG\Cache\Psr16\FileSystemCacheEngine()
             ],
             'ShmopCache'    => [
-                new \ByJG\Cache\Engine\ShmopCacheEngine()
+                new \ByJG\Cache\Psr16\ShmopCacheEngine()
             ],
             'SessionCache'  => [
-                new \ByJG\Cache\Engine\SessionCacheEngine()
+                new \ByJG\Cache\Psr16\SessionCacheEngine()
             ],
             'NoCacheEngine' => [
-                new \ByJG\Cache\Engine\NoCacheEngine()
+                new \ByJG\Cache\Psr16\NoCacheEngine()
             ],
             'Memcached'     => [
-                new \ByJG\Cache\Engine\MemcachedEngine($memcachedServer)
+                new \ByJG\Cache\Psr16\MemcachedEngine($memcachedServer)
             ],
             'Redis'         => [
-                new \ByJG\Cache\Engine\RedisCacheEngine($redisCacheServer, $redisPassword)
+                new \ByJG\Cache\Psr16\RedisCacheEngine($redisCacheServer, $redisPassword)
             ]
         ];
     }

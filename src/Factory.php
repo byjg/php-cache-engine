@@ -2,13 +2,13 @@
 namespace ByJG\Cache;
 
 
-use ByJG\Cache\Engine\ArrayCacheEngine;
-use ByJG\Cache\Engine\FileSystemCacheEngine;
-use ByJG\Cache\Engine\MemcachedEngine;
-use ByJG\Cache\Engine\NoCacheEngine;
-use ByJG\Cache\Engine\RedisCacheEngine;
-use ByJG\Cache\Engine\SessionCacheEngine;
-use ByJG\Cache\Engine\ShmopCacheEngine;
+use ByJG\Cache\Psr16\ArrayCacheEngine;
+use ByJG\Cache\Psr16\FileSystemCacheEngine;
+use ByJG\Cache\Psr16\MemcachedEngine;
+use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\Cache\Psr16\RedisCacheEngine;
+use ByJG\Cache\Psr16\SessionCacheEngine;
+use ByJG\Cache\Psr16\ShmopCacheEngine;
 use ByJG\Cache\Psr\CachePool;
 
 class Factory

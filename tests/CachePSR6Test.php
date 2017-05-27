@@ -10,13 +10,12 @@ class CachePSR6Test extends BaseCacheTest
 {
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testGetOneItemPsr6(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testGetOneItem(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-6 Test
         $object = new CachePool($cacheEngine);
         if ($object->isAvailable()) {
             // First time
@@ -46,13 +45,12 @@ class CachePSR6Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testGetMultipleItemsPsr6(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testGetMultipleItems(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-6 Test
         $object = new CachePool($cacheEngine);
         if ($object->isAvailable()) {
             // First time
@@ -90,13 +88,12 @@ class CachePSR6Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testTtlPsr6(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testTtl(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-6 Test
         $object = new CachePool($cacheEngine);
         if ($object->isAvailable()) {
             // First time
@@ -117,6 +114,42 @@ class CachePSR6Test extends BaseCacheTest
             $item3 = $object->getItem('chave');
             $this->assertFalse($item3->isHit());
             $this->assertEquals(null, $item3->get());
+
+            // Remove
+            $object->deleteItem('chave');
+
+            // Check Removed
+            $item = $object->getItem('chave');
+            $this->assertFalse($item->isHit());
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     */
+    public function testCacheObject(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        $object = new CachePool($cacheEngine);
+        if ($object->isAvailable()) {
+            // First time
+            $item = $object->getItem('chave');
+            $this->assertFalse($item->isHit());
+
+            // Set object
+            $model = new Model(10, 20);
+            $item->set($model);
+            $object->save($item);
+            $this->assertTrue($item->isHit());
+
+            // Get Object
+            $item2 = $object->getItem('chave');
+            $this->assertTrue($item2->isHit());
+            $this->assertEquals($model, $item2->get());
 
             // Remove
             $object->deleteItem('chave');

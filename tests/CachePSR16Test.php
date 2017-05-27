@@ -2,7 +2,7 @@
 
 namespace Test;
 
-use ByJG\Cache\Engine\NoCacheEngine;
+use ByJG\Cache\Psr16\NoCacheEngine;
 
 require_once 'BaseCacheTest.php';
 
@@ -10,13 +10,12 @@ class CachePSR16Test extends BaseCacheTest
 {
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testGetOneItemPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testGetOneItem(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-6 Test
         if ($cacheEngine->isAvailable()) {
             // First time
             $item = $cacheEngine->get('chave', null);
@@ -28,7 +27,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave', 'valor');
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave', 'default');
                 $this->assertEquals('valor', $item2);
             }
@@ -46,13 +45,12 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testGetMultipleItemsPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testGetMultipleItems(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-6 Test
         if ($cacheEngine->isAvailable()) {
             // First time
             $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
@@ -67,7 +65,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave2', 'valor2');
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
                 $item2 = $cacheEngine->getMultiple(['chave1', 'chave2']);
                 $this->assertEquals('valor1', $item2['chave1']);
                 $this->assertEquals('valor2', $item2['chave2']);
@@ -87,13 +85,12 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testTtlPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testTtl(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-6 Test
         if ($cacheEngine->isAvailable()) {
             // First time
             $item = $cacheEngine->get('chave');
@@ -108,7 +105,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave2', 'valor2', 2);
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave');
                 $this->assertEquals('valor', $item2);
                 $this->assertTrue($cacheEngine->has('chave2'));
@@ -124,13 +121,12 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testCacheObjectPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testCacheObject(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-16 Test
         if ($cacheEngine->isAvailable()) {
             // First time
             $item = $cacheEngine->get('chave');
@@ -141,7 +137,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave', $model);
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Engine\NoCacheEngine)) {
+            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave');
                 $this->assertEquals($model, $item2);
             }
@@ -157,13 +153,12 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Engine\BaseCacheEngine $cacheEngine
+     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
      */
-    public function testClearPsr16(\ByJG\Cache\Engine\BaseCacheEngine $cacheEngine)
+    public function testClear(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
-        // PSR-16 Test
         if ($cacheEngine->isAvailable()) {
             // Values
             $empty = [
