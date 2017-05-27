@@ -119,6 +119,7 @@ class MemcachedEngine extends BaseCacheEngine
 
     public function clear()
     {
+        $this->lazyLoadMemCachedServers();
         $result = $this->memCached->flush();
         return $result;
     }
