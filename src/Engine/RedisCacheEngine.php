@@ -2,10 +2,9 @@
 
 namespace ByJG\Cache\Engine;
 
-use ByJG\Cache\CacheEngineInterface;
 use Psr\Log\NullLogger;
 
-class RedisCacheEngine implements CacheEngineInterface
+class RedisCacheEngine extends BaseCacheEngine
 {
 
     /**
@@ -51,19 +50,23 @@ class RedisCacheEngine implements CacheEngineInterface
         }
     }
 
+    protected function fixKey($key) {
+        return "cache:$key";
+    }
+
     /**
      * @param string $key The object KEY
      * @param int $default IGNORED IN MEMCACHED.
      * @return object Description
      */
-    public function get($key, $default = 0)
+    public function get($key, $default = null)
     {
         $this->lazyLoadRedisServer();
 
-        $value = $this->redis->get($key);
+        $value = $this->redis->get($this->fixKey($key));
         $this->logger->info("[Redis Cache] Get '$key' result ");
 
-        return ($value === false ? null : $value);
+        return ($value === false ? $default : unserialize($value));
     }
 
     /**
@@ -72,61 +75,38 @@ class RedisCacheEngine implements CacheEngineInterface
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $value, $ttl = null)
     {
         $this->lazyLoadRedisServer();
 
-        $this->redis->set($key, $value, $ttl);
+        $this->redis->set($this->fixKey($key), serialize($value), $ttl);
         $this->logger->info("[Redis Cache] Set '$key' result ");
 
         return true;
     }
 
-    /**
-     * Unlock resource
-     * @param string $key
-     */
     public function delete($key)
     {
         $this->lazyLoadRedisServer();
 
-        $this->redis->delete($key);
+        $this->redis->delete($this->fixKey($key));
+
+        return true;
     }
 
-    /**
-     *
-     * @param string $key
-     * @param string $str
-     * @return bool
-     */
-    public function append($key, $str)
+    public function clear()
     {
-        $this->lazyLoadRedisServer();
-
-        $this->logger->info("[Redis Cache] Append '$key' in Memcached");
-        return $this->redis->append($key, $str);
+        $keys = $this->redis->keys('cache:*');
+        foreach ((array)$keys as $key) {
+            if (preg_match('/^cache\:(?<key>.*)/', $key, $matches)) {
+                $this->delete($matches['key']);
+            }
+        }
     }
 
-    /**
-     * Lock resource before set it.
-     * @param string $key
-     */
-    public function lock($key)
+    public function has($key)
     {
-        $this->lazyLoadRedisServer();
-
-        return;
-    }
-
-    /**
-     * UnLock resource after set it
-     * @param string $key
-     */
-    public function unlock($key)
-    {
-        $this->lazyLoadRedisServer();
-
-        return;
+        return $this->redis->exists($this->fixKey($key));
     }
 
     public function isAvailable()

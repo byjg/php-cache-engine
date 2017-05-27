@@ -3,12 +3,16 @@
 namespace ByJG\Cache\Engine;
 
 use ByJG\Cache\CacheAvailabilityInterface;
+use ByJG\Cache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 
 abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
 {
     public function getMultiple($keys, $default = null)
     {
+        if (!is_array($keys)) {
+            throw new InvalidArgumentException('getMultipleKeys expected an array');
+        }
         $result = [];
         foreach ($keys as $key) {
             $result[$key] = $this->get($key, $default);

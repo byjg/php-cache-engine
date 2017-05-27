@@ -119,12 +119,8 @@ class MemcachedEngine extends BaseCacheEngine
 
     public function clear()
     {
-        $keys = $this->memCached->getAllKeys();
-        foreach ((array)$keys as $key) {
-            if (preg_match('/^cache-(?<key>.*?)/', $key, $matches)) {
-                $this->delete($matches['key']);
-            }
-        }
+        $result = $this->memCached->flush();
+        return $result;
     }
 
     public function has($key)
