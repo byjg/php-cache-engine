@@ -1,10 +1,8 @@
 <?php
 
-namespace ByJG\Cache\Engine;
+namespace ByJG\Cache\Psr16;
 
-use ByJG\Cache\CacheEngineInterface;
-
-class SessionCacheEngine implements CacheEngineInterface
+class SessionCacheEngine extends BaseCacheEngine
 {
 
     protected $prefix = null;
@@ -32,41 +30,20 @@ class SessionCacheEngine implements CacheEngineInterface
         return $this->prefix . '-' . $key;
     }
 
-    public function append($key, $str)
+    public function get($key, $default = null)
     {
         $this->checkSession();
 
         $keyName = $this->keyName($key);
 
-        $current = $this->get($keyName);
-        if ($current === false) {
-            $this->set($keyName, $str);
-        } else {
-            $this->set($keyName, $current . $str);
-        }
-    }
-
-    public function get($key, $ttl = 0)
-    {
-        $this->checkSession();
-
-        $keyName = $this->keyName($key);
-
-        if (isset($_SESSION[$keyName])) {
+        if ($this->has($key)) {
             return $_SESSION[$keyName];
         } else {
-            return null;
+            return $default;
         }
     }
 
-    public function lock($key)
-    {
-        $this->checkSession();
-
-        // Nothing to implement here;
-    }
-
-    public function release($key)
+    public function delete($key)
     {
         $this->checkSession();
 
@@ -75,21 +52,41 @@ class SessionCacheEngine implements CacheEngineInterface
         if (isset($_SESSION[$keyName])) {
             unset($_SESSION[$keyName]);
         }
+        if (isset($_SESSION["$keyName.ttl"])) {
+            unset($_SESSION["$keyName.ttl"]);
+        }
     }
 
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = null)
     {
         $this->checkSession();
 
         $keyName = $this->keyName($key);
-        $_SESSION[$keyName] = $object;
+        $_SESSION[$keyName] = $value;
+        if (!empty($ttl)) {
+            $_SESSION["$keyName.ttl"] = $this->addToNow($ttl);
+        }
     }
 
-    public function unlock($key)
+    public function clear()
     {
-        $this->checkSession();
+        session_destroy();
+    }
 
-        // Nothing to implement here;
+    public function has($key)
+    {
+        $keyName = $this->keyName($key);
+
+        if (isset($_SESSION[$keyName])) {
+            if (isset($_SESSION["$keyName.ttl"]) && time() >= $_SESSION["$keyName.ttl"]) {
+                $this->delete($key);
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public function isAvailable()

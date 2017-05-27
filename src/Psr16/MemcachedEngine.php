@@ -1,12 +1,11 @@
 <?php
 
-namespace ByJG\Cache\Engine;
+namespace ByJG\Cache\Psr16;
 
-use ByJG\Cache\CacheEngineInterface;
 use Memcached;
 use Psr\Log\NullLogger;
 
-class MemcachedEngine implements CacheEngineInterface
+class MemcachedEngine extends BaseCacheEngine
 {
 
     /**
@@ -34,6 +33,10 @@ class MemcachedEngine implements CacheEngineInterface
         }
     }
 
+    protected function fixKey($key) {
+        return "cache-" . $key;
+    }
+
     protected function lazyLoadMemCachedServers()
     {
         if (is_null($this->memCached)) {
@@ -52,33 +55,33 @@ class MemcachedEngine implements CacheEngineInterface
 
     /**
      * @param string $key The object KEY
-     * @param int $ttl IGNORED IN MEMCACHED.
-     * @return object Description
+     * @param int $default IGNORED IN MEMCACHED.
+     * @return mixed Description
      */
-    public function get($key, $ttl = 0)
+    public function get($key, $default = null)
     {
         $this->lazyLoadMemCachedServers();
 
-        $value = $this->memCached->get($key);
+        $value = $this->memCached->get($this->fixKey($key));
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->info("[Memcached] Cache '$key' missed with status " . $this->memCached->getResultCode());
-            return null;
+            return $default;
         }
 
-        return $value;
+        return unserialize($value);
     }
 
     /**
      * @param string $key The object Key
-     * @param object $object The object to be cached
+     * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $object, $ttl = 0)
+    public function set($key, $value, $ttl = null)
     {
         $this->lazyLoadMemCachedServers();
 
-        $this->memCached->set($key, $object, $ttl);
+        $this->memCached->set($this->fixKey($key), serialize($value), $ttl);
         $this->logger->info("[Memcached] Set '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
@@ -88,50 +91,15 @@ class MemcachedEngine implements CacheEngineInterface
     }
 
     /**
-     * Unlock resource
      * @param string $key
-     */
-    public function release($key)
-    {
-        $this->lazyLoadMemCachedServers();
-
-        $this->memCached->delete($key);
-    }
-
-    /**
-     *
-     * @param string $key
-     * @param string $str
      * @return bool
      */
-    public function append($key, $str)
+    public function delete($key)
     {
         $this->lazyLoadMemCachedServers();
 
-        $this->logger->info("[Memcached] Append '$key' in Memcached");
-        return $this->memCached->append($key, $str);
-    }
-
-    /**
-     * Lock resource before set it.
-     * @param string $key
-     */
-    public function lock($key)
-    {
-        $this->lazyLoadMemCachedServers();
-
-        return;
-    }
-
-    /**
-     * UnLock resource after set it
-     * @param string $key
-     */
-    public function unlock($key)
-    {
-        $this->lazyLoadMemCachedServers();
-
-        return;
+        $this->memCached->delete($this->fixKey($key));
+        return true;
     }
 
     public function isAvailable()
@@ -146,5 +114,20 @@ class MemcachedEngine implements CacheEngineInterface
         } catch (\Exception $ex) {
             return false;
         }
+    }
+
+    public function clear()
+    {
+        $this->lazyLoadMemCachedServers();
+        $result = $this->memCached->flush();
+        return $result;
+    }
+
+    public function has($key)
+    {
+        $this->lazyLoadMemCachedServers();
+
+        $this->memCached->get($this->fixKey($key));
+        return ($this->memCached->getResultCode() === Memcached::RES_SUCCESS);
     }
 }

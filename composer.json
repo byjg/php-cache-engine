@@ -1,6 +1,6 @@
 {
   "name": "byjg/cache-engine",
-  "description": "A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.",
+  "description": "A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.",
   "authors": [
     {
       "name": "João Gilberto Magalhães",
@@ -15,7 +15,8 @@
   "require": {
     "php": ">=5.4.0",
     "psr/cache": "1.0.*",
-    "psr/log": "1.0.2"
+    "psr/log": "1.0.2",
+    "psr/simple-cache": "1.0.*"
   },
   "suggest": {
     "ext-memcached": "*"

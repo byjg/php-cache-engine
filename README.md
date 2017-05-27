@@ -6,41 +6,55 @@
 
 ## Description
 
-A multi-purpose cache engine in PHP with several drivers. PSR-6 compliant.
+A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.
 
-## Avaible cache engines
+## Cache Engine PSR-16 compliant
+ 
+PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
+of engines available in this library that is PSR-16 compliant:
 
-| Class                             | Description                                                         |
-|:----------------------------------|:--------------------------------------------------------------------|
-| \ByJG\Cache\NoCacheEngine         | Do nothing. Use it for disable the cache without change your code   |
-| \ByJG\Cache\ArrayCacheEngine      | Local cache only using array. It does not persists between requests |
-| \ByJG\Cache\FileSystemCacheEngine | Save the cache result in the local file system                      |
-| \ByJG\Cache\MemcachedEngine       | Uses the Memcached as the cache engine                              |
-| \ByJG\Cache\SessionCachedEngine   | uses the PHP session as cache                                       |
-| \ByJG\Cache\ShmopCachedEngine     | uses the shared memory area for cache                               |
+| Class                                   | Description                                                         |
+|:----------------------------------------|:--------------------------------------------------------------------|
+| \ByJG\Cache\Psr16\NoCacheEngine         | Do nothing. Use it for disable the cache without change your code   |
+| \ByJG\Cache\Psr16\ArrayCacheEngine      | Local cache only using array. It does not persists between requests |
+| \ByJG\Cache\Psr16\FileSystemCacheEngine | Save the cache result in the local file system                      |
+| \ByJG\Cache\Psr16\MemcachedEngine       | Uses the Memcached as the cache engine                              |
+| \ByJG\Cache\Psr16\SessionCachedEngine   | uses the PHP session as cache                                       |
+| \ByJG\Cache\Psr16\ShmopCachedEngine     | uses the shared memory area for cache                               |
 
-## Create new cache instance
-
-### Creating a PSR-6 compatible instance 
-
-You can set instance in the 'cacheconfig.php' setup (see below how to configure the factory)
+To create a new Cache Instance just create the proper cache engine and use it:
 
 ```php
+<?php
+$cache = new \ByJG\Cache\Psr16\FileSystemCacheEngine();
+
+// And use it:
+$object = $cache->get('key');
+$cache->set('key', 'value');
+if ($cache->has('key')) {
+    //...
+};
+```
+
+## Cache Engine PSR-6 compliant 
+
+The PSR-6 implementation use the engines defined above. PSR-6 is more verbosity and
+have an extra layer do get and set the cache values. 
+
+You can use one of the factory methods to create a instance of the CachePool implementation:
+
+```php
+<?php
 $cachePool = \ByJG\Cache\Factory::createFilePool();
 ```
 
-or you can create the CachePool imediatelly:
+ OR just create a new CachePool and pass to the constructor an instance of a PSR-16 compliant class:
 
 ```php
 $cachePool = new CachePool(new FileSystemCacheEngine());
 ```
 
-### Logging cache commands
- 
-You can add a PSR Log compatible to the constructor in order to get Log of the operations
-
-
-### List of Avaiable Factory Commands
+## List of Avaiable Factory Commands
 
 **Note: All parameters are optional**
 
@@ -62,9 +76,13 @@ The Commom parameters are:
 - servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]` 
 - config: Specific setup for shmop. E.g.: `[ 'max-size' => 524288, 'default-permission' => '0700' ]`
 
+## Logging cache commands
+ 
+You can add a PSR Log compatible to the constructor in order to get Log of the operations
+
 ## Install
 
-Just type: `composer require "byjg/cache-engine=3.0.*"`
+Just type: `composer require "byjg/cache-engine=4.0.*"`
 
 
 ## Running Unit Testes
