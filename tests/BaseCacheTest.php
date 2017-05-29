@@ -2,8 +2,6 @@
 
 namespace Test;
 
-use ByJG\Cache\Psr6\CachePool;
-
 require_once 'Model.php';
 
 // backward compatibility

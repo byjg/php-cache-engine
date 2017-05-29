@@ -3,7 +3,7 @@
 This will available for the cache instances:
 
 ```php
-ByJG\Cache\LogHandler::getInstance()->pushLogHandler(
-    new \Monolog\Handler\StreamHandler('php://stderr', Monolog\Logger::DEBUG)
-);
+<?php
+$logger = new \Monolog\Handler\StreamHandler('php://stderr', \Monolog\Logger::DEBUG);
+$cache = new \ByJG\Cache\Psr16\FileSystemCacheEngine(null, $logger);
 ```
