@@ -49,6 +49,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @param string $key The object KEY
      * @param mixed $default IGNORED IN MEMCACHED.
      * @return mixed Description
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get($key, $default = null)
     {

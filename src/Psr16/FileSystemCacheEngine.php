@@ -115,6 +115,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     /**
      * @param string $key
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete($key)
     {

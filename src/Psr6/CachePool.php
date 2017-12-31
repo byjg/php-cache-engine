@@ -107,9 +107,11 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr implementation of getItem()
-     * 
+     *
      * @param string $key
      * @return CacheItem
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getItem($key)
     {
@@ -132,9 +134,10 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr implementation of getItems()
-     * 
+     *
      * @param array $keys
      * @return array
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getItems(array $keys = array())
     {
@@ -148,9 +151,10 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr implementation of hasItems()
-     * 
+     *
      * @param string $key
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function hasItem($key)
     {
@@ -171,6 +175,7 @@ class CachePool implements CacheItemPoolInterface
      *
      * @param string $key
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteItem($key)
     {
@@ -179,9 +184,11 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr Implementation of deleteItems()
-     * 
+     *
      * @param array $keys
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function deleteItems(array $keys)
     {
@@ -196,6 +203,8 @@ class CachePool implements CacheItemPoolInterface
     /**
      * @param CacheItemInterface $item
      * @return bool
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function save(CacheItemInterface $item)
     {
@@ -232,6 +241,8 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr implementation of commit()
+     *
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function commit()
     {

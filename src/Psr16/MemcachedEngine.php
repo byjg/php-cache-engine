@@ -37,6 +37,9 @@ class MemcachedEngine extends BaseCacheEngine
         return "cache-" . $key;
     }
 
+    /**
+     * @throws \Exception
+     */
     protected function lazyLoadMemCachedServers()
     {
         if (is_null($this->memCached)) {
@@ -57,6 +60,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @param string $key The object KEY
      * @param int $default IGNORED IN MEMCACHED.
      * @return mixed Description
+     * @throws \Exception
      */
     public function get($key, $default = null)
     {
@@ -76,6 +80,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
+     * @throws \Exception
      */
     public function set($key, $value, $ttl = null)
     {
@@ -93,6 +98,7 @@ class MemcachedEngine extends BaseCacheEngine
     /**
      * @param string $key
      * @return bool
+     * @throws \Exception
      */
     public function delete($key)
     {
@@ -116,6 +122,10 @@ class MemcachedEngine extends BaseCacheEngine
         }
     }
 
+    /**
+     * @return bool
+     * @throws \Exception
+     */
     public function clear()
     {
         $this->lazyLoadMemCachedServers();
@@ -123,6 +133,11 @@ class MemcachedEngine extends BaseCacheEngine
         return $result;
     }
 
+    /**
+     * @param string $key
+     * @return bool
+     * @throws \Exception
+     */
     public function has($key)
     {
         $this->lazyLoadMemCachedServers();

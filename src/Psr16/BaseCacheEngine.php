@@ -8,6 +8,13 @@ use Psr\SimpleCache\CacheInterface;
 
 abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
 {
+    /**
+     * @param $keys
+     * @param null $default
+     * @return array|iterable
+     * @throws \ByJG\Cache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function getMultiple($keys, $default = null)
     {
         if (!is_array($keys)) {
@@ -20,6 +27,12 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
         return $result;
     }
 
+    /**
+     * @param iterable $values
+     * @param null $ttl
+     * @return bool|void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function setMultiple($values, $ttl = null)
     {
         foreach ($values as $key => $value) {
@@ -27,6 +40,11 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
         }
     }
 
+    /**
+     * @param iterable $keys
+     * @return bool|void
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function deleteMultiple($keys)
     {
         foreach ($keys as $key) {
