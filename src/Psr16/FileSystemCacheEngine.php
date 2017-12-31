@@ -27,6 +27,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * @param string $key The object KEY
      * @param mixed $default IGNORED IN MEMCACHED.
      * @return mixed Description
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function get($key, $default = null)
     {
@@ -84,6 +85,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
         try {
             if (file_exists($fileKey)) {
                 unlink($fileKey);
+            }
+            if (file_exists("$fileKey.ttl")) {
                 unlink("$fileKey.ttl");
             }
 
