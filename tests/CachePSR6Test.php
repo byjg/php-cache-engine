@@ -2,6 +2,7 @@
 
 namespace Test;
 
+use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
 
 require_once 'BaseCacheTest.php';
@@ -11,8 +12,9 @@ class CachePSR6Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testGetOneItem(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testGetOneItem(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -46,8 +48,9 @@ class CachePSR6Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testGetMultipleItems(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testGetMultipleItems(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -89,8 +92,9 @@ class CachePSR6Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testTtl(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testTtl(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -129,8 +133,9 @@ class CachePSR6Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testCacheObject(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testCacheObject(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 

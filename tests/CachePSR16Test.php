@@ -2,6 +2,7 @@
 
 namespace Test;
 
+use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 
 require_once 'BaseCacheTest.php';
@@ -11,8 +12,9 @@ class CachePSR16Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testGetOneItem(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testGetOneItem(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -27,7 +29,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave', 'valor');
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
+            if (!($cacheEngine instanceof NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave', 'default');
                 $this->assertEquals('valor', $item2);
             }
@@ -46,8 +48,10 @@ class CachePSR16Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \ByJG\Cache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testGetMultipleItems(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testGetMultipleItems(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -65,7 +69,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave2', 'valor2');
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
+            if (!($cacheEngine instanceof NoCacheEngine)) {
                 $item2 = $cacheEngine->getMultiple(['chave1', 'chave2']);
                 $this->assertEquals('valor1', $item2['chave1']);
                 $this->assertEquals('valor2', $item2['chave2']);
@@ -86,8 +90,9 @@ class CachePSR16Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testTtl(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testTtl(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -105,7 +110,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave2', 'valor2', 2);
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
+            if (!($cacheEngine instanceof NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave');
                 $this->assertEquals('valor', $item2);
                 $this->assertTrue($cacheEngine->has('chave2'));
@@ -122,8 +127,9 @@ class CachePSR16Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testCacheObject(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testCacheObject(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
@@ -137,7 +143,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->set('chave', $model);
 
             // Get Object
-            if (!($cacheEngine instanceof \ByJG\Cache\Psr16\NoCacheEngine)) {
+            if (!($cacheEngine instanceof NoCacheEngine)) {
                 $item2 = $cacheEngine->get('chave');
                 $this->assertEquals($model, $item2);
             }
@@ -154,8 +160,10 @@ class CachePSR16Test extends BaseCacheTest
     /**
      * @dataProvider CachePoolProvider
      * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @throws \ByJG\Cache\InvalidArgumentException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function testClear(\ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine)
+    public function testClear(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
 
