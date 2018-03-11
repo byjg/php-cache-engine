@@ -2,14 +2,11 @@
 
 namespace Test;
 
+use PHPUnit\Framework\TestCase;
+
 require_once 'Model.php';
 
-// backward compatibility
-if (!class_exists('\PHPUnit\Framework\TestCase')) {
-    class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
-}
-
-abstract class BaseCacheTest extends \PHPUnit\Framework\TestCase
+abstract class BaseCacheTest extends TestCase
 {
     /**
      * @var \ByJG\Cache\Psr16\BaseCacheEngine

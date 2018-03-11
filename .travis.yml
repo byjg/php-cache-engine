@@ -23,4 +23,4 @@ install:
   - composer install
 
 script:
-  - phpunit --stderr
+  - vendor/bin/phpunit --stderr
