@@ -106,7 +106,13 @@ class RedisCacheEngine extends BaseCacheEngine
 
     public function has($key)
     {
-        return $this->redis->exists($this->fixKey($key));
+        $result = $this->redis->exists($this->fixKey($key));
+
+        if (is_numeric($result)) {
+            return $result !== 0;
+        }
+
+        return $result;
     }
 
     public function isAvailable()
