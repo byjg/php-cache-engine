@@ -29,12 +29,17 @@ To create a new Cache Instance just create the proper cache engine and use it:
 $cache = new \ByJG\Cache\Psr16\FileSystemCacheEngine();
 
 // And use it:
-$object = $cache->get('key');
-$cache->set('key', 'value');
 if ($cache->has('key')) {
-    //...
+    // Do the complex code to get the value to be cached
+    $object = callComplexCode();
+    
+    // Save to cache
+    $cache->set('key', $object);
 };
+$object = $cache->get('key');
 ```
+
+See more PSR-16 examples [here](docs/basic-usage-psr16-simplecache.md)
 
 ## Cache Engine PSR-6 compliant 
 
@@ -53,6 +58,8 @@ $cachePool = \ByJG\Cache\Factory::createFilePool();
 ```php
 $cachePool = new CachePool(new FileSystemCacheEngine());
 ```
+
+See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
 
 ## List of Avaiable Factory Commands
 
@@ -79,6 +86,8 @@ The Commom parameters are:
 ## Logging cache commands
  
 You can add a PSR Log compatible to the constructor in order to get Log of the operations
+
+See log examples [here](docs/setup-log-handler.md)
 
 ## Install
 
