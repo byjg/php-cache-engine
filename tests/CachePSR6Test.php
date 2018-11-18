@@ -4,6 +4,7 @@ namespace Test;
 
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
+use DateInterval;
 
 require_once 'BaseCacheTest.php';
 
@@ -96,37 +97,44 @@ class CachePSR6Test extends BaseCacheTest
      */
     public function testTtl(BaseCacheEngine $cacheEngine)
     {
-        $this->cacheEngine = $cacheEngine;
+        $timeList = [
+            2,
+            DateInterval::createFromDateString("2 seconds")
+        ];
 
-        $object = new CachePool($cacheEngine);
-        if ($object->isAvailable()) {
-            // First time
-            $item = $object->getItem('chave');
-            $this->assertFalse($item->isHit());
+        foreach ($timeList as $time) {
+            $this->cacheEngine = $cacheEngine;
 
-            // Set object
-            $item->set('valor');
-            $item->expiresAfter(2);
-            $object->save($item);
-            $this->assertTrue($item->isHit());
+            $object = new CachePool($cacheEngine);
+            if ($object->isAvailable()) {
+                // First time
+                $item = $object->getItem('chave');
+                $this->assertFalse($item->isHit());
 
-            // Get Object
-            $item2 = $object->getItem('chave');
-            $this->assertTrue($item2->isHit());
-            $this->assertEquals('valor', $item2->get());
-            sleep(3);
-            $item3 = $object->getItem('chave');
-            $this->assertFalse($item3->isHit());
-            $this->assertEquals(null, $item3->get());
+                // Set object
+                $item->set('valor');
+                $item->expiresAfter($time);
+                $object->save($item);
+                $this->assertTrue($item->isHit());
 
-            // Remove
-            $object->deleteItem('chave');
+                // Get Object
+                $item2 = $object->getItem('chave');
+                $this->assertTrue($item2->isHit());
+                $this->assertEquals('valor', $item2->get());
+                sleep(3);
+                $item3 = $object->getItem('chave');
+                $this->assertFalse($item3->isHit());
+                $this->assertEquals(null, $item3->get());
 
-            // Check Removed
-            $item = $object->getItem('chave');
-            $this->assertFalse($item->isHit());
-        } else {
-            $this->markTestIncomplete('Object is not fully functional');
+                // Remove
+                $object->deleteItem('chave');
+
+                // Check Removed
+                $item = $object->getItem('chave');
+                $this->assertFalse($item->isHit());
+            } else {
+                $this->markTestIncomplete('Object is not fully functional');
+            }
         }
     }
 

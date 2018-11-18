@@ -2,6 +2,9 @@
 
 namespace ByJG\Cache\Psr6;
 
+use DateInterval;
+use DateTime;
+use DateTimeInterface;
 use Psr\Cache\CacheItemInterface;
 
 class CacheItem implements CacheItemInterface
@@ -22,7 +25,7 @@ class CacheItem implements CacheItemInterface
     protected $hit;
     
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     protected $expiration;
 
@@ -76,10 +79,8 @@ class CacheItem implements CacheItemInterface
      */
     public function expiresAt($expiration)
     {
-        if (is_null($expiration)) {
-            $this->expiration = new \DateTime('now +1 year');
-        } else {
-            assert('$expiration instanceof \DateTimeInterface');
+        $this->expiration = new DateTime('now +1 year');
+        if ($expiration instanceof DateTimeInterface) {
             $this->expiration = $expiration;
         }
         return $this;
@@ -89,13 +90,11 @@ class CacheItem implements CacheItemInterface
      */
     public function expiresAfter($time)
     {
-        if (is_null($time)) {
-            $this->expiration = new \DateTime('now +1 year');
-        } elseif (is_numeric($time)) {
-            $this->expiration = new \DateTime('now +' . $time . ' seconds');
-        } else {
-            assert('$time instanceof DateInterval');
-            $expiration = new \DateTime();
+        $this->expiration = new DateTime('now +1 year');
+        if (is_numeric($time)) {
+            $this->expiration = new DateTime('now +' . $time . ' seconds');
+        } else if ($time instanceof DateInterval) {
+            $expiration = new DateTime();
             $expiration->add($time);
             $this->expiration = $expiration;
         }
@@ -103,7 +102,7 @@ class CacheItem implements CacheItemInterface
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
     public function getExpiresAt()
     {
@@ -112,6 +111,6 @@ class CacheItem implements CacheItemInterface
     
     public function getExpiresInSecs()
     {
-        return $this->getExpiresAt()->getTimestamp() - (new \DateTime('now'))->getTimestamp();
+        return $this->getExpiresAt()->getTimestamp() - (new DateTime('now'))->getTimestamp();
     }
 }
