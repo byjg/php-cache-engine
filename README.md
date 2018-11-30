@@ -64,9 +64,11 @@ $cachePool = new CachePool(new FileSystemCacheEngine());
 
 See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
 
-# List of Avaiable Factory Commands
+# List of Available Factory Commands
 
 **Note: All parameters are optional**
+
+{:.table}
 
 | Engine           | Factory Command                                                       |
 |:-----------------|:----------------------------------------------------------------------|
