@@ -6,14 +6,15 @@
 [![Build Status](https://travis-ci.org/byjg/cache-engine-php.svg?branch=master)](https://travis-ci.org/byjg/cache-engine-php)
 
 
-## Description
 
 A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.
 
-## Cache Engine PSR-16 compliant
+# Cache Engine PSR-16 compliant
  
 PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
 of engines available in this library that is PSR-16 compliant:
+
+{:.table}
 
 | Class                                   | Description                                                         |
 |:----------------------------------------|:--------------------------------------------------------------------|
@@ -43,7 +44,7 @@ $object = $cache->get('key');
 
 See more PSR-16 examples [here](docs/basic-usage-psr16-simplecache.md)
 
-## Cache Engine PSR-6 compliant 
+# Cache Engine PSR-6 compliant 
 
 The PSR-6 implementation use the engines defined above. PSR-6 is more verbosity and
 have an extra layer do get and set the cache values. 
@@ -63,7 +64,7 @@ $cachePool = new CachePool(new FileSystemCacheEngine());
 
 See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
 
-## List of Avaiable Factory Commands
+# List of Avaiable Factory Commands
 
 **Note: All parameters are optional**
 
@@ -85,7 +86,7 @@ The Commom parameters are:
 - servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]` 
 - config: Specific setup for shmop. E.g.: `[ 'max-size' => 524288, 'default-permission' => '0700' ]`
 
-## Logging cache commands
+# Logging cache commands
  
 You can add a PSR Log compatible to the constructor in order to get Log of the operations
 
@@ -93,10 +94,14 @@ See log examples [here](docs/setup-log-handler.md)
 
 ## Install
 
-Just type: `composer require "byjg/cache-engine=4.0.*"`
+Just type: 
+
+```
+composer require "byjg/cache-engine=4.0.*"
+```
 
 
-## Running Unit Testes
+# Running Unit Testes
 
 ```
 phpunit --stderr
