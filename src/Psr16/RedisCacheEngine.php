@@ -89,7 +89,7 @@ class RedisCacheEngine extends BaseCacheEngine
     {
         $this->lazyLoadRedisServer();
 
-        $this->redis->delete($this->fixKey($key));
+        $this->redis->del($this->fixKey($key));
 
         return true;
     }
