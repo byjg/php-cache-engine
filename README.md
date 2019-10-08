@@ -80,7 +80,7 @@ See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
 | Redis            | Factory::createRedisCacheEngine($server, $pwd, $bufferSize, $logger); |
 | Shmop            | Factory::createShmopPool($config[], $bufferSize, $logger);            |
 
-The Commom parameters are:
+The Common parameters are:
 
 - logger: A valid instance that implement the LoggerInterface defined by the PSR/LOG
 - bufferSize: the Buffer of CachePool
