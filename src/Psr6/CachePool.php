@@ -2,10 +2,10 @@
 
 namespace ByJG\Cache\Psr6;
 
+use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Psr\Log\InvalidArgumentException;
 
 class CachePool implements CacheItemPoolInterface
 {
@@ -203,7 +203,6 @@ class CachePool implements CacheItemPoolInterface
     /**
      * @param CacheItemInterface $item
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function save(CacheItemInterface $item)
