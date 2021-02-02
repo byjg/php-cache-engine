@@ -3,7 +3,7 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\CacheAvailabilityInterface;
-use ByJG\Cache\InvalidArgumentException;
+use ByJG\Cache\Exception\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 
 abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
@@ -12,7 +12,6 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @param $keys
      * @param null $default
      * @return array|iterable
-     * @throws \ByJG\Cache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMultiple($keys, $default = null)

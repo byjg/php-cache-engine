@@ -2,7 +2,8 @@
 
 namespace ByJG\Cache\Psr16;
 
-use Psr\Cache\InvalidArgumentException;
+use ByJG\Cache\Exception\InvalidArgumentException;
+use ByJG\Cache\Exception\StorageErrorException;
 use Psr\Log\NullLogger;
 
 /**
@@ -125,6 +126,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      *                                     for it or let the driver take care of that.
      * @return bool True on success and false on failure.
      * @throws InvalidArgumentException
+     * @throws StorageErrorException
      */
     public function set($key, $value, $ttl = null)
     {
@@ -136,7 +138,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         $size = strlen($serialized);
 
         if ($size > $this->getMaxSize()) {
-            throw new \ByJG\Cache\InvalidArgumentException('Object is greater than the max size allowed: ' . $this->getMaxSize());
+            throw new StorageErrorException('Object is greater than the max size allowed: ' . $this->getMaxSize());
         }
 
         $file = $this->getFilenameToken($key);
@@ -148,7 +150,7 @@ class ShmopCacheEngine extends BaseCacheEngine
             if (isset($lastError['message'])) {
                 $message = $lastError['message'];
             }
-            throw new \ByJG\Cache\InvalidArgumentException($message);
+            throw new StorageErrorException($message);
         }
 
         $shm_bytes_written = shmop_write($shm_id, $serialized, 0);

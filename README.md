@@ -1,15 +1,18 @@
 # Cache Engine
 
-[![Opensource ByJG](https://img.shields.io/badge/opensource-byjg.com-brightgreen.svg)](http://opensource.byjg.com)
+[![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/cache-engine-php/)
+[![GitHub license](https://img.shields.io/github/license/byjg/cache-engine-php.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub release](https://img.shields.io/github/release/byjg/cache-engine-php.svg)](https://github.com/byjg/cache-engine-php/releases/)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/cache-engine-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/cache-engine-php/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/f643fd22-8ab1-4f41-9bef-f9f9e127ec0d/mini.png)](https://insight.sensiolabs.com/projects/f643fd22-8ab1-4f41-9bef-f9f9e127ec0d)
-[![Build Status](https://travis-ci.org/byjg/cache-engine-php.svg?branch=master)](https://travis-ci.org/byjg/cache-engine-php)
+[![Build Status](https://travis-ci.com/byjg/cache-engine-php.svg?branch=master)](https://travis-ci.com/byjg/cache-engine-php)
 
 
 
 A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.
 
-# Cache Engine PSR-16 compliant
+## PSR-16
  
 PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
 of engines available in this library that is PSR-16 compliant:
@@ -44,7 +47,7 @@ $object = $cache->get('key');
 
 See more PSR-16 examples [here](docs/basic-usage-psr16-simplecache.md)
 
-# Cache Engine PSR-6 compliant 
+## PSR-6 
 
 The PSR-6 implementation use the engines defined above. PSR-6 is more verbosity and
 have an extra layer do get and set the cache values. 
@@ -64,7 +67,7 @@ $cachePool = new CachePool(new FileSystemCacheEngine());
 
 See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
 
-# List of Available Factory Commands
+## List of Available Factory Commands
 
 **Note: All parameters are optional**
 
@@ -88,7 +91,7 @@ The Common parameters are:
 - servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]` 
 - config: Specific setup for shmop. E.g.: `[ 'max-size' => 524288, 'default-permission' => '0700' ]`
 
-# Logging cache commands
+## Logging cache commands
  
 You can add a PSR Log compatible to the constructor in order to get Log of the operations
 
@@ -103,7 +106,7 @@ composer require "byjg/cache-engine=4.0.*"
 ```
 
 
-# Running Unit Testes
+## Running Unit Testes
 
 ```
 phpunit --stderr

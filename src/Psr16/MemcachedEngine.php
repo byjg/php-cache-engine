@@ -2,6 +2,7 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\Exception\StorageErrorException;
 use Memcached;
 use Psr\Log\NullLogger;
 
@@ -38,7 +39,7 @@ class MemcachedEngine extends BaseCacheEngine
     }
 
     /**
-     * @throws \Exception
+     * @throws StorageErrorException
      */
     protected function lazyLoadMemCachedServers()
     {
@@ -50,7 +51,7 @@ class MemcachedEngine extends BaseCacheEngine
 
                 $stats = $this->memCached->getStats();
                 if (!isset($stats[$server]) || $stats[$server]['pid'] === -1) {
-                    throw new \Exception("Memcached server $server is down");
+                    throw new StorageErrorException("Memcached server $server is down");
                 }
             }
         }
@@ -60,7 +61,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @param string $key The object KEY
      * @param int $default IGNORED IN MEMCACHED.
      * @return mixed Description
-     * @throws \Exception
+     * @throws StorageErrorException
      */
     public function get($key, $default = null)
     {
@@ -80,7 +81,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @param object $value The object to be cached
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
-     * @throws \Exception
+     * @throws StorageErrorException
      */
     public function set($key, $value, $ttl = null)
     {
@@ -98,7 +99,7 @@ class MemcachedEngine extends BaseCacheEngine
     /**
      * @param string $key
      * @return bool
-     * @throws \Exception
+     * @throws StorageErrorException
      */
     public function delete($key)
     {
@@ -117,14 +118,14 @@ class MemcachedEngine extends BaseCacheEngine
         try {
             $this->lazyLoadMemCachedServers();
             return true;
-        } catch (\Exception $ex) {
+        } catch (StorageErrorException $ex) {
             return false;
         }
     }
 
     /**
      * @return bool
-     * @throws \Exception
+     * @throws StorageErrorException
      */
     public function clear()
     {
@@ -136,7 +137,7 @@ class MemcachedEngine extends BaseCacheEngine
     /**
      * @param string $key
      * @return bool
-     * @throws \Exception
+     * @throws StorageErrorException
      */
     public function has($key)
     {
