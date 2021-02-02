@@ -25,3 +25,11 @@ install:
 
 script:
   - vendor/bin/phpunit --stderr
+
+jobs:
+  include:
+    - stage: documentation
+      if: branch = master
+      before_install: skip
+      install: skip
+      script: "curl https://opensource.byjg.com/add-doc.sh | bash /dev/stdin php cache-engine-php"
