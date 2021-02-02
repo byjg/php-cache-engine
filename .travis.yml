@@ -32,4 +32,4 @@ jobs:
       if: branch = master
       before_install: skip
       install: skip
-      script: "curl https://opensource.byjg.com/add-doc.sh | bash /dev/stdin php cache-engine-php"
+      script: "curl https://opensource.byjg.com/add-doc.sh | bash /dev/stdin php cache-engine-php docs"
