@@ -1,12 +1,6 @@
 {
   "name": "byjg/cache-engine",
   "description": "A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.",
-  "authors": [
-    {
-      "name": "João Gilberto Magalhães",
-      "email": "joao@byjg.com.br"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "ByJG\\Cache\\": "src/"
