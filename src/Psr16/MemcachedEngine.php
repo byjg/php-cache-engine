@@ -87,7 +87,7 @@ class MemcachedEngine extends BaseCacheEngine
     {
         $this->lazyLoadMemCachedServers();
 
-        $this->memCached->set($this->fixKey($key), serialize($value), $ttl);
+        $this->memCached->set($this->fixKey($key), serialize($value), is_null($ttl) ? 0 : $ttl);
         $this->logger->info("[Memcached] Set '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
