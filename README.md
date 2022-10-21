@@ -1,13 +1,10 @@
 # Cache Engine
 
+[![Build Status](https://github.com/byjg/cache-engine-php/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/cache-engine-php/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/cache-engine-php/)
 [![GitHub license](https://img.shields.io/github/license/byjg/cache-engine-php.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/cache-engine-php.svg)](https://github.com/byjg/cache-engine-php/releases/)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/cache-engine-php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/cache-engine-php/?branch=master)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/f643fd22-8ab1-4f41-9bef-f9f9e127ec0d/mini.png)](https://insight.sensiolabs.com/projects/f643fd22-8ab1-4f41-9bef-f9f9e127ec0d)
-[![Build Status](https://travis-ci.com/byjg/cache-engine-php.svg?branch=master)](https://travis-ci.com/byjg/cache-engine-php)
-
 
 
 A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.

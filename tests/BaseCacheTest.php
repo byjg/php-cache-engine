@@ -13,12 +13,7 @@ abstract class BaseCacheTest extends TestCase
      */
     protected $cacheEngine = null;
 
-    protected function setUp()
-    {
-
-    }
-
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->cacheEngine->clear();
         $this->cacheEngine = null;

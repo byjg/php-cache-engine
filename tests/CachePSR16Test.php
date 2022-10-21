@@ -21,7 +21,7 @@ class CachePSR16Test extends BaseCacheTest
         if ($cacheEngine->isAvailable()) {
             // First time
             $item = $cacheEngine->get('chave', null);
-            $this->assertEquals(null, $item);
+            $this->assertNull($item);
             $item = $cacheEngine->get('chave', 'default');
             $this->assertEquals('default', $item);
 
@@ -39,7 +39,7 @@ class CachePSR16Test extends BaseCacheTest
 
             // Check Removed
             $item = $cacheEngine->get('chave');
-            $this->assertEquals(null, $item);
+            $this->assertNull($item);
         } else {
             $this->markTestIncomplete('Object is not fully functional');
         }
@@ -58,8 +58,8 @@ class CachePSR16Test extends BaseCacheTest
         if ($cacheEngine->isAvailable()) {
             // First time
             $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
-            $this->assertEquals(null, $items['chave1']);
-            $this->assertEquals(null, $items['chave2']);
+            $this->assertNull($items['chave1']);
+            $this->assertNull($items['chave2']);
             $items = $cacheEngine->getMultiple(['chave1', 'chave2'], 'default');
             $this->assertEquals('default', $items['chave1']);
             $this->assertEquals('default', $items['chave2']);
@@ -80,8 +80,8 @@ class CachePSR16Test extends BaseCacheTest
 
             // Check Removed
             $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
-            $this->assertEquals(null, $items['chave1']);
-            $this->assertEquals(null, $items['chave2']);
+            $this->assertNull($items['chave1']);
+            $this->assertNull($items['chave2']);
         } else {
             $this->markTestIncomplete('Object is not fully functional');
         }
@@ -99,10 +99,10 @@ class CachePSR16Test extends BaseCacheTest
         if ($cacheEngine->isAvailable()) {
             // First time
             $item = $cacheEngine->get('chave');
-            $this->assertEquals(null, $item);
+            $this->assertNull($item);
             $this->assertFalse($cacheEngine->has('chave'));
             $item2 = $cacheEngine->get('chave2');
-            $this->assertEquals(null, $item2);
+            $this->assertNull($item2);
             $this->assertFalse($cacheEngine->has('chave2'));
 
             // Set object
@@ -116,7 +116,7 @@ class CachePSR16Test extends BaseCacheTest
                 $this->assertTrue($cacheEngine->has('chave2'));
                 sleep(3);
                 $item2 = $cacheEngine->get('chave');
-                $this->assertEquals(null, $item2);
+                $this->assertNull($item2);
                 $this->assertFalse($cacheEngine->has('chave2'));
             }
         } else {
@@ -136,7 +136,7 @@ class CachePSR16Test extends BaseCacheTest
         if ($cacheEngine->isAvailable()) {
             // First time
             $item = $cacheEngine->get('chave');
-            $this->assertEquals(null, $item);
+            $this->assertNull($item);
 
             // Set object
             $model = new Model(10, 20);
@@ -151,7 +151,7 @@ class CachePSR16Test extends BaseCacheTest
             // Delete
             $cacheEngine->delete('chave');
             $item = $cacheEngine->get('chave');
-            $this->assertEquals(null, $item);
+            $this->assertNull($item);
         } else {
             $this->markTestIncomplete('Object is not fully functional');
         }
