@@ -14,7 +14,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @return array|iterable
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(iterable $keys, mixed $default = null): iterable
     {
         if (!is_array($keys)) {
             throw new InvalidArgumentException('getMultipleKeys expected an array');
@@ -32,11 +32,13 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @return bool|void
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple(iterable $values, null|int|\DateInterval $ttl = null): bool
     {
         foreach ($values as $key => $value) {
             $this->set($key, $value, $ttl);
         }
+
+        return true;
     }
 
     /**
@@ -44,11 +46,13 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @return bool|void
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
         foreach ($keys as $key) {
             $this->delete($key);
         }
+
+        return true;
     }
 
     abstract public function isAvailable();

@@ -8,9 +8,9 @@ class ArrayCacheEngine extends BaseCacheEngine
 {
 
     protected $cache = array();
-    
+
     protected $logger = null;
-    
+
     public function __construct($logger = null)
     {
         $this->logger = $logger;
@@ -31,7 +31,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         if (isset($this->cache[$key])) {
             if (isset($this->cache["$key.ttl"]) && time() >= $this->cache["$key.ttl"]) {
@@ -51,7 +51,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @return mixed Description
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         if ($this->has($key)) {
             $this->logger->info("[Array cache] Get '$key' from L1 Cache");
@@ -76,7 +76,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $this->logger->info("[Array cache] Set '$key' in L1 Cache");
 
@@ -88,9 +88,10 @@ class ArrayCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $this->cache = [];
+        return true;
     }
 
     /**
@@ -99,7 +100,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         unset($this->cache[$key]);
         unset($this->cache["$key.ttl"]);

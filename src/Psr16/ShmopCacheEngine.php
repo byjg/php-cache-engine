@@ -72,7 +72,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @param mixed $default The time to live in seconds of the object. Depends on implementation.
      * @return mixed The Object
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
        if ($default === false) {
             $this->logger->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
@@ -128,7 +128,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws StorageErrorException
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $this->logger->info("[Shmop Cache] set '$key'");
 
@@ -172,7 +172,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->logger->info("[Shmop Cache] release '$key'");
 
@@ -207,16 +207,17 @@ class ShmopCacheEngine extends BaseCacheEngine
         }
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $patternKey = sys_get_temp_dir() . '/shmop-*.cache';
         $list = glob($patternKey);
         foreach ($list as $file) {
             $this->deleteFromFilenameToken($file);
         }
+        return true;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $file = $this->getFilenameToken($key);
         $fileKey = $this->getFTok($file);

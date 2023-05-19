@@ -11,7 +11,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @param int $default IGNORED IN MEMCACHED.
      * @return mixed Description
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         return $default;
     }
@@ -22,7 +22,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $value, $ttl = 0)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         return true;
     }
@@ -31,7 +31,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         return true;
     }
@@ -64,7 +64,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      *
      * @return bool True on success and false on failure.
      */
-    public function clear()
+    public function clear(): bool
     {
         return true;
     }
@@ -81,7 +81,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
     */
-    public function has($key)
+    public function has(string $key): bool
     {
         return false;
     }

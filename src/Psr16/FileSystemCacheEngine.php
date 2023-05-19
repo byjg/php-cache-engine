@@ -29,7 +29,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * @return mixed Description
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         // Check if file is Locked
         $fileKey = $this->fixKey($key);
@@ -76,7 +76,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $fileKey = $this->fixKey($key);
 
@@ -117,7 +117,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->set($key, null);
         return true;
@@ -146,7 +146,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      */
     public function unlock($key)
     {
-        
+
         $this->logger->info("[Filesystem cache] Unlock '$key'");
 
         $lockFile = $this->fixKey($key) . ".lock";
@@ -174,7 +174,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      *
      * @return bool True on success and false on failure.
      */
-    public function clear()
+    public function clear(): bool
     {
         $patternKey = $this->fixKey('*');
         $list = glob($patternKey);
@@ -196,7 +196,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $fileKey = $this->fixKey($key);
         if (file_exists($fileKey)) {

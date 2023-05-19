@@ -2,15 +2,16 @@
 
 namespace ByJG\Cache\Psr6;
 
+use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
-class CachePool implements CacheItemPoolInterface
+class CachePool implements CacheItemPoolInterface, CacheAvailabilityInterface
 {
     /**
-     * @var \Psr\SimpleCache\CacheInterface
+     * @var BaseCacheEngine
      */
     protected $_cacheEngine;
 
@@ -36,7 +37,7 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * CachePool constructor.
-     * 
+     *
      * @param BaseCacheEngine $_cacheEngine
      * @param int $bufferSize
      */
@@ -64,8 +65,8 @@ class CachePool implements CacheItemPoolInterface
 
 
     /**
-     * Add an element to buffer. If the buffer is full, the first element added will be removed 
-     * 
+     * Add an element to buffer. If the buffer is full, the first element added will be removed
+     *
      * @param CacheItem $cacheItem
      */
     protected function addElementToBuffer(CacheItem $cacheItem)
@@ -91,7 +92,7 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Remove a specific key from buffer
-     * 
+     *
      * @param $key
      */
     protected function removeElementFromBuffer($key)
@@ -113,7 +114,7 @@ class CachePool implements CacheItemPoolInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getItem($key)
+    public function getItem(string $key): CacheItemInterface
     {
         // Get the element from the buffer if still remains valid!
         if (in_array($key, $this->bufferKeys)) {
@@ -122,7 +123,7 @@ class CachePool implements CacheItemPoolInterface
                 return $cacheItem;
             }
         }
-        
+
         // Get the element from the cache!
         $result = $this->_cacheEngine->get($key);
         $cache = new CacheItem($key, $result, $result !== null);
@@ -139,7 +140,7 @@ class CachePool implements CacheItemPoolInterface
      * @return array
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getItems(array $keys = array())
+    public function getItems(array $keys = array()): iterable
     {
         $result = [];
         foreach ($keys as $key) {
@@ -156,7 +157,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function hasItem($key)
+    public function hasItem(string $key): bool
     {
         return $this->getItem($key)->isHit();
     }
@@ -164,10 +165,11 @@ class CachePool implements CacheItemPoolInterface
     /**
      * Psr implementation of clear()
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->bufferKeys = [];
         $this->buffer = [];
+        return true;
     }
 
     /**
@@ -177,7 +179,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function deleteItem($key)
+    public function deleteItem(string $key): bool
     {
         return $this->deleteItems([$key]);
     }
@@ -190,13 +192,13 @@ class CachePool implements CacheItemPoolInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function deleteItems(array $keys)
+    public function deleteItems(array $keys): bool
     {
         foreach ($keys as $key) {
             $this->_cacheEngine->delete($key);
             $this->removeElementFromBuffer($key);
         }
-        
+
         return true;
     }
 
@@ -205,19 +207,19 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function save(CacheItemInterface $item)
+    public function save(CacheItemInterface $item): bool
     {
         if (!($item instanceof CacheItem)) {
             throw new InvalidArgumentException('The cache item must be an implementation of \ByJG\Cache\Psr\CacheItem');
         }
-        
+
         if ($item->getExpiresInSecs() < 1) {
             throw new InvalidArgumentException('Object has expired!');
         }
-        
+
         $this->_cacheEngine->set($item->getKey(), $item->get(), $item->getExpiresInSecs());
         $this->addElementToBuffer($item);
-        
+
         return true;
     }
 
@@ -228,11 +230,11 @@ class CachePool implements CacheItemPoolInterface
 
     /**
      * Psr Implementation of saveDeferred()
-     * 
+     *
      * @param CacheItemInterface $item
      * @return bool
      */
-    public function saveDeferred(CacheItemInterface $item)
+    public function saveDeferred(CacheItemInterface $item): bool
     {
         $this->deferredItem[] = $item;
         return true;
@@ -243,13 +245,15 @@ class CachePool implements CacheItemPoolInterface
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function commit()
+    public function commit(): bool
     {
         foreach ($this->deferredItem as $item) {
             $this->save($item);
         }
-        
+
         $this->deferredItem = [];
+
+        return true;
     }
 
     public function isAvailable()

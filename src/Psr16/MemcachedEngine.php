@@ -63,7 +63,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return mixed Description
      * @throws StorageErrorException
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->lazyLoadMemCachedServers();
 
@@ -83,7 +83,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool If the object is successfully posted
      * @throws StorageErrorException
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $this->lazyLoadMemCachedServers();
 
@@ -101,7 +101,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool
      * @throws StorageErrorException
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->lazyLoadMemCachedServers();
 
@@ -127,7 +127,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool
      * @throws StorageErrorException
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->lazyLoadMemCachedServers();
         $result = $this->memCached->flush();
@@ -139,7 +139,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool
      * @throws StorageErrorException
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $this->lazyLoadMemCachedServers();
 
