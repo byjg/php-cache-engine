@@ -96,7 +96,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         $this->logger->info("[Shmop Cache] Get '$key'");
 
         $serialized = shmop_read($shm_id, 0, shmop_size($shm_id));
-        shmop_close($shm_id);
+        // shmop_close($shm_id);
 
         return unserialize($serialized);
     }
@@ -158,7 +158,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         if ($shm_bytes_written != $size) {
             $this->logger->warning("Couldn't write the entire length of data");
         }
-        shmop_close($shm_id);
+        // shmop_close($shm_id);
 
         $validUntil = $this->addToNow($ttl);
         if (!empty($validUntil)) {
@@ -201,7 +201,7 @@ class ShmopCacheEngine extends BaseCacheEngine
 
         if ($shm_id) {
             shmop_delete($shm_id);
-            shmop_close($shm_id);
+            // shmop_close($shm_id);
 
             $this->logger->info("[Shmop Cache] release confirmed.");
         }
@@ -227,7 +227,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         $exists = !(!$shm_id);
 
         if ($exists) {
-            shmop_close($shm_id);
+            // shmop_close($shm_id);
             return $this->isValidAge($file);
         }
 

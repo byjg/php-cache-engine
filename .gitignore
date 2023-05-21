@@ -4,3 +4,4 @@ composer.lock
 vendor
 config/cacheconfig.php
 .idea
+.phpunit.result.cache

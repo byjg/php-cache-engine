@@ -13,12 +13,7 @@ abstract class BaseCacheTest extends TestCase
      */
     protected $cacheEngine = null;
 
-    protected function setUp()
-    {
-
-    }
-
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->cacheEngine->clear();
         $this->cacheEngine = null;
@@ -26,8 +21,8 @@ abstract class BaseCacheTest extends TestCase
 
     public function CachePoolProvider()
     {
-        $memcachedServer = ['memcached-container:11211'];
-        $redisCacheServer = 'redis-container:6379';
+        $memcachedServer = ['memcached:11211'];
+        $redisCacheServer = 'redis:6379';
         $redisPassword = '';
 
         return [
