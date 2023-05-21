@@ -99,14 +99,14 @@ See log examples [here](docs/setup-log-handler.md)
 Just type: 
 
 ```
-composer require "byjg/cache-engine=4.0.*"
+composer require "byjg/cache-engine=4.9.*"
 ```
 
 
 ## Running Unit Testes
 
 ```
-phpunit --stderr
+vendor/bin/phpunit --stderr
 ```
 
 **Note:** the parameter `--stderr` after `phpunit` is to permit run the tests on SessionCacheEngine.  
