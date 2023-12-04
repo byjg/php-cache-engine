@@ -12,10 +12,12 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     protected $logger = null;
 
     protected $prefix = null;
+    protected $path = null;
 
-    public function __construct($prefix = 'cache', $logger = null)
+    public function __construct($prefix = 'cache', $path = null, $logger = null)
     {
         $this->prefix = $prefix;
+        $this->path = $path ?? sys_get_temp_dir();
 
         $this->logger = $logger;
         if (is_null($logger)) {
@@ -146,7 +148,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      */
     public function unlock($key)
     {
-        
+
         $this->logger->info("[Filesystem cache] Unlock '$key'");
 
         $lockFile = $this->fixKey($key) . ".lock";
@@ -163,7 +165,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
 
     protected function fixKey($key)
     {
-        return sys_get_temp_dir() . '/'
+        return $this->path . '/'
             . $this->prefix
             . '-' . preg_replace("/[\/\\\]/", "#", $key)
             . '.cache';

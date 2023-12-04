@@ -28,10 +28,10 @@ class Factory
         );
     }
 
-    public static function createFilePool($prefix = null, $bufferSize = null, $logger = null)
+    public static function createFilePool($prefix = null, $path = null, $bufferSize = null, $logger = null)
     {
         return new CachePool(
-            new FileSystemCacheEngine($prefix, $logger),
+            new FileSystemCacheEngine($prefix, $path, $logger),
             $bufferSize
         );
     }
