@@ -4,6 +4,8 @@ namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
+use DateInterval;
+use DateTime;
 use Psr\SimpleCache\CacheInterface;
 
 abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
@@ -59,12 +61,25 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
             return strtotime("+$ttl second");
         }
 
-        if ($ttl instanceof \DateInterval) {
-            $now = new \DateTime();
+        if ($ttl instanceof DateInterval) {
+            $now = new DateTime();
             $now->add($ttl);
             return $now->getTimestamp();
         }
 
         return null;
+    }
+
+    protected function convertToSeconds($ttl)
+    {
+        if (empty($ttl) || is_numeric($ttl)) {
+            return $ttl;
+        }
+
+        if ($ttl instanceof DateInterval) {
+            return $ttl->days*86400 + $ttl->h*3600 + $ttl->i*60 + $ttl->s;
+        }
+
+        throw new InvalidArgumentException('Invalid TTL');
     }
 }
