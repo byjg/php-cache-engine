@@ -13,6 +13,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      */
     public function get($key, $default = null)
     {
+        $key = $this->getKeyFromContainer($key);
         return $default;
     }
 
@@ -24,6 +25,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      */
     public function set($key, $value, $ttl = 0)
     {
+        $key = $this->getKeyFromContainer($key);
         return true;
     }
 
@@ -33,6 +35,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      */
     public function delete($key)
     {
+        $key = $this->getKeyFromContainer($key);
         return true;
     }
 
@@ -83,6 +86,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
     */
     public function has($key)
     {
+        $key = $this->getKeyFromContainer($key);
         return false;
     }
 }

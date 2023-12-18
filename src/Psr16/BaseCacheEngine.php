@@ -6,10 +6,13 @@ use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
 use DateTime;
+use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 
 abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
 {
+    protected ?ContainerInterface $container;
+
     /**
      * @param $keys
      * @param null $default
@@ -81,5 +84,25 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
         }
 
         throw new InvalidArgumentException('Invalid TTL');
+    }
+
+
+    protected function getKeyFromContainer($key)
+    {
+        if (empty($this->container)) {
+            return $key;
+        }
+
+        if (!$this->container->has($key)) {
+            throw new InvalidArgumentException("Key '$key' not found in container");
+        }
+
+        return $this->container->get($key);
+    }
+
+    public function withKeysFromContainer(?ContainerInterface $container)
+    {
+        $this->container = $container;
+        return $this;
     }
 }

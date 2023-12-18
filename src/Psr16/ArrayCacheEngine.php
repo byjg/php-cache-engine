@@ -34,6 +34,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      */
     public function has($key)
     {
+        $key = $this->getKeyFromContainer($key);
         if (isset($this->cache[$key])) {
             if (isset($this->cache["$key.ttl"]) && time() >= $this->cache["$key.ttl"]) {
                 $this->delete($key);
@@ -55,6 +56,7 @@ class ArrayCacheEngine extends BaseCacheEngine
     public function get($key, $default = null)
     {
         if ($this->has($key)) {
+            $key = $this->getKeyFromContainer($key);
             $this->logger->info("[Array cache] Get '$key' from L1 Cache");
             return $this->cache[$key];
         } else {
@@ -78,6 +80,8 @@ class ArrayCacheEngine extends BaseCacheEngine
      */
     public function set($key, $value, $ttl = null)
     {
+        $key = $this->getKeyFromContainer($key);
+
         $this->logger->info("[Array cache] Set '$key' in L1 Cache");
 
         $this->cache[$key] = $value;
@@ -101,6 +105,8 @@ class ArrayCacheEngine extends BaseCacheEngine
      */
     public function delete($key)
     {
+        $key = $this->getKeyFromContainer($key);
+
         unset($this->cache[$key]);
         unset($this->cache["$key.ttl"]);
         return true;

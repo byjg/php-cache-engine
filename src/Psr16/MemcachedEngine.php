@@ -36,6 +36,7 @@ class MemcachedEngine extends BaseCacheEngine
     }
 
     protected function fixKey($key) {
+        $key = $this->getKeyFromContainer($key);
         return "cache-" . $key;
     }
 

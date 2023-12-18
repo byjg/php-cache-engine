@@ -165,6 +165,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
 
     protected function fixKey($key)
     {
+        $key = $this->getKeyFromContainer($key);
+
         return $this->path . '/'
             . $this->prefix
             . '-' . preg_replace("/[\/\\\]/", "#", $key)
