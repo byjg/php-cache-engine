@@ -134,5 +134,14 @@ vendor/bin/phpunit --stderr
 
 **Note:** the parameter `--stderr` after `phpunit` is to permit run the tests on SessionCacheEngine.  
 
+## Dependencies
+
+```mermaid
+flowchart TD
+    CacheEngine --> psr/cache
+    CacheEngine --> psr/log
+    CacheEngine --> psr/simple-cache
+    CacheEngine --> psr/container
+```
 ----
 [Open source ByJG](http://opensource.byjg.com)
