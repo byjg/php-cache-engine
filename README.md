@@ -138,10 +138,10 @@ vendor/bin/phpunit --stderr
 
 ```mermaid
 flowchart TD
-    CacheEngine --> psr/cache
-    CacheEngine --> psr/log
-    CacheEngine --> psr/simple-cache
-    CacheEngine --> psr/container
+    byjg/cache-engine --> psr/cache
+    byjg/cache-engine --> psr/log
+    byjg/cache-engine --> psr/simple-cache
+    byjg/cache-engine --> psr/container
 ```
 ----
 [Open source ByJG](http://opensource.byjg.com)
