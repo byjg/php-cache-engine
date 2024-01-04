@@ -1,10 +1,10 @@
 # Cache Engine
 
-[![Build Status](https://github.com/byjg/cache-engine-php/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/cache-engine-php/actions/workflows/phpunit.yml)
+[![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
-[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/cache-engine-php/)
-[![GitHub license](https://img.shields.io/github/license/byjg/cache-engine-php.svg)](https://opensource.byjg.com/opensource/licensing.html)
-[![GitHub release](https://img.shields.io/github/release/byjg/cache-engine-php.svg)](https://github.com/byjg/cache-engine-php/releases/)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
 
 
 A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.
