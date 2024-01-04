@@ -122,7 +122,7 @@ If it does not exist in the PSR-11 container, an exception will be thrown.
 Just type: 
 
 ```
-composer require "byjg/cache-engine=4.9.*"
+composer require "byjg/cache-engine"
 ```
 
 
