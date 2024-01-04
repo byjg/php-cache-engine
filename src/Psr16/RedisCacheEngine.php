@@ -51,6 +51,7 @@ class RedisCacheEngine extends BaseCacheEngine
     }
 
     protected function fixKey($key) {
+        $key = $this->getKeyFromContainer($key);
         return "cache:$key";
     }
 
@@ -79,6 +80,8 @@ class RedisCacheEngine extends BaseCacheEngine
     {
         $this->lazyLoadRedisServer();
 
+        $ttl = $this->convertToSeconds($ttl);
+
         $this->redis->set($this->fixKey($key), serialize($value), $ttl);
         $this->logger->info("[Redis Cache] Set '$key' result ");
 
@@ -98,7 +101,7 @@ class RedisCacheEngine extends BaseCacheEngine
     {
         $keys = $this->redis->keys('cache:*');
         foreach ((array)$keys as $key) {
-            if (preg_match('/^cache\:(?<key>.*)/', $key, $matches)) {
+            if (preg_match('/^cache:(?<key>.*)/', $key, $matches)) {
                 $this->delete($matches['key']);
             }
         }

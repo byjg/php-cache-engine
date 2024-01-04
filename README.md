@@ -1,10 +1,10 @@
 # Cache Engine
 
-[![Build Status](https://github.com/byjg/cache-engine-php/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/cache-engine-php/actions/workflows/phpunit.yml)
+[![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
-[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/cache-engine-php/)
-[![GitHub license](https://img.shields.io/github/license/byjg/cache-engine-php.svg)](https://opensource.byjg.com/opensource/licensing.html)
-[![GitHub release](https://img.shields.io/github/release/byjg/cache-engine-php.svg)](https://github.com/byjg/cache-engine-php/releases/)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
 
 
 A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.
@@ -95,12 +95,34 @@ You can add a PSR Log compatible to the constructor in order to get Log of the o
 
 See log examples [here](docs/setup-log-handler.md)
 
+## Use a PSR-11 container to retrieve the cache keys
+
+You can use a PSR-11 compatible to retrieve the cache keys. Once is defined, only the keys defined 
+in the PSR-11 will be used to cache. 
+
+```php
+<?php
+$fileCache = new \ByJG\Cache\Psr16\FileSystemCacheEngine()
+$fileCache->withKeysFromContainer(new SomePsr11Implementation());
+```
+
+After the PSR-11 container is defined, when I run:
+
+```php
+$value = $fileCache->get('my-key');
+```
+
+The key `my-key` will be retrieved from the PSR-11 container and
+the value retrieved will be used as the cache key.
+If it does not exist in the PSR-11 container, an exception will be thrown.
+
+
 ## Install
 
 Just type: 
 
 ```
-composer require "byjg/cache-engine=4.9.*"
+composer require "byjg/cache-engine"
 ```
 
 
@@ -112,5 +134,14 @@ vendor/bin/phpunit --stderr
 
 **Note:** the parameter `--stderr` after `phpunit` is to permit run the tests on SessionCacheEngine.  
 
+## Dependencies
+
+```mermaid
+flowchart TD
+    byjg/cache-engine --> psr/cache
+    byjg/cache-engine --> psr/log
+    byjg/cache-engine --> psr/simple-cache
+    byjg/cache-engine --> psr/container
+```
 ----
 [Open source ByJG](http://opensource.byjg.com)

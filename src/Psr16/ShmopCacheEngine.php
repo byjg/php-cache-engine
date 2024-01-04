@@ -46,6 +46,7 @@ class ShmopCacheEngine extends BaseCacheEngine
 
     protected function getFilenameToken($key)
     {
+        $key = $this->getKeyFromContainer($key);
         return sys_get_temp_dir() . '/shmop-' . sha1($key) . '.cache';
     }
     
