@@ -13,6 +13,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
+        $key = $this->getKeyFromContainer($key);
         return $default;
     }
 
@@ -24,6 +25,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      */
     public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
+        $key = $this->getKeyFromContainer($key);
         return true;
     }
 
@@ -33,6 +35,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      */
     public function delete(string $key): bool
     {
+        $key = $this->getKeyFromContainer($key);
         return true;
     }
 
@@ -83,6 +86,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
     */
     public function has(string $key): bool
     {
+        $key = $this->getKeyFromContainer($key);
         return false;
     }
 }

@@ -3,6 +3,7 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\CacheLockInterface;
+use DateInterval;
 use Exception;
 use Psr\Log\NullLogger;
 
@@ -12,10 +13,12 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     protected $logger = null;
 
     protected $prefix = null;
+    protected $path = null;
 
-    public function __construct($prefix = 'cache', $logger = null)
+    public function __construct($prefix = 'cache', $path = null, $logger = null)
     {
         $this->prefix = $prefix;
+        $this->path = $path ?? sys_get_temp_dir();
 
         $this->logger = $logger;
         if (is_null($logger)) {
@@ -67,13 +70,12 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      *
      * @param string                $key   The key of the item to store.
      * @param mixed                 $value The value of the item to store, must be serializable.
-     * @param null|int|\DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
+     * @param null|int|DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
      *                                     the driver supports TTL then the library may set a default value
      *                                     for it or let the driver take care of that.
      *
      * @return bool True on success and false on failure.
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
     public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
@@ -163,7 +165,9 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
 
     protected function fixKey($key)
     {
-        return sys_get_temp_dir() . '/'
+        $key = $this->getKeyFromContainer($key);
+
+        return $this->path . '/'
             . $this->prefix
             . '-' . preg_replace("/[\/\\\]/", "#", $key)
             . '.cache';

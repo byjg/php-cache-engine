@@ -27,6 +27,7 @@ class SessionCacheEngine extends BaseCacheEngine
 
     protected function keyName($key)
     {
+        $key = $this->getKeyFromContainer($key);
         return $this->prefix . '-' . $key;
     }
 
