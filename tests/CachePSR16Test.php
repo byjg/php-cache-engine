@@ -2,10 +2,13 @@
 
 namespace Test;
 
+use BasicContainer;
+use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 
 require_once 'BaseCacheTest.php';
+require_once 'BasicContainer.php';
 
 class CachePSR16Test extends BaseCacheTest
 {
@@ -199,4 +202,46 @@ class CachePSR16Test extends BaseCacheTest
             $this->markTestIncomplete('Object is not fully functional');
         }
     }
+
+    /**
+     * @dataProvider CachePoolProvider
+     */
+    public function testCacheContainerKeyNonExistent(BaseCacheEngine $cacheEngine)
+    {
+        if ($cacheEngine->isAvailable()) {
+            $this->expectException(InvalidArgumentException::class);
+            $this->expectExceptionMessage("Key 'abc' not found in container");
+
+            $cacheEngine->withKeysFromContainer(new BasicContainer());
+            $cacheEngine->set("abc", "30");
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     */
+    public function testCacheContainerKey(BaseCacheEngine $cacheEngine)
+    {
+        if ($cacheEngine->isAvailable() && !($cacheEngine instanceof NoCacheEngine)) {
+            $cacheEngine->clear();
+
+            // This first part will get the "test-key" from the container.
+            // The real key is container["test-key"] = "container-key"
+            $cacheEngine->withKeysFromContainer(new BasicContainer());
+            $this->assertFalse($cacheEngine->has("test-key"));
+            $cacheEngine->set("test-key", "something");
+            $this->assertTrue($cacheEngine->has("test-key"));
+            $this->assertEquals("something", $cacheEngine->get("test-key"));
+
+            // This part, we will disable the container and try to get the original key from test.
+            $cacheEngine->withKeysFromContainer(null);
+            $this->assertTrue($cacheEngine->has("container-key"));
+            $this->assertEquals("something", $cacheEngine->get("container-key"));
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
 }

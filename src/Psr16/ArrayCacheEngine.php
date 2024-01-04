@@ -2,15 +2,16 @@
 
 namespace ByJG\Cache\Psr16;
 
+use DateInterval;
 use Psr\Log\NullLogger;
 
 class ArrayCacheEngine extends BaseCacheEngine
 {
 
     protected $cache = array();
-    
+
     protected $logger = null;
-    
+
     public function __construct($logger = null)
     {
         $this->logger = $logger;
@@ -31,8 +32,9 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function has($key)
+    public function has(string $key): bool
     {
+        $key = $this->getKeyFromContainer($key);
         if (isset($this->cache[$key])) {
             if (isset($this->cache["$key.ttl"]) && time() >= $this->cache["$key.ttl"]) {
                 $this->delete($key);
@@ -51,9 +53,10 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @return mixed Description
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         if ($this->has($key)) {
+            $key = $this->getKeyFromContainer($key);
             $this->logger->info("[Array cache] Get '$key' from L1 Cache");
             return $this->cache[$key];
         } else {
@@ -67,17 +70,18 @@ class ArrayCacheEngine extends BaseCacheEngine
      *
      * @param string                $key   The key of the item to store.
      * @param mixed                 $value The value of the item to store, must be serializable.
-     * @param null|int|\DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
+     * @param null|int|DateInterval $ttl   Optional. The TTL value of this item. If no value is sent and
      *                                     the driver supports TTL then the library may set a default value
      *                                     for it or let the driver take care of that.
      *
      * @return bool True on success and false on failure.
      *
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
+        $key = $this->getKeyFromContainer($key);
+
         $this->logger->info("[Array cache] Set '$key' in L1 Cache");
 
         $this->cache[$key] = $value;
@@ -88,9 +92,10 @@ class ArrayCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $this->cache = [];
+        return true;
     }
 
     /**
@@ -99,8 +104,10 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
+        $key = $this->getKeyFromContainer($key);
+
         unset($this->cache[$key]);
         unset($this->cache["$key.ttl"]);
         return true;

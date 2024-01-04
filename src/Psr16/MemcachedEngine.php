@@ -3,6 +3,7 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\Exception\StorageErrorException;
+use DateInterval;
 use Memcached;
 use Psr\Log\NullLogger;
 
@@ -35,6 +36,7 @@ class MemcachedEngine extends BaseCacheEngine
     }
 
     protected function fixKey($key) {
+        $key = $this->getKeyFromContainer($key);
         return "cache-" . $key;
     }
 
@@ -63,7 +65,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return mixed Description
      * @throws StorageErrorException
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->lazyLoadMemCachedServers();
 
@@ -78,14 +80,16 @@ class MemcachedEngine extends BaseCacheEngine
 
     /**
      * @param string $key The object Key
-     * @param object $value The object to be cached
-     * @param int $ttl The time to live in seconds of this objects
+     * @param mixed $value The object to be cached
+     * @param DateInterval|int|null $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      * @throws StorageErrorException
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $this->lazyLoadMemCachedServers();
+
+        $ttl = $this->convertToSeconds($ttl);
 
         $this->memCached->set($this->fixKey($key), serialize($value), is_null($ttl) ? 0 : $ttl);
         $this->logger->info("[Memcached] Set '$key' result " . $this->memCached->getResultCode());
@@ -101,7 +105,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool
      * @throws StorageErrorException
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->lazyLoadMemCachedServers();
 
@@ -127,7 +131,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool
      * @throws StorageErrorException
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->lazyLoadMemCachedServers();
         $result = $this->memCached->flush();
@@ -139,7 +143,7 @@ class MemcachedEngine extends BaseCacheEngine
      * @return bool
      * @throws StorageErrorException
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $this->lazyLoadMemCachedServers();
 

@@ -13,17 +13,17 @@ class CacheItem implements CacheItemInterface
      * @var string
      */
     protected $key;
-    
+
     /**
      * @var mixed
      */
     protected $value;
-    
+
     /**
      * @var boolean
      */
     protected $hit;
-    
+
     /**
      * @var DateTime
      */
@@ -46,22 +46,22 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function getKey()
+    public function getKey(): string
     {
         return $this->key;
     }
-    
+
     /**
      * {@inheritdoc}
      */
-    public function get()
+    public function get(): mixed
     {
         return $this->isHit() ? $this->value : null;
     }
     /**
      * {@inheritdoc}
      */
-    public function set($value = null)
+    public function set(mixed $value = null): static
     {
         $this->value = $value;
         $this->hit = !is_null($value);
@@ -70,14 +70,14 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function isHit()
+    public function isHit(): bool
     {
         return $this->hit;
     }
     /**
      * {@inheritdoc}
      */
-    public function expiresAt($expiration)
+    public function expiresAt(?\DateTimeInterface $expiration): static
     {
         $this->expiration = new DateTime('now +1 year');
         if ($expiration instanceof DateTimeInterface) {
@@ -88,7 +88,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
-    public function expiresAfter($time)
+    public function expiresAfter(int|\DateInterval|null $time): static
     {
         $this->expiration = new DateTime('now +1 year');
         if (is_numeric($time)) {
@@ -108,7 +108,7 @@ class CacheItem implements CacheItemInterface
     {
         return $this->expiration;
     }
-    
+
     public function getExpiresInSecs()
     {
         return $this->getExpiresAt()->getTimestamp() - (new DateTime('now'))->getTimestamp();

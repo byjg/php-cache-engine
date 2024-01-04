@@ -15,6 +15,9 @@ abstract class BaseCacheTest extends TestCase
 
     protected function tearDown(): void
     {
+        if (empty($this->cacheEngine)) {
+            return;
+        }
         $this->cacheEngine->clear();
         $this->cacheEngine = null;
     }

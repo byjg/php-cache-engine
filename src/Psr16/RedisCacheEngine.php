@@ -51,6 +51,7 @@ class RedisCacheEngine extends BaseCacheEngine
     }
 
     protected function fixKey($key) {
+        $key = $this->getKeyFromContainer($key);
         return "cache:$key";
     }
 
@@ -59,7 +60,7 @@ class RedisCacheEngine extends BaseCacheEngine
      * @param int $default IGNORED IN MEMCACHED.
      * @return mixed Description
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->lazyLoadRedisServer();
 
@@ -75,9 +76,11 @@ class RedisCacheEngine extends BaseCacheEngine
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, null|int|\DateInterval $ttl = null): bool
     {
         $this->lazyLoadRedisServer();
+
+        $ttl = $this->convertToSeconds($ttl);
 
         $this->redis->set($this->fixKey($key), serialize($value), $ttl);
         $this->logger->info("[Redis Cache] Set '$key' result ");
@@ -85,7 +88,7 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->lazyLoadRedisServer();
 
@@ -94,17 +97,19 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $keys = $this->redis->keys('cache:*');
         foreach ((array)$keys as $key) {
-            if (preg_match('/^cache\:(?<key>.*)/', $key, $matches)) {
+            if (preg_match('/^cache:(?<key>.*)/', $key, $matches)) {
                 $this->delete($matches['key']);
             }
         }
+
+        return true;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $result = $this->redis->exists($this->fixKey($key));
 
