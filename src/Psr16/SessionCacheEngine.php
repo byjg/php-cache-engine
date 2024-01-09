@@ -2,6 +2,8 @@
 
 namespace ByJG\Cache\Psr16;
 
+use DateInterval;
+
 class SessionCacheEngine extends BaseCacheEngine
 {
 
@@ -31,7 +33,7 @@ class SessionCacheEngine extends BaseCacheEngine
         return $this->prefix . '-' . $key;
     }
 
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->checkSession();
 
@@ -44,7 +46,7 @@ class SessionCacheEngine extends BaseCacheEngine
         }
     }
 
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->checkSession();
 
@@ -56,9 +58,11 @@ class SessionCacheEngine extends BaseCacheEngine
         if (isset($_SESSION["$keyName.ttl"])) {
             unset($_SESSION["$keyName.ttl"]);
         }
+
+        return true;
     }
 
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->checkSession();
 
@@ -67,14 +71,17 @@ class SessionCacheEngine extends BaseCacheEngine
         if (!empty($ttl)) {
             $_SESSION["$keyName.ttl"] = $this->addToNow($ttl);
         }
+
+        return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         session_destroy();
+        return true;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $keyName = $this->keyName($key);
 
@@ -90,7 +97,7 @@ class SessionCacheEngine extends BaseCacheEngine
         return false;
     }
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         try {
             $this->checkSession();

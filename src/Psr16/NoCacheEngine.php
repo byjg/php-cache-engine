@@ -3,6 +3,7 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\CacheLockInterface;
+use DateInterval;
 
 class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
 {
@@ -11,7 +12,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @param int $default IGNORED IN MEMCACHED.
      * @return mixed Description
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $key = $this->getKeyFromContainer($key);
         return $default;
@@ -23,7 +24,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $value, $ttl = 0)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $key = $this->getKeyFromContainer($key);
         return true;
@@ -33,7 +34,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
         return true;
@@ -43,7 +44,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * Lock resource before set it.
      * @param string $key
      */
-    public function lock($key)
+    public function lock(string $key): void
     {
         return;
     }
@@ -52,12 +53,12 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * UnLock resource after set it
      * @param string $key
      */
-    public function unlock($key)
+    public function unlock(string $key): void
     {
         return;
     }
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return true;
     }
@@ -67,7 +68,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      *
      * @return bool True on success and false on failure.
      */
-    public function clear()
+    public function clear(): bool
     {
         return true;
     }
@@ -84,7 +85,7 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      *   MUST be thrown if the $key string is not a legal value.
     */
-    public function has($key)
+    public function has(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
         return false;

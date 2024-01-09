@@ -7,10 +7,10 @@
     }
   },
   "require": {
-    "php": ">=7.4",
-    "psr/cache": "^1.0",
-    "psr/log": "^1.1",
-    "psr/simple-cache": "^1.0",
+    "php": ">=8.1",
+    "psr/cache": "^1.0|^2.0|^3.0",
+    "psr/log": "^1.1|^2.0|^3.0",
+    "psr/simple-cache": "^1.0|^2.0|^3.0",
     "psr/container": "^2.0"
   },
   "require-dev": {
@@ -18,7 +18,8 @@
   },
   "suggest": {
     "ext-memcached": "*",
-    "ext-redis": "*"
+    "ext-redis": "*",
+    "ext-shmop": "*"
   },
   "license": "MIT"
 }

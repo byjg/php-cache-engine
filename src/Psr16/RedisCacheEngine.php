@@ -2,6 +2,7 @@
 
 namespace ByJG\Cache\Psr16;
 
+use DateInterval;
 use Psr\Log\NullLogger;
 
 class RedisCacheEngine extends BaseCacheEngine
@@ -60,7 +61,7 @@ class RedisCacheEngine extends BaseCacheEngine
      * @param int $default IGNORED IN MEMCACHED.
      * @return mixed Description
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->lazyLoadRedisServer();
 
@@ -76,7 +77,7 @@ class RedisCacheEngine extends BaseCacheEngine
      * @param int $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->lazyLoadRedisServer();
 
@@ -88,7 +89,7 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->lazyLoadRedisServer();
 
@@ -97,7 +98,7 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $keys = $this->redis->keys('cache:*');
         foreach ((array)$keys as $key) {
@@ -105,9 +106,10 @@ class RedisCacheEngine extends BaseCacheEngine
                 $this->delete($matches['key']);
             }
         }
+        return true;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $result = $this->redis->exists($this->fixKey($key));
 
@@ -118,7 +120,7 @@ class RedisCacheEngine extends BaseCacheEngine
         return $result;
     }
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         if (!class_exists('\Redis')) {
             return false;

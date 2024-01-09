@@ -2,7 +2,10 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\NullLogger;
 
 class ArrayCacheEngine extends BaseCacheEngine
@@ -29,10 +32,11 @@ class ArrayCacheEngine extends BaseCacheEngine
      *
      * @param string $key The cache item key.
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
+     * @throws InvalidArgumentException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
         if (isset($this->cache[$key])) {
@@ -51,9 +55,11 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @param string $key The object KEY
      * @param mixed $default IGNORED IN MEMCACHED.
      * @return mixed Description
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         if ($this->has($key)) {
             $key = $this->getKeyFromContainer($key);
@@ -78,7 +84,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      *
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $key = $this->getKeyFromContainer($key);
 
@@ -92,9 +98,10 @@ class ArrayCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $this->cache = [];
+        return true;
     }
 
     /**
@@ -103,7 +110,7 @@ class ArrayCacheEngine extends BaseCacheEngine
      * @param string $key
      * @return bool
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
 
@@ -112,7 +119,7 @@ class ArrayCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return true;
     }

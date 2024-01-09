@@ -6,7 +6,9 @@ use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
 use DateTime;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\CacheInterface;
 
 abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInterface
@@ -14,16 +16,17 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
     protected ?ContainerInterface $container;
 
     /**
-     * @param $keys
+     * @param string|iterable $keys
      * @param null $default
-     * @return array|iterable
+     * @return iterable
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getMultiple($keys, $default = null)
+    public function getMultiple(string|iterable $keys, mixed $default = null): iterable
     {
-        if (!is_array($keys)) {
-            throw new InvalidArgumentException('getMultipleKeys expected an array');
+        if (is_string($keys)) {
+            $keys = [$keys];
         }
+
         $result = [];
         foreach ($keys as $key) {
             $result[$key] = $this->get($key, $default);
@@ -34,31 +37,33 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
     /**
      * @param iterable $values
      * @param null $ttl
-     * @return bool|void
+     * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setMultiple($values, $ttl = null)
+    public function setMultiple(iterable $values, $ttl = null): bool
     {
         foreach ($values as $key => $value) {
             $this->set($key, $value, $ttl);
         }
+        return true;
     }
 
     /**
      * @param iterable $keys
-     * @return bool|void
+     * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function deleteMultiple($keys)
+    public function deleteMultiple(iterable $keys): bool
     {
         foreach ($keys as $key) {
             $this->delete($key);
         }
+        return true;
     }
 
-    abstract public function isAvailable();
+    abstract public function isAvailable(): bool;
 
-    protected function addToNow($ttl)
+    protected function addToNow(DateInterval|int|null $ttl): int|null
     {
         if (is_numeric($ttl)) {
             return strtotime("+$ttl second");
@@ -73,7 +78,10 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
         return null;
     }
 
-    protected function convertToSeconds($ttl)
+    /**
+     * @throws InvalidArgumentException
+     */
+    protected function convertToSeconds(DateInterval|int $ttl)
     {
         if (empty($ttl) || is_numeric($ttl)) {
             return $ttl;
@@ -87,7 +95,12 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
     }
 
 
-    protected function getKeyFromContainer($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
+    protected function getKeyFromContainer(string $key): mixed
     {
         if (empty($this->container)) {
             return $key;
