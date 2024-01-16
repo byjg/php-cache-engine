@@ -14,17 +14,15 @@ A multi-purpose cache engine PSR-6 and PSR-16 implementation with several driver
 PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
 of engines available in this library that is PSR-16 compliant:
 
-{:.table}
-
 | Class                                                                            | Description                                                         |
 |:---------------------------------------------------------------------------------|:--------------------------------------------------------------------|
-| [\ByJG\Cache\Psr16\NoCacheEngine](docs/class-no-cache-engine.md)                 | Do nothing. Use it for disable the cache without change your code   |
-| [\ByJG\Cache\Psr16\ArrayCacheEngine](docs/class-array-cache-engine.md)           | Local cache only using array. It does not persists between requests |
-| [\ByJG\Cache\Psr16\FileSystemCacheEngine](docs/class-filesystem-cache-engine.md) | Save the cache result in the local file system                      |
-| [\ByJG\Cache\Psr16\MemcachedEngine](docs/class-memcached-engine.md)              | Uses the Memcached as the cache engine                              |
-| [\ByJG\Cache\Psr16\RedisCachedEngine](docs/class-redis-cache-engine.md)          | uses the Redis as cache                                             |
-| [\ByJG\Cache\Psr16\SessionCachedEngine](docs/class-session-cache-engine.md)      | uses the PHP session as cache                                       |
-| [\ByJG\Cache\Psr16\ShmopCachedEngine](docs/class-shmop-cache-engine.md)          | uses the shared memory area for cache                               |
+| [\ByJG\Cache\Psr16\NoCacheEngine](class-no-cache-engine.md)                 | Do nothing. Use it for disable the cache without change your code   |
+| [\ByJG\Cache\Psr16\ArrayCacheEngine](class-array-cache-engine.md)           | Local cache only using array. It does not persists between requests |
+| [\ByJG\Cache\Psr16\FileSystemCacheEngine](class-filesystem-cache-engine.md) | Save the cache result in the local file system                      |
+| [\ByJG\Cache\Psr16\MemcachedEngine](class-memcached-engine.md)              | Uses the Memcached as the cache engine                              |
+| [\ByJG\Cache\Psr16\RedisCachedEngine](class-redis-cache-engine.md)          | uses the Redis as cache                                             |
+| [\ByJG\Cache\Psr16\SessionCachedEngine](class-session-cache-engine.md)      | uses the PHP session as cache                                       |
+| [\ByJG\Cache\Psr16\ShmopCachedEngine](class-shmop-cache-engine.md)          | uses the shared memory area for cache                               |
 
 To create a new Cache Instance just create the proper cache engine and use it:
 
@@ -43,7 +41,7 @@ if ($cache->has('key')) {
 $object = $cache->get('key');
 ```
 
-See more PSR-16 examples [here](docs/basic-usage-psr16-simplecache.md)
+See more PSR-16 examples [here](basic-usage-psr16-simplecache.md)
 
 ## PSR-6 
 
@@ -63,13 +61,11 @@ $cachePool = \ByJG\Cache\Factory::createFilePool();
 $cachePool = new CachePool(new FileSystemCacheEngine());
 ```
 
-See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
+See more PSR-6 examples [here](basic-usage-psr6-cachepool.md)
 
 ## List of Available Factory Commands
 
 **Note: All parameters are optional**
-
-{:.table}
 
 | Engine           | Factory Command                                                       |
 |:-----------------|:----------------------------------------------------------------------|
@@ -93,7 +89,7 @@ The Common parameters are:
  
 You can add a PSR Log compatible to the constructor in order to get Log of the operations
 
-See log examples [here](docs/setup-log-handler.md)
+See log examples [here](setup-log-handler.md)
 
 ## Use a PSR-11 container to retrieve the cache keys
 
