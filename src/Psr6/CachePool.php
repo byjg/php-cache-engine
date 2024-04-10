@@ -167,6 +167,7 @@ class CachePool implements CacheItemPoolInterface
      */
     public function clear(): bool
     {
+        $this->_cacheEngine->clear();
         $this->bufferKeys = [];
         $this->buffer = [];
         return true;
