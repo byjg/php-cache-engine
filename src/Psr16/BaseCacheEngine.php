@@ -81,7 +81,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
     /**
      * @throws InvalidArgumentException
      */
-    protected function convertToSeconds(DateInterval|int $ttl)
+    protected function convertToSeconds(DateInterval|int|null $ttl): DateInterval|int|null
     {
         if (empty($ttl) || is_numeric($ttl)) {
             return $ttl;
