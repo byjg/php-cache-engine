@@ -58,7 +58,7 @@ class ArrayCacheEngine extends BaseCacheEngine
         if ($this->has($key)) {
             $key = $this->getKeyFromContainer($key);
             $this->logger->info("[Array cache] Get '$key' from L1 Cache");
-            return $this->cache[$key];
+            return unserialize($this->cache[$key]);
         } else {
             $this->logger->info("[Array cache] Not found '$key'");
             return $default;
@@ -84,7 +84,7 @@ class ArrayCacheEngine extends BaseCacheEngine
 
         $this->logger->info("[Array cache] Set '$key' in L1 Cache");
 
-        $this->cache[$key] = $value;
+        $this->cache[$key] = serialize($value);
         if (!empty($ttl)) {
             $this->cache["$key.ttl"] = $this->addToNow($ttl);
         }
