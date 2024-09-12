@@ -2,25 +2,31 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Redis;
+use RedisException;
 
 class RedisCacheEngine extends BaseCacheEngine
 {
 
     /**
      *
-     * @var \Redis
+     * @var Redis
      */
-    protected $redis = null;
+    protected ?Redis $redis = null;
 
-    protected $logger = null;
+    protected LoggerInterface|null $logger = null;
 
-    protected $server = null;
+    protected ?string $server = null;
 
-    protected $password = null;
+    protected ?string $password = null;
 
-    public function __construct($server = null, $password = null, $logger = null)
+    public function __construct(?string $server = null, ?string $password = null, ?LoggerInterface $logger = null)
     {
         $this->server = $server;
         if (is_null($server)) {
@@ -35,31 +41,44 @@ class RedisCacheEngine extends BaseCacheEngine
         }
     }
 
-    protected function lazyLoadRedisServer()
+    /**
+     * @throws RedisException
+     */
+    protected function lazyLoadRedisServer(): void
     {
         if (is_null($this->redis)) {
-            $this->redis = new \Redis();
+            $this->redis = new Redis();
             $data = explode(":", $this->server);
-            $this->redis->connect($data[0], isset($data[1]) ? $data[1] : 6379);
+            $this->redis->connect($data[0], intval($data[1] ?? 6379));
 
             if (!empty($this->password)) {
                 $this->redis->auth($this->password);
             }
-            $this->redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
+            $this->redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);
 
             $this->redis->info('redis_version');
         }
     }
 
-    protected function fixKey($key) {
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    protected function fixKey(string $key): string
+    {
         $key = $this->getKeyFromContainer($key);
         return "cache:$key";
     }
 
     /**
-     * @param string $key The object KEY
-     * @param int $default IGNORED IN MEMCACHED.
-     * @return mixed Description
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     * @throws RedisException
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -72,10 +91,14 @@ class RedisCacheEngine extends BaseCacheEngine
     }
 
     /**
-     * @param string $key The object Key
-     * @param object $value The object to be cached
-     * @param int $ttl The time to live in seconds of this objects
-     * @return bool If the object is successfully posted
+     * @param string $key
+     * @param mixed $value
+     * @param DateInterval|int|null $ttl
+     * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     * @throws RedisException
      */
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
@@ -89,6 +112,12 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws RedisException
+     * @throws ContainerExceptionInterface
+     */
     public function delete(string $key): bool
     {
         $this->lazyLoadRedisServer();
@@ -98,6 +127,12 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws RedisException
+     * @throws ContainerExceptionInterface
+     */
     public function clear(): bool
     {
         $keys = $this->redis->keys('cache:*');
@@ -109,12 +144,22 @@ class RedisCacheEngine extends BaseCacheEngine
         return true;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws RedisException
+     * @throws ContainerExceptionInterface
+     */
     public function has(string $key): bool
     {
         $result = $this->redis->exists($this->fixKey($key));
 
         if (is_numeric($result)) {
             return $result !== 0;
+        }
+
+        if ($result instanceof Redis) {
+            return true;
         }
 
         return $result;

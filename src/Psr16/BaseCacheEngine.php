@@ -17,8 +17,8 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
 
     /**
      * @param string|iterable $keys
-     * @param null $default
-     * @return iterable
+     * @param mixed $default
+     * @return iterable<string, mixed>
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getMultiple(string|iterable $keys, mixed $default = null): iterable
@@ -36,11 +36,11 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
 
     /**
      * @param iterable $values
-     * @param null $ttl
+     * @param DateInterval|int|null $ttl
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function setMultiple(iterable $values, $ttl = null): bool
+    public function setMultiple(iterable $values, DateInterval|int|null $ttl = null): bool
     {
         foreach ($values as $key => $value) {
             $this->set($key, $value, $ttl);
@@ -87,11 +87,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
             return $ttl;
         }
 
-        if ($ttl instanceof DateInterval) {
-            return $ttl->days*86400 + $ttl->h*3600 + $ttl->i*60 + $ttl->s;
-        }
-
-        throw new InvalidArgumentException('Invalid TTL');
+        return $ttl->days*86400 + $ttl->h*3600 + $ttl->i*60 + $ttl->s;
     }
 
 

@@ -11,9 +11,9 @@ use Psr\SimpleCache\CacheInterface;
 class CachePool implements CacheItemPoolInterface
 {
     /**
-     * @var CacheInterface
+     * @var BaseCacheEngine
      */
-    protected CacheInterface $_cacheEngine;
+    protected BaseCacheEngine $_cacheEngine;
 
     /**
      * @var CacheItem

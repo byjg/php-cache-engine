@@ -1,11 +1,6 @@
 <?php
-/**
- * User: jg
- * Date: 27/05/17
- * Time: 12:42
- */
 
-namespace Test;
+namespace Tests;
 
 
 class Model

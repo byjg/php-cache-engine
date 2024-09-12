@@ -3,14 +3,20 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\CacheLockInterface;
+use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
 {
     /**
-     * @param string $key The object KEY
-     * @param int $default IGNORED IN MEMCACHED.
-     * @return mixed Description
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -19,10 +25,13 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
     }
 
     /**
-     * @param string $key The object Key
-     * @param object $value The object to be cached
-     * @param int $ttl The time to live in seconds of this objects
-     * @return bool If the object is successfully posted
+     * @param string $key
+     * @param mixed $value
+     * @param DateInterval|int|null $ttl
+     * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
@@ -33,6 +42,9 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
     /**
      * @param string $key
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
     public function delete(string $key): bool
     {
@@ -82,9 +94,10 @@ class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
      *
      * @param string $key The cache item key.
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
-    */
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
     public function has(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);

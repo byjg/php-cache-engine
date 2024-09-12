@@ -2,9 +2,13 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Exception\StorageErrorException;
 use DateInterval;
 use Memcached;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class MemcachedEngine extends BaseCacheEngine
@@ -12,15 +16,15 @@ class MemcachedEngine extends BaseCacheEngine
 
     /**
      *
-     * @var Memcached
+     * @var Memcached|null
      */
-    protected $memCached = null;
+    protected Memcached|null $memCached = null;
 
-    protected $logger = null;
+    protected LoggerInterface|null $logger = null;
 
-    protected $servers = null;
+    protected ?array $servers = null;
 
-    public function __construct($servers = null, $logger = null)
+    public function __construct(?array $servers = null, $logger = null)
     {
         $this->servers = (array)$servers;
         if (is_null($servers)) {
@@ -35,7 +39,13 @@ class MemcachedEngine extends BaseCacheEngine
         }
     }
 
-    protected function fixKey($key) {
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
+    protected function fixKey(string $key): string
+    {
         $key = $this->getKeyFromContainer($key);
         return "cache-" . $key;
     }
@@ -43,13 +53,13 @@ class MemcachedEngine extends BaseCacheEngine
     /**
      * @throws StorageErrorException
      */
-    protected function lazyLoadMemCachedServers()
+    protected function lazyLoadMemCachedServers(): void
     {
         if (is_null($this->memCached)) {
             $this->memCached = new Memcached();
             foreach ($this->servers as $server) {
                 $data = explode(":", $server);
-                $this->memCached->addServer($data[0], $data[1]);
+                $this->memCached->addServer($data[0], intval($data[1]));
 
                 $stats = $this->memCached->getStats();
                 if (!isset($stats[$server]) || $stats[$server]['pid'] === -1) {
@@ -60,9 +70,12 @@ class MemcachedEngine extends BaseCacheEngine
     }
 
     /**
-     * @param string $key The object KEY
-     * @param int $default IGNORED IN MEMCACHED.
-     * @return mixed Description
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
     public function get(string $key, mixed $default = null): mixed
@@ -83,6 +96,9 @@ class MemcachedEngine extends BaseCacheEngine
      * @param mixed $value The object to be cached
      * @param DateInterval|int|null $ttl The time to live in seconds of this objects
      * @return bool If the object is successfully posted
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
@@ -103,6 +119,9 @@ class MemcachedEngine extends BaseCacheEngine
     /**
      * @param string $key
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
     public function delete(string $key): bool
@@ -141,6 +160,9 @@ class MemcachedEngine extends BaseCacheEngine
     /**
      * @param string $key
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
     public function has(string $key): bool

@@ -6,16 +6,17 @@ use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class ArrayCacheEngine extends BaseCacheEngine
 {
 
-    protected $cache = array();
+    protected array $cache = [];
     
-    protected $logger = null;
+    protected LoggerInterface|null $logger = null;
     
-    public function __construct($logger = null)
+    public function __construct(LoggerInterface|null $logger = null)
     {
         $this->logger = $logger;
         if (is_null($logger)) {

@@ -2,37 +2,51 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class SessionCacheEngine extends BaseCacheEngine
 {
 
-    protected $prefix = null;
+    protected string $prefix;
 
     /**
      * SessionCacheEngine constructor.
      *
      * @param string $prefix
      */
-    public function __construct($prefix = 'cache')
+    public function __construct(string $prefix = 'cache')
     {
         $this->prefix = $prefix;
     }
 
 
-    protected function checkSession()
+    protected function checkSession(): void
     {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
     }
 
-    protected function keyName($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    protected function keyName($key): string
     {
         $key = $this->getKeyFromContainer($key);
         return $this->prefix . '-' . $key;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         $this->checkSession();
@@ -46,6 +60,11 @@ class SessionCacheEngine extends BaseCacheEngine
         }
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
     public function delete(string $key): bool
     {
         $this->checkSession();
