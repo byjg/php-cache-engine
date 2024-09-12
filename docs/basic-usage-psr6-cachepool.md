@@ -1,4 +1,4 @@
-# Basic Usage
+# Basic Usage - Psr6 Cache Pool
 
 ## Get an element from cache (using Factory...)
 

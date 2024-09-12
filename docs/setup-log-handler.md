@@ -1,6 +1,8 @@
 # Setup Log Handler
 
-This will available for the cache instances:
+You can add a PSR Log compatible to the constructor in order to get Log of the operations.
+
+## Example
 
 ```php
 <?php

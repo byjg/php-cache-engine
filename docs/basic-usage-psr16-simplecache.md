@@ -1,6 +1,8 @@
-# Basic Usage
+# Basic Usage - Psr16 Simple Cache
 
-All implementations are PDR-16. So, just create an instance:
+Psr16 is a standard for cache in PHP with less verbosity than Psr6.
+
+You can just instantiate the cache engine and use it as you can see below. 
 
 ```php
 <?php
@@ -19,3 +21,4 @@ if (!empty($result))
 }
 return $result;
 ```
+
