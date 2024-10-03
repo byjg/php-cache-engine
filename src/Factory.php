@@ -10,17 +10,18 @@ use ByJG\Cache\Psr16\RedisCacheEngine;
 use ByJG\Cache\Psr16\SessionCacheEngine;
 use ByJG\Cache\Psr16\ShmopCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
+use Psr\Log\LoggerInterface;
 
 class Factory
 {
-    public static function createNullPool()
+    public static function createNullPool(): CachePool
     {
         return new CachePool(
             new NoCacheEngine()
         );
     }
 
-    public static function createSessionPool($prefix = null, $bufferSize = null)
+    public static function createSessionPool(string $prefix = 'cache', int $bufferSize = 10): CachePool
     {
         return new CachePool(
             new SessionCacheEngine($prefix),
@@ -28,15 +29,15 @@ class Factory
         );
     }
 
-    public static function createFilePool($prefix = null, $path = null, $bufferSize = null, $logger = null)
+    public static function createFilePool(string $prefix = 'cache', ?string $path = null, int $bufferSize = 10, ?LoggerInterface $logger = null, bool $createPath = false): CachePool
     {
         return new CachePool(
-            new FileSystemCacheEngine($prefix, $path, $logger),
+            new FileSystemCacheEngine($prefix, $path, $logger, $createPath),
             $bufferSize
         );
     }
 
-    public static function createShmopPool($config = [], $bufferSize = null, $logger = null)
+    public static function createShmopPool(array $config = [], int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
     {
         return new CachePool(
             new ShmopCacheEngine($config, $logger),
@@ -44,7 +45,7 @@ class Factory
         );
     }
 
-    public static function createArrayPool($bufferSize = null, $logger = null)
+    public static function createArrayPool(int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
     {
         return new CachePool(
             new ArrayCacheEngine($logger),
@@ -52,7 +53,7 @@ class Factory
         );
     }
 
-    public static function createMemcachedPool($servers = null, $bufferSize = null, $logger = null)
+    public static function createMemcachedPool(?array $servers = null, int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
     {
         return new CachePool(
             new MemcachedEngine($servers, $logger),
@@ -60,7 +61,7 @@ class Factory
         );
     }
 
-    public static function createRedisCacheEngine($servers = null, $password = null, $bufferSize = null, $logger = null)
+    public static function createRedisCacheEngine(?string $servers = null, ?string $password = null, int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
     {
         return new CachePool(
             new RedisCacheEngine($servers, $password, $logger),

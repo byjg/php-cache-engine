@@ -1,10 +1,8 @@
 <?php
 
-namespace Test;
+namespace Tests;
 
 use PHPUnit\Framework\TestCase;
-
-require_once 'Model.php';
 
 abstract class BaseCacheTest extends TestCase
 {

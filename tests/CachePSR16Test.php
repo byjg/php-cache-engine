@@ -1,20 +1,16 @@
 <?php
 
-namespace Test;
+namespace Tests;
 
-use BasicContainer;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
-
-require_once 'BaseCacheTest.php';
-require_once 'BasicContainer.php';
 
 class CachePSR16Test extends BaseCacheTest
 {
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function testGetOneItem(BaseCacheEngine $cacheEngine)
@@ -50,8 +46,7 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
-     * @throws \ByJG\Cache\InvalidArgumentException
+     * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function testGetMultipleItems(BaseCacheEngine $cacheEngine)
@@ -60,10 +55,10 @@ class CachePSR16Test extends BaseCacheTest
 
         if ($cacheEngine->isAvailable()) {
             // First time
-            $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
+            $items = [...$cacheEngine->getMultiple(['chave1', 'chave2'])];
             $this->assertNull($items['chave1']);
             $this->assertNull($items['chave2']);
-            $items = $cacheEngine->getMultiple(['chave1', 'chave2'], 'default');
+            $items = [...$cacheEngine->getMultiple(['chave1', 'chave2'], 'default')];
             $this->assertEquals('default', $items['chave1']);
             $this->assertEquals('default', $items['chave2']);
 
@@ -73,7 +68,7 @@ class CachePSR16Test extends BaseCacheTest
 
             // Get Object
             if (!($cacheEngine instanceof NoCacheEngine)) {
-                $item2 = $cacheEngine->getMultiple(['chave1', 'chave2']);
+                $item2 = [...$cacheEngine->getMultiple(['chave1', 'chave2'])];
                 $this->assertEquals('valor1', $item2['chave1']);
                 $this->assertEquals('valor2', $item2['chave2']);
             }
@@ -82,7 +77,7 @@ class CachePSR16Test extends BaseCacheTest
             $cacheEngine->deleteMultiple(['chave1', 'chave2']);
 
             // Check Removed
-            $items = $cacheEngine->getMultiple(['chave1', 'chave2']);
+            $items = [...$cacheEngine->getMultiple(['chave1', 'chave2'])];
             $this->assertNull($items['chave1']);
             $this->assertNull($items['chave2']);
         } else {
@@ -92,7 +87,7 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function testTtl(BaseCacheEngine $cacheEngine)
@@ -129,7 +124,7 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
+     * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function testCacheObject(BaseCacheEngine $cacheEngine)
@@ -162,8 +157,7 @@ class CachePSR16Test extends BaseCacheTest
 
     /**
      * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
-     * @throws \ByJG\Cache\InvalidArgumentException
+     * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function testClear(BaseCacheEngine $cacheEngine)

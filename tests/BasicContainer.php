@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests;
+
 use Psr\Container\ContainerInterface;
 
 class BasicContainer implements ContainerInterface

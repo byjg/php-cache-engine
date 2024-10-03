@@ -2,36 +2,52 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\Exception\InvalidArgumentException;
+use DateInterval;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+
 class SessionCacheEngine extends BaseCacheEngine
 {
 
-    protected $prefix = null;
+    protected string $prefix;
 
     /**
      * SessionCacheEngine constructor.
      *
      * @param string $prefix
      */
-    public function __construct($prefix = 'cache')
+    public function __construct(string $prefix = 'cache')
     {
         $this->prefix = $prefix;
     }
 
 
-    protected function checkSession()
+    protected function checkSession(): void
     {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
     }
 
-    protected function keyName($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    protected function keyName($key): string
     {
         $key = $this->getKeyFromContainer($key);
         return $this->prefix . '-' . $key;
     }
 
-    public function get($key, $default = null)
+    /**
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function get(string $key, mixed $default = null): mixed
     {
         $this->checkSession();
 
@@ -44,7 +60,12 @@ class SessionCacheEngine extends BaseCacheEngine
         }
     }
 
-    public function delete($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
+    public function delete(string $key): bool
     {
         $this->checkSession();
 
@@ -56,9 +77,11 @@ class SessionCacheEngine extends BaseCacheEngine
         if (isset($_SESSION["$keyName.ttl"])) {
             unset($_SESSION["$keyName.ttl"]);
         }
+
+        return true;
     }
 
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->checkSession();
 
@@ -67,14 +90,17 @@ class SessionCacheEngine extends BaseCacheEngine
         if (!empty($ttl)) {
             $_SESSION["$keyName.ttl"] = $this->addToNow($ttl);
         }
+
+        return true;
     }
 
-    public function clear()
+    public function clear(): bool
     {
         session_destroy();
+        return true;
     }
 
-    public function has($key)
+    public function has(string $key): bool
     {
         $keyName = $this->keyName($key);
 
@@ -90,7 +116,7 @@ class SessionCacheEngine extends BaseCacheEngine
         return false;
     }
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         try {
             $this->checkSession();

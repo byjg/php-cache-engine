@@ -1,12 +1,10 @@
 <?php
 
-namespace Test;
+namespace Tests;
 
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
 use DateInterval;
-
-require_once 'BaseCacheTest.php';
 
 class CachePSR6Test extends BaseCacheTest
 {

@@ -5,20 +5,27 @@ namespace ByJG\Cache\Psr16;
 use ByJG\Cache\CacheLockInterface;
 use DateInterval;
 use Exception;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterface
 {
 
-    protected $logger = null;
+    protected ?LoggerInterface $logger = null;
 
-    protected $prefix = null;
-    protected $path = null;
+    protected ?string $prefix = null;
+    protected ?string $path = null;
 
-    public function __construct($prefix = 'cache', $path = null, $logger = null)
+    public function __construct(string $prefix = 'cache', ?string $path = null, ?LoggerInterface $logger = null, bool $createPath = false)
     {
         $this->prefix = $prefix;
         $this->path = $path ?? sys_get_temp_dir();
+        if ($createPath && !file_exists($this->path)) {
+            mkdir($this->path, 0777, true);
+        }
 
         $this->logger = $logger;
         if (is_null($logger)) {
@@ -30,9 +37,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * @param string $key The object KEY
      * @param mixed $default IGNORED IN MEMCACHED.
      * @return mixed Description
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         // Check if file is Locked
         $fileKey = $this->fixKey($key);
@@ -78,7 +87,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      *
      *   MUST be thrown if the $key string is not a legal value.
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $fileKey = $this->fixKey($key);
 
@@ -104,7 +113,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
 
             $validUntil = $this->addToNow($ttl);
             if (!empty($validUntil)) {
-                file_put_contents($fileKey . ".ttl", $validUntil);
+                file_put_contents($fileKey . ".ttl", (string)$validUntil);
             }
         } catch (Exception $ex) {
             $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
@@ -117,9 +126,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     /**
      * @param string $key
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->set($key, null);
         return true;
@@ -129,7 +137,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * Lock resource before set it.
      * @param string $key
      */
-    public function lock($key)
+    public function lock(string $key): void
     {
         $this->logger->info("[Filesystem cache] Lock '$key'");
 
@@ -146,7 +154,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * UnLock resource after set it.
      * @param string $key
      */
-    public function unlock($key)
+    public function unlock(string $key): void
     {
 
         $this->logger->info("[Filesystem cache] Unlock '$key'");
@@ -158,12 +166,22 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
         }
     }
 
-    public function isAvailable()
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     */
+    public function isAvailable(): bool
     {
         return is_writable(dirname($this->fixKey('test')));
     }
 
-    protected function fixKey($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     */
+    protected function fixKey(string $key): string
     {
         $key = $this->getKeyFromContainer($key);
 
@@ -177,8 +195,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      * Wipes clean the entire cache's keys.
      *
      * @return bool True on success and false on failure.
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
      */
-    public function clear()
+    public function clear(): bool
     {
         $patternKey = $this->fixKey('*');
         $list = glob($patternKey);
@@ -197,10 +218,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
      *
      * @param string $key The cache item key.
      * @return bool
-     * @throws \Psr\SimpleCache\InvalidArgumentException
-     *   MUST be thrown if the $key string is not a legal value.
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
      */
-    public function has($key)
+    public function has(string $key): bool
     {
         $fileKey = $this->fixKey($key);
         if (file_exists($fileKey)) {

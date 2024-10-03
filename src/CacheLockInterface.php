@@ -14,11 +14,11 @@ interface CacheLockInterface
      * Lock resource before set it.
      * @param string $key
      */
-    public function lock($key);
+    public function lock(string $key): void;
 
     /**
      * Unlock resource
      * @param string $key
      */
-    public function unlock($key);
+    public function unlock(string $key): void;
 }

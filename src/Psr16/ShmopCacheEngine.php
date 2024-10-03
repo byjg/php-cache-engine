@@ -4,6 +4,10 @@ namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Exception\StorageErrorException;
+use DateInterval;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -23,11 +27,11 @@ use Psr\Log\NullLogger;
  */
 class ShmopCacheEngine extends BaseCacheEngine
 {
-    protected $logger = null;
+    protected LoggerInterface|null $logger = null;
 
-    protected $config = [];
+    protected array $config = [];
 
-    public function __construct($config = [], $logger = null)
+    public function __construct(array $config = [], ?LoggerInterface $logger = null)
     {
         $this->config = $config;
 
@@ -44,7 +48,12 @@ class ShmopCacheEngine extends BaseCacheEngine
         }
     }
 
-    protected function getFilenameToken($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    protected function getFilenameToken(string $key): string
     {
         $key = $this->getKeyFromContainer($key);
         return sys_get_temp_dir() . '/shmop-' . sha1($key) . '.cache';
@@ -60,7 +69,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         return $this->config['default-permission'];
     }
 
-    protected function getFTok($file)
+    protected function getFTok(string $file): int
     {
         if (!file_exists($file)) {
             touch($file);
@@ -72,8 +81,11 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @param string $key The object KEY
      * @param mixed $default The time to live in seconds of the object. Depends on implementation.
      * @return mixed The Object
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
-    public function get($key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
        if ($default === false) {
             $this->logger->info("[Shmop Cache] Ignored  $key because TTL=FALSE");
@@ -102,7 +114,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         return unserialize($serialized);
     }
 
-    protected function isValidAge($file)
+    protected function isValidAge(string $file): bool
     {
         if (file_exists("$file.ttl")) {
             $fileTtl = intval(file_get_contents("$file.ttl"));
@@ -126,10 +138,12 @@ class ShmopCacheEngine extends BaseCacheEngine
      *                                     the driver supports TTL then the library may set a default value
      *                                     for it or let the driver take care of that.
      * @return bool True on success and false on failure.
+     * @throws ContainerExceptionInterface
      * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
-    public function set($key, $value, $ttl = null)
+    public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->logger->info("[Shmop Cache] set '$key'");
 
@@ -163,7 +177,7 @@ class ShmopCacheEngine extends BaseCacheEngine
 
         $validUntil = $this->addToNow($ttl);
         if (!empty($validUntil)) {
-            file_put_contents("$file.ttl", $validUntil);
+            file_put_contents("$file.ttl", (string)$validUntil);
         }
 
         return true;
@@ -172,8 +186,11 @@ class ShmopCacheEngine extends BaseCacheEngine
     /**
      * @param string $key
      * @return bool
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
      */
-    public function delete($key)
+    public function delete(string $key): bool
     {
         $this->logger->info("[Shmop Cache] release '$key'");
 
@@ -187,7 +204,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    private function deleteFromFilenameToken($file)
+    private function deleteFromFilenameToken(string $file): void
     {
         $filekey = $this->getFTok($file);
         $shm_id = @shmop_open($filekey, "w", 0, 0);
@@ -208,16 +225,22 @@ class ShmopCacheEngine extends BaseCacheEngine
         }
     }
 
-    public function clear()
+    public function clear(): bool
     {
         $patternKey = sys_get_temp_dir() . '/shmop-*.cache';
         $list = glob($patternKey);
         foreach ($list as $file) {
             $this->deleteFromFilenameToken($file);
         }
+        return true;
     }
 
-    public function has($key)
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws NotFoundExceptionInterface
+     */
+    public function has(string $key): bool
     {
         $file = $this->getFilenameToken($key);
         $fileKey = $this->getFTok($file);
@@ -232,11 +255,11 @@ class ShmopCacheEngine extends BaseCacheEngine
             return $this->isValidAge($file);
         }
 
-        return $exists;
+        return false;
     }
 
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return function_exists('shmop_open');
     }
