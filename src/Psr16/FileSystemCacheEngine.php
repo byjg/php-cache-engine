@@ -19,10 +19,13 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     protected ?string $prefix = null;
     protected ?string $path = null;
 
-    public function __construct(string $prefix = 'cache', ?string $path = null, ?LoggerInterface $logger = null)
+    public function __construct(string $prefix = 'cache', ?string $path = null, ?LoggerInterface $logger = null, bool $createPath = false)
     {
         $this->prefix = $prefix;
         $this->path = $path ?? sys_get_temp_dir();
+        if ($createPath && !file_exists($this->path)) {
+            mkdir($this->path, 0777, true);
+        }
 
         $this->logger = $logger;
         if (is_null($logger)) {
