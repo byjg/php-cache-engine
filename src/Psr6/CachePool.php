@@ -6,33 +6,34 @@ use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\SimpleCache\CacheInterface;
 
 class CachePool implements CacheItemPoolInterface
 {
     /**
-     * @var \Psr\SimpleCache\CacheInterface
+     * @var BaseCacheEngine
      */
-    protected $_cacheEngine;
+    protected BaseCacheEngine $_cacheEngine;
 
     /**
      * @var CacheItem
      */
-    protected $_lastCacheItem;
+    protected CacheItem $_lastCacheItem;
 
     /**
      * @var int
      */
-    protected $bufferSize = 10;
+    protected int $bufferSize = 10;
 
     /**
      * @var CacheItem[]
      */
-    protected $buffer = [];
+    protected array $buffer = [];
 
     /**
      * @var array
      */
-    protected $bufferKeys = [];
+    protected array $bufferKeys = [];
 
     /**
      * CachePool constructor.
@@ -40,16 +41,16 @@ class CachePool implements CacheItemPoolInterface
      * @param BaseCacheEngine $_cacheEngine
      * @param int $bufferSize
      */
-    public function __construct(BaseCacheEngine $_cacheEngine, $bufferSize = 10)
+    public function __construct(BaseCacheEngine $_cacheEngine, int $bufferSize = 10)
     {
         $this->_cacheEngine = $_cacheEngine;
-        $this->bufferSize = intval($bufferSize);
+        $this->bufferSize = $bufferSize;
     }
 
     /**
      * @return int
      */
-    public function getBufferSize()
+    public function getBufferSize(): int
     {
         return $this->bufferSize;
     }
@@ -57,7 +58,7 @@ class CachePool implements CacheItemPoolInterface
     /**
      * @param int $bufferSize
      */
-    public function setBufferSize($bufferSize)
+    public function setBufferSize(int $bufferSize): void
     {
         $this->bufferSize = $bufferSize;
     }
@@ -68,7 +69,7 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @param CacheItem $cacheItem
      */
-    protected function addElementToBuffer(CacheItem $cacheItem)
+    protected function addElementToBuffer(CacheItem $cacheItem): void
     {
         if ($this->bufferSize < 1) {
             return;
@@ -94,7 +95,7 @@ class CachePool implements CacheItemPoolInterface
      * 
      * @param $key
      */
-    protected function removeElementFromBuffer($key)
+    protected function removeElementFromBuffer(string $key): void
     {
         $result = array_search($key, $this->bufferKeys);
         if ($result === false) {
@@ -113,7 +114,7 @@ class CachePool implements CacheItemPoolInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getItem($key)
+    public function getItem(string $key): CacheItemInterface
     {
         // Get the element from the buffer if still remains valid!
         if (in_array($key, $this->bufferKeys)) {
@@ -139,7 +140,7 @@ class CachePool implements CacheItemPoolInterface
      * @return array
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function getItems(array $keys = array())
+    public function getItems(array $keys = array()): iterable
     {
         $result = [];
         foreach ($keys as $key) {
@@ -156,7 +157,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function hasItem($key)
+    public function hasItem(string $key): bool
     {
         return $this->getItem($key)->isHit();
     }
@@ -164,11 +165,12 @@ class CachePool implements CacheItemPoolInterface
     /**
      * Psr implementation of clear()
      */
-    public function clear()
+    public function clear(): bool
     {
         $this->_cacheEngine->clear();
         $this->bufferKeys = [];
         $this->buffer = [];
+        return true;
     }
 
     /**
@@ -178,7 +180,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function deleteItem($key)
+    public function deleteItem(string $key): bool
     {
         return $this->deleteItems([$key]);
     }
@@ -191,7 +193,7 @@ class CachePool implements CacheItemPoolInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function deleteItems(array $keys)
+    public function deleteItems(array $keys): bool
     {
         foreach ($keys as $key) {
             $this->_cacheEngine->delete($key);
@@ -206,7 +208,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function save(CacheItemInterface $item)
+    public function save(CacheItemInterface $item): bool
     {
         if (!($item instanceof CacheItem)) {
             throw new InvalidArgumentException('The cache item must be an implementation of \ByJG\Cache\Psr\CacheItem');
@@ -225,7 +227,7 @@ class CachePool implements CacheItemPoolInterface
     /**
      * @var CacheItem[]
      */
-    protected $deferredItem = [];
+    protected array $deferredItem = [];
 
     /**
      * Psr Implementation of saveDeferred()
@@ -233,7 +235,7 @@ class CachePool implements CacheItemPoolInterface
      * @param CacheItemInterface $item
      * @return bool
      */
-    public function saveDeferred(CacheItemInterface $item)
+    public function saveDeferred(CacheItemInterface $item): bool
     {
         $this->deferredItem[] = $item;
         return true;
@@ -244,16 +246,17 @@ class CachePool implements CacheItemPoolInterface
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function commit()
+    public function commit(): bool
     {
         foreach ($this->deferredItem as $item) {
             $this->save($item);
         }
         
         $this->deferredItem = [];
+        return true;
     }
 
-    public function isAvailable()
+    public function isAvailable(): bool
     {
         return $this->_cacheEngine->isAvailable();
     }
