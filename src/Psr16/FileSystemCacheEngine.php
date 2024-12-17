@@ -204,7 +204,9 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
         $patternKey = $this->fixKey('*');
         $list = glob($patternKey);
         foreach ($list as $file) {
-            unlink($file);
+            if (file_exists($file)) {
+                unlink($file);
+            }
         }
         return true;
     }
