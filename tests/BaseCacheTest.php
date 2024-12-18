@@ -47,6 +47,9 @@ abstract class BaseCacheTest extends TestCase
             ],
             'Redis'         => [
                 new \ByJG\Cache\Psr16\RedisCacheEngine($redisCacheServer, $redisPassword)
+            ],
+            'Memory'         => [
+                new \ByJG\Cache\Psr16\TmpfsCacheEngine()
             ]
         ];
     }
