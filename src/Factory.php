@@ -5,6 +5,7 @@ namespace ByJG\Cache;
 use ByJG\Cache\Psr16\ArrayCacheEngine;
 use ByJG\Cache\Psr16\FileSystemCacheEngine;
 use ByJG\Cache\Psr16\MemcachedEngine;
+use ByJG\Cache\Psr16\TmpfsCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Cache\Psr16\RedisCacheEngine;
 use ByJG\Cache\Psr16\SessionCacheEngine;
@@ -66,6 +67,13 @@ class Factory
         return new CachePool(
             new RedisCacheEngine($servers, $password, $logger),
             $bufferSize
+        );
+    }
+
+    public static function createTmpfsCachePool(?LoggerInterface $logger = null): CachePool
+    {
+        return new CachePool(
+            new TmpfsCacheEngine($logger)
         );
     }
 

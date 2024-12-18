@@ -7,86 +7,38 @@
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
 
 
-A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.
+A multipurpose cache engine PSR-6 and PSR-16 implementation with several drivers.
 
 ## PSR-16
  
 PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
 of engines available in this library that is PSR-16 compliant:
 
-| Class                                                                                                     | Description                                                            |
-|:----------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------|
-| [\ByJG\Cache\Psr16\NoCacheEngine](docs/class-no-cache-engine.md)                                          | Do nothing. Use it for disable the cache without change your code      |
-| [\ByJG\Cache\Psr16\ArrayCacheEngine](docs/class-array-cache-engine.md)                                    | Local cache only using array. It does not persists between requests    |
-| [\ByJG\AnyDataset\NoSql\Cache\KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql)          | Use S3-Like or ClouflareKV as a store for the cache (other repository) |
-| [\ByJG\Cache\Psr16\FileSystemCacheEngine](docs/class-filesystem-cache-engine.md)                          | Save the cache result in the local file system                         |
-| [\ByJG\Cache\Psr16\MemcachedEngine](docs/class-memcached-engine.md)                                       | Uses the Memcached as the cache engine                                 |
-| [\ByJG\Cache\Psr16\RedisCachedEngine](docs/class-redis-cache-engine.md)                                   | uses the Redis as cache                                                |
-| [\ByJG\Cache\Psr16\SessionCachedEngine](docs/class-session-cache-engine.md)                               | uses the PHP session as cache                                          |
-| [\ByJG\Cache\Psr16\ShmopCachedEngine](docs/class-shmop-cache-engine.md)                                   | uses the shared memory area for cache                                  |
+PSR-16 Getting Started: [here](docs/basic-usage-psr16-simplecache.md)
 
-To create a new Cache Instance just create the proper cache engine and use it:
-
-```php
-<?php
-$cache = new \ByJG\Cache\Psr16\FileSystemCacheEngine();
-
-// And use it:
-if ($cache->has('key')) {
-    // Do the complex code to get the value to be cached
-    $object = callComplexCode();
-    
-    // Save to cache
-    $cache->set('key', $object);
-};
-$object = $cache->get('key');
-```
-
-See more PSR-16 examples [here](docs/basic-usage-psr16-simplecache.md)
-
-## PSR-6 
+## PSR-6
 
 The PSR-6 implementation use the engines defined above. PSR-6 is more verbosity and
-have an extra layer do get and set the cache values. 
+have an extra layer do get and set the cache values.
 
 You can use one of the factory methods to create a instance of the CachePool implementation:
 
-```php
-<?php
-$cachePool = \ByJG\Cache\Factory::createFilePool();
-```
+PSR-6 Getting Started: [here](docs/basic-usage-psr6-cachepool.md)
 
- OR just create a new CachePool and pass to the constructor an instance of a PSR-16 compliant class:
+## List of Cache Engines
 
-```php
-$cachePool = new CachePool(new FileSystemCacheEngine());
-```
+| Class                                                                                            | Description                                                            |
+|:-------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------|
+| [\ByJG\Cache\Psr16\NoCacheEngine](docs/class-no-cache-engine.md)                                 | Do nothing. Use it for disable the cache without change your code      |
+| [\ByJG\Cache\Psr16\ArrayCacheEngine](docs/class-array-cache-engine.md)                           | Local cache only using array. It does not persists between requests    |
+| [\ByJG\AnyDataset\NoSql\Cache\KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql) | Use S3-Like or ClouflareKV as a store for the cache (other repository) |
+| [\ByJG\Cache\Psr16\FileSystemCacheEngine](docs/class-filesystem-cache-engine.md)                 | Save the cache result in the local file system                         |
+| [\ByJG\Cache\Psr16\MemcachedEngine](docs/class-memcached-engine.md)                              | Uses the Memcached as the cache engine                                 |
+| [\ByJG\Cache\Psr16\TmpfsCacheEngine](docs/class-memcached-engine.md)                             | Uses the Tmpfs as the cache engine                                     |
+| [\ByJG\Cache\Psr16\RedisCachedEngine](docs/class-redis-cache-engine.md)                          | uses the Redis as cache                                                |
+| [\ByJG\Cache\Psr16\SessionCachedEngine](docs/class-session-cache-engine.md)                      | uses the PHP session as cache                                          |
+| [\ByJG\Cache\Psr16\ShmopCachedEngine](docs/class-shmop-cache-engine.md)                          | uses the shared memory area for cache                                  |
 
-See more PSR-6 examples [here](docs/basic-usage-psr6-cachepool.md)
-
-## List of Available Factory Commands
-
-**Note: All parameters are optional**
-
-| Engine        | Factory Command                                                                |
-|:--------------|:-------------------------------------------------------------------------------|
-| No Cache      | Factory::createNullPool($prefix, $bufferSize, $logger);                        |
-| Aws S3        | See [Anydataset-NoSql](https://github.com/byjg/php-anydataset-nosql) component |
-| Array         | Factory::createArrayPool($bufferSize, $logger);                                |
-| Cloudflare KV | See [Anydataset-NoSql](https://github.com/byjg/php-anydataset-nosql) component |
-| File System   | Factory::createFilePool($prefix, $bufferSize, $logger);                        |
-| Memcached     | Factory::createMemcachedPool($servers[], $bufferSize, $logger);                |
-| Session       | Factory::createSessionPool($prefix, $bufferSize, $logger);                     |
-| Redis         | Factory::createRedisCacheEngine($server, $pwd, $bufferSize, $logger);          |
-| Shmop         | Factory::createShmopPool($config[], $bufferSize, $logger);                     |
-
-The Common parameters are:
-
-- logger: A valid instance that implement the LoggerInterface defined by the PSR/LOG
-- bufferSize: the Buffer of CachePool
-- prefix: A prefix name to compose the KEY physically 
-- servers: An array of memcached servers. E.g.: `[ '127.0.0.1:11211' ]` 
-- config: Specific setup for shmop. E.g.: `[ 'max-size' => 524288, 'default-permission' => '0700' ]`
 
 ## Logging cache commands
  
@@ -96,25 +48,9 @@ See log examples [here](docs/setup-log-handler.md)
 
 ## Use a PSR-11 container to retrieve the cache keys
 
-You can use a PSR-11 compatible to retrieve the cache keys. Once is defined, only the keys defined 
-in the PSR-11 will be used to cache. 
+You can use a PSR-11 compatible to retrieve the cache keys. 
 
-```php
-<?php
-$fileCache = new \ByJG\Cache\Psr16\FileSystemCacheEngine()
-$fileCache->withKeysFromContainer(new SomePsr11Implementation());
-```
-
-After the PSR-11 container is defined, when I run:
-
-```php
-$value = $fileCache->get('my-key');
-```
-
-The key `my-key` will be retrieved from the PSR-11 container and
-the value retrieved will be used as the cache key.
-If it does not exist in the PSR-11 container, an exception will be thrown.
-
+See more [here](docs/psr11-usage.md)
 
 ## Install
 

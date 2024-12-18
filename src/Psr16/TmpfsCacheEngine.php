@@ -9,7 +9,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 
-class MemoryCacheEngine extends FileSystemCacheEngine
+class TmpfsCacheEngine extends FileSystemCacheEngine
 {
 
     public function __construct(?LoggerInterface $logger = null)
