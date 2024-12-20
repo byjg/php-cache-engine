@@ -52,6 +52,17 @@ You can use a PSR-11 compatible to retrieve the cache keys.
 
 See more [here](docs/psr11-usage.md)
 
+## Beyond the PSR protocol
+
+The PSR protocol is a good way to standardize the cache access, 
+but sometimes you need to go beyond the protocol.
+
+Some cache engines have additional features that are not covered by the PSR protocol.
+
+Some examples are:
+- [Atomic Operations](docs/atomic-operations.md)
+- [Garbage Collection](docs/garbage-collection.md)
+
 ## Install
 
 Just type: 

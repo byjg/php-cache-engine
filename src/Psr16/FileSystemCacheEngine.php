@@ -2,7 +2,9 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\AtomicOperationInterface;
 use ByJG\Cache\GarbageCollectorInterface;
+use Closure;
 use DateInterval;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
@@ -10,7 +12,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorInterface
+class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorInterface, AtomicOperationInterface
 {
 
     protected ?LoggerInterface $logger = null;
@@ -75,21 +77,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         $this->logger->info("[Filesystem cache] Set '$key' in FileSystem");
 
         try {
-            if (file_exists($fileKey)) {
-                unlink($fileKey);
-            }
-            if (file_exists("$fileKey.ttl")) {
-                unlink("$fileKey.ttl");
-            }
-
-            if (is_null($value)) {
-                return false;
-            }
-
             if (is_string($value) && (strlen($value) === 0)) {
                 touch($fileKey);
             } else {
-                $this->putContents($fileKey, $value, $this->addToNow($ttl));
+                return $this->putContents($fileKey, $value, $this->addToNow($ttl));
             }
         } catch (Exception $ex) {
             $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
@@ -208,12 +199,34 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         return $content;
     }
 
-    protected function putContents(string $fileKey, mixed $value, ?string $ttl): void
+    protected function putContents(string $fileKey, mixed $value, ?int $ttl, ?Closure $operation = null): mixed
     {
-        $fo = fopen($fileKey, 'w');
+        $returnValue = true;
+
+        if (file_exists("$fileKey.ttl")) {
+            unlink("$fileKey.ttl");
+        }
+
+        if (is_null($value)) {
+            if (file_exists($fileKey)) {
+                unlink($fileKey);
+            }
+            return false;
+        }
+
+        $fo = fopen($fileKey, 'a+');
         $waitIfLocked = 1;
         $lock = flock($fo, LOCK_EX, $waitIfLocked);
         try {
+            if (!is_null($operation)) {
+                if (!file_exists($fileKey)) {
+                    $currentValue = 0;
+                } else {
+                    $content = file_get_contents($fileKey);
+                    $currentValue = !empty($content) ? unserialize($content) : $content;
+                }
+                $value = $returnValue = $operation($currentValue, $value);
+            }
             file_put_contents($fileKey, serialize($value));
             if (!is_null($ttl)) {
                 file_put_contents("$fileKey.ttl", serialize($ttl));
@@ -222,6 +235,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
             flock($fo, LOCK_UN);
             fclose($fo);
         }
+
+        return $returnValue;
     }
 
     public function collectGarbage()
@@ -249,5 +264,33 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
             return intval($this->getContents("$fileKey.ttl"));
         }
         return null;
+    }
+
+    public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
+    {
+        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+            return intval($currentValue) + $value;
+        });
+    }
+
+    public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
+    {
+        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+            return intval($currentValue) - $value;
+        });
+    }
+
+    public function add(string $key, $value, DateInterval|int|null $ttl = null): array
+    {
+        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+            if (empty($currentValue)) {
+                return [$value];
+            }
+            if (!is_array($currentValue)) {
+                return [$currentValue, $value];
+            }
+            $currentValue[] = $value;
+            return $currentValue;
+        });
     }
 }

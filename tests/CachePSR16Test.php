@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use ByJG\Cache\AtomicOperationInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\GarbageCollectorInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
@@ -161,6 +162,44 @@ class CachePSR16Test extends BaseCacheTest
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    public function testCacheArray(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable()) {
+            // First time
+            $item = $cacheEngine->get('chave');
+            $this->assertNull($item);
+
+            // Get Object
+            if (($cacheEngine instanceof NoCacheEngine)) {
+                return;
+            }
+
+            // Set object
+            $cacheEngine->set('chave', [ 'a' => 10, 'b' => 20 ]);
+            $this->assertEquals([ 'a' => 10, 'b' => 20 ], $cacheEngine->get('chave'));
+
+            $cacheEngine->set('chave', [ 10, 20 ]);
+            $this->assertEquals([ 10, 20 ], $cacheEngine->get('chave'));
+
+            $cacheEngine->set('chave', [ 'a' => 10, 'b' => new Model(1, 2) ]);
+            $this->assertEquals([ 'a' => 10, 'b' => new Model(1, 2) ], $cacheEngine->get('chave'));
+
+            // Delete
+            $cacheEngine->delete('chave');
+            $item = $cacheEngine->get('chave');
+            $this->assertNull($item);
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
     public function testClear(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -267,6 +306,81 @@ class CachePSR16Test extends BaseCacheTest
             $this->assertFalse($cacheEngine->has('chave'));
         } else {
             $this->markTestIncomplete('Does not support garbage collector or it is native');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     */
+    public function testAtomicIncrement(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $cacheEngine->set('chave', 10);
+            $this->assertEquals(11, $cacheEngine->increment('chave'));
+            $this->assertEquals(12, $cacheEngine->increment('chave'));
+            $this->assertEquals(13, $cacheEngine->increment('chave'));
+            $this->assertEquals(14, $cacheEngine->increment('chave'));
+            $this->assertEquals(15, $cacheEngine->increment('chave'));
+            $this->assertEquals(15, $cacheEngine->get('chave'));
+        } else {
+            $this->markTestIncomplete('Does not support atomic increment or it is native');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     */
+    public function testAtomicDecrement(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $cacheEngine->set('chave', 10);
+            $this->assertEquals(9, $cacheEngine->decrement('chave'));
+            $this->assertEquals(8, $cacheEngine->decrement('chave'));
+            $this->assertEquals(7, $cacheEngine->decrement('chave'));
+            $this->assertEquals(6, $cacheEngine->decrement('chave'));
+            $this->assertEquals(5, $cacheEngine->decrement('chave'));
+            $this->assertEquals(5, $cacheEngine->get('chave'));
+        } else {
+            $this->markTestIncomplete('Does not support atomic decrement or it is native');
+        }
+    }
+
+    /**
+     * @dataProvider CachePoolProvider
+     */
+    public function testAtomicAdd(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $this->assertEquals([10], $cacheEngine->add('chave', 10));
+            $this->assertEquals([10, 20], $cacheEngine->add('chave', 20));
+            $this->assertEquals([10, 20, "value"], $cacheEngine->add('chave', "value"));
+            $this->assertEquals([10, 20, "value"], $cacheEngine->get('chave'));
+
+            $cacheEngine->set('chave', 10);
+            $this->assertEquals(10, $cacheEngine->get('chave'));
+            $this->assertEquals([10, 20], $cacheEngine->add('chave', 20));
+
+            $cacheEngine->set('chave', ["A", "B"]);
+            $this->assertEquals(["A", "B"], $cacheEngine->get('chave'));
+            $this->assertEquals(["A", "B", "C"], $cacheEngine->add('chave', "C"));
+
+            $cacheEngine->set('chave', new Model(10, 20));
+            $this->assertEquals(new Model(10, 20), $cacheEngine->get('chave'));
+            $this->assertEquals([new Model(10, 20), new Model(20, 30)], $cacheEngine->add('chave', new Model(20, 30)));
+
+            $cacheEngine->set('chave', [new Model(10, 20)]);
+            $this->assertEquals([new Model(10, 20)], $cacheEngine->get('chave'));
+            $this->assertEquals([new Model(10, 20), new Model(20, 30)], $cacheEngine->add('chave', new Model(20, 30)));
+
+
+        } else {
+            $this->markTestIncomplete('Does not support atomic add or it is native');
         }
     }
 }
