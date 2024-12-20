@@ -3,6 +3,7 @@
 namespace Tests;
 
 use ByJG\Cache\Exception\InvalidArgumentException;
+use ByJG\Cache\GarbageCollectorInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 
@@ -238,4 +239,34 @@ class CachePSR16Test extends BaseCacheTest
         }
     }
 
+    /**
+     * @dataProvider CachePoolProvider
+     */
+    public function testGarbageCollector(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof GarbageCollectorInterface)) {
+            // First time
+            $cacheEngine->set('chave', "ok");
+            $this->assertTrue($cacheEngine->has('chave'));
+            $this->assertNull($cacheEngine->getTtl('chave'));
+            $cacheEngine->delete('chave');
+            $this->assertFalse($cacheEngine->has('chave'));
+
+            // Set TTL
+            $cacheEngine->set('chave', "ok", 1);
+            $this->assertTrue($cacheEngine->has('chave'));
+            $this->assertNotNull($cacheEngine->getTtl('chave'));
+            $cacheEngine->collectGarbage();
+            $this->assertTrue($cacheEngine->has('chave'));
+            $this->assertNotNull($cacheEngine->getTtl('chave')); // Should not delete yet
+            sleep(1);
+            $cacheEngine->collectGarbage();
+            $this->assertNull($cacheEngine->getTtl('chave')); // Should be deleted
+            $this->assertFalse($cacheEngine->has('chave'));
+        } else {
+            $this->markTestIncomplete('Does not support garbage collector or it is native');
+        }
+    }
 }

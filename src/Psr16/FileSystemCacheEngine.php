@@ -2,16 +2,15 @@
 
 namespace ByJG\Cache\Psr16;
 
-use ByJG\Cache\CacheLockInterface;
+use ByJG\Cache\GarbageCollectorInterface;
 use DateInterval;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Psr\SimpleCache\InvalidArgumentException;
 
-class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterface
+class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorInterface
 {
 
     protected ?LoggerInterface $logger = null;
@@ -45,29 +44,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     {
         // Check if file is Locked
         $fileKey = $this->fixKey($key);
-        $lockFile = $fileKey . ".lock";
-        if (file_exists($lockFile)) {
-            $this->logger->info("[Filesystem cache] Locked! $key. Waiting...");
-            $lockTime = filemtime($lockFile);
-
-            while (true) {
-                if (!file_exists($lockFile)) {
-                    $this->logger->info("[Filesystem cache] Lock released for '$key'");
-                    break;
-                }
-                if (intval(time() - $lockTime) > 20) {  // Wait for 10 seconds
-                    $this->logger->info("[Filesystem cache] Gave up to wait unlock. Release lock for '$key'");
-                    $this->unlock($key);
-                    return $default;
-                }
-                sleep(1); // 1 second
-            }
-        }
 
         // Check if file exists
         if ($this->has($key)) {
             $this->logger->info("[Filesystem cache] Get '$key'");
-            return unserialize(file_get_contents($fileKey));
+            return $this->getContents($fileKey, $default);
         } else {
             $this->logger->info("[Filesystem cache] Not found '$key'");
             return $default;
@@ -108,12 +89,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
             if (is_string($value) && (strlen($value) === 0)) {
                 touch($fileKey);
             } else {
-                file_put_contents($fileKey, serialize($value));
-            }
-
-            $validUntil = $this->addToNow($ttl);
-            if (!empty($validUntil)) {
-                file_put_contents($fileKey . ".ttl", (string)$validUntil);
+                $this->putContents($fileKey, $value, $this->addToNow($ttl));
             }
         } catch (Exception $ex) {
             $this->logger->warning("[Filesystem cache] I could not write to cache on file '" . basename($key) . "'. Switching to nocache=true mode.");
@@ -131,39 +107,6 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     {
         $this->set($key, null);
         return true;
-    }
-
-    /**
-     * Lock resource before set it.
-     * @param string $key
-     */
-    public function lock(string $key): void
-    {
-        $this->logger->info("[Filesystem cache] Lock '$key'");
-
-        $lockFile = $this->fixKey($key) . ".lock";
-
-        try {
-            file_put_contents($lockFile, date('c'));
-        } catch (Exception $ex) {
-            // Ignoring... Set will cause an error
-        }
-    }
-
-    /**
-     * UnLock resource after set it.
-     * @param string $key
-     */
-    public function unlock(string $key): void
-    {
-
-        $this->logger->info("[Filesystem cache] Unlock '$key'");
-
-        $lockFile = $this->fixKey($key) . ".lock";
-
-        if (file_exists($lockFile)) {
-            unlink($lockFile);
-        }
     }
 
     /**
@@ -227,9 +170,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
     public function has(string $key): bool
     {
         $fileKey = $this->fixKey($key);
+        $fileTtl = null;
         if (file_exists($fileKey)) {
             if (file_exists("$fileKey.ttl")) {
-                $fileTtl = intval(file_get_contents("$fileKey.ttl"));
+                $fileTtl = intval($this->getContents("$fileKey.ttl"));
             }
 
             if (!empty($fileTtl) && time() >= $fileTtl) {
@@ -243,5 +187,67 @@ class FileSystemCacheEngine extends BaseCacheEngine implements CacheLockInterfac
         }
 
         return false;
+    }
+
+    protected function getContents(string $fileKey, mixed $default = null): mixed
+    {
+        if (!file_exists($fileKey)) {
+            return $default;
+        }
+
+        $fo = fopen($fileKey, 'r');
+        $waitIfLocked = 1;
+        $lock = flock($fo, LOCK_EX, $waitIfLocked);
+        try {
+            $content = unserialize(file_get_contents($fileKey));
+        } finally {
+            flock($fo, LOCK_UN);
+            fclose($fo);
+        }
+
+        return $content;
+    }
+
+    protected function putContents(string $fileKey, mixed $value, ?string $ttl): void
+    {
+        $fo = fopen($fileKey, 'w');
+        $waitIfLocked = 1;
+        $lock = flock($fo, LOCK_EX, $waitIfLocked);
+        try {
+            file_put_contents($fileKey, serialize($value));
+            if (!is_null($ttl)) {
+                file_put_contents("$fileKey.ttl", serialize($ttl));
+            }
+        } finally {
+            flock($fo, LOCK_UN);
+            fclose($fo);
+        }
+    }
+
+    public function collectGarbage()
+    {
+        $patternKey = $this->fixKey('*');
+        $list = glob("$patternKey.ttl");
+        foreach ($list as $file) {
+            $fileTtl = intval($this->getContents($file));
+            if (time() >= $fileTtl) {
+                $fileContent = str_replace('.ttl', '', $file);
+                if (file_exists($fileContent)) {
+                    unlink($fileContent);
+                }
+                unlink($file);
+            }
+        }
+        return true;
+    }
+
+
+    public function getTtl(string $key): ?int
+    {
+        $fileKey = $this->fixKey($key);
+        if (file_exists("$fileKey.ttl")) {
+            return intval($this->getContents("$fileKey.ttl"));
+        }
+        return null;
     }
 }

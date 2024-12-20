@@ -33,6 +33,9 @@ abstract class BaseCacheTest extends TestCase
             'FileSystem'    => [
                 new \ByJG\Cache\Psr16\FileSystemCacheEngine()
             ],
+            'Tmpfs'    => [
+                new \ByJG\Cache\Psr16\TmpfsCacheEngine()
+            ],
             'ShmopCache'    => [
                 new \ByJG\Cache\Psr16\ShmopCacheEngine()
             ],

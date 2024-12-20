@@ -2,13 +2,12 @@
 
 namespace ByJG\Cache\Psr16;
 
-use ByJG\Cache\CacheLockInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
-class NoCacheEngine extends BaseCacheEngine implements CacheLockInterface
+class NoCacheEngine extends BaseCacheEngine
 {
     /**
      * @param string $key

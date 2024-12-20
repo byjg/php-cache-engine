@@ -37,7 +37,7 @@ PSR-6 Getting Started: [here](docs/basic-usage-psr6-cachepool.md)
 | [\ByJG\Cache\Psr16\TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                           | Uses the Tmpfs as the cache engine                                     |
 | [\ByJG\Cache\Psr16\RedisCachedEngine](docs/class-redis-cache-engine.md)                          | uses the Redis as cache                                                |
 | [\ByJG\Cache\Psr16\SessionCachedEngine](docs/class-session-cache-engine.md)                      | uses the PHP session as cache                                          |
-| [\ByJG\Cache\Psr16\ShmopCachedEngine](docs/class-shmop-cache-engine.md)                          | uses the shared memory area for cache                                  |
+| [\ByJG\Cache\Psr16\ShmopCacheEngine](docs/class-shmop-cache-engine.md) (deprecated)              | uses the shared memory area for cache. Use TmpfsCacheEngine.           |
 
 
 ## Logging cache commands
