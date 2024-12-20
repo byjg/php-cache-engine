@@ -37,7 +37,7 @@ PSR-6 Getting Started: [here](docs/basic-usage-psr6-cachepool.md)
 | [\ByJG\Cache\Psr16\TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                           | Uses the Tmpfs as the cache engine                                     |
 | [\ByJG\Cache\Psr16\RedisCachedEngine](docs/class-redis-cache-engine.md)                          | uses the Redis as cache                                                |
 | [\ByJG\Cache\Psr16\SessionCachedEngine](docs/class-session-cache-engine.md)                      | uses the PHP session as cache                                          |
-| [\ByJG\Cache\Psr16\ShmopCachedEngine](docs/class-shmop-cache-engine.md)                          | uses the shared memory area for cache                                  |
+| [\ByJG\Cache\Psr16\ShmopCacheEngine](docs/class-shmop-cache-engine.md) (deprecated)              | uses the shared memory area for cache. Use TmpfsCacheEngine.           |
 
 
 ## Logging cache commands
@@ -51,6 +51,17 @@ See log examples [here](docs/setup-log-handler.md)
 You can use a PSR-11 compatible to retrieve the cache keys. 
 
 See more [here](docs/psr11-usage.md)
+
+## Beyond the PSR protocol
+
+The PSR protocol is a good way to standardize the cache access, 
+but sometimes you need to go beyond the protocol.
+
+Some cache engines have additional features that are not covered by the PSR protocol.
+
+Some examples are:
+- [Atomic Operations](docs/atomic-operations.md)
+- [Garbage Collection](docs/garbage-collection.md)
 
 ## Install
 

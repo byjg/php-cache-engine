@@ -3,16 +3,19 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\Exception\InvalidArgumentException;
+use ByJG\Cache\GarbageCollectorInterface;
 use DateInterval;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class ArrayCacheEngine extends BaseCacheEngine
+class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterface
 {
 
-    protected array $cache = [];
+    protected array $cache = [
+        "ttl" => []
+    ];
     
     protected LoggerInterface|null $logger = null;
     
@@ -41,7 +44,7 @@ class ArrayCacheEngine extends BaseCacheEngine
     {
         $key = $this->getKeyFromContainer($key);
         if (isset($this->cache[$key])) {
-            if (isset($this->cache["$key.ttl"]) && time() >= $this->cache["$key.ttl"]) {
+            if (isset($this->cache['ttl']["$key"]) && time() >= $this->cache["ttl"]["$key"]) {
                 $this->delete($key);
                 return false;
             }
@@ -93,7 +96,7 @@ class ArrayCacheEngine extends BaseCacheEngine
 
         $this->cache[$key] = serialize($value);
         if (!empty($ttl)) {
-            $this->cache["$key.ttl"] = $this->addToNow($ttl);
+            $this->cache["ttl"]["$key"] = $this->addToNow($ttl);
         }
 
         return true;
@@ -116,12 +119,32 @@ class ArrayCacheEngine extends BaseCacheEngine
         $key = $this->getKeyFromContainer($key);
 
         unset($this->cache[$key]);
-        unset($this->cache["$key.ttl"]);
+        unset($this->cache["ttl"]["$key"]);
         return true;
     }
 
     public function isAvailable(): bool
     {
         return true;
+    }
+
+    public function collectGarbage()
+    {
+        foreach ($this->cache["ttl"] as $key => $ttl) {
+            if (time() >= $ttl) {
+                unset($this->cache[$key]);
+                unset($this->cache["ttl"]["$key"]);
+            }
+        }
+    }
+
+    public function getTtl(string $key): ?int
+    {
+        $key = $this->getKeyFromContainer($key);
+        if (isset($this->cache["ttl"]["$key"])) {
+            return $this->cache["ttl"]["$key"];
+        }
+
+        return null;
     }
 }
