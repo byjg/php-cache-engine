@@ -7,8 +7,8 @@ use Psr\Log\LoggerInterface;
 class TmpfsCacheEngine extends FileSystemCacheEngine
 {
 
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct(string $prefix = "cache", ?LoggerInterface $logger = null)
     {
-        parent::__construct('cache', '/dev/shm', $logger);
+        parent::__construct($prefix, '/dev/shm', $logger);
     }
 }
