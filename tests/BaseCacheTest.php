@@ -22,8 +22,8 @@ abstract class BaseCacheTest extends TestCase
 
     public function CachePoolProvider()
     {
-        $memcachedServer = ['memcached:11211'];
-        $redisCacheServer = 'redis:6379';
+        $memcachedServer = ['127.0.0.1:11211'];
+        $redisCacheServer = '127.0.0.1:6379';
         $redisPassword = '';
 
         return [
@@ -32,6 +32,9 @@ abstract class BaseCacheTest extends TestCase
             ],
             'FileSystem'    => [
                 new \ByJG\Cache\Psr16\FileSystemCacheEngine()
+            ],
+            'Tmpfs'    => [
+                new \ByJG\Cache\Psr16\TmpfsCacheEngine()
             ],
             'ShmopCache'    => [
                 new \ByJG\Cache\Psr16\ShmopCacheEngine()

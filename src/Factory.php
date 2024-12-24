@@ -70,10 +70,10 @@ class Factory
         );
     }
 
-    public static function createTmpfsCachePool(?LoggerInterface $logger = null): CachePool
+    public static function createTmpfsCachePool(string $prefix = 'cache', ?LoggerInterface $logger = null): CachePool
     {
         return new CachePool(
-            new TmpfsCacheEngine($logger)
+            new TmpfsCacheEngine($prefix, $logger)
         );
     }
 

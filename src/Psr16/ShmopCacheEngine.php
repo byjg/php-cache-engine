@@ -24,6 +24,7 @@ use Psr\Log\NullLogger;
  * min seg size (bytes) = 1
  *
  *
+ * @deprecated Use TmpfsCacheEngine instead
  */
 class ShmopCacheEngine extends BaseCacheEngine
 {

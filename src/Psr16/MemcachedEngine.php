@@ -2,6 +2,7 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\AtomicOperationInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Exception\StorageErrorException;
 use DateInterval;
@@ -11,7 +12,7 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class MemcachedEngine extends BaseCacheEngine
+class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterface
 {
 
     /**
@@ -88,7 +89,7 @@ class MemcachedEngine extends BaseCacheEngine
             return $default;
         }
 
-        return unserialize($value);
+        return $value;
     }
 
     /**
@@ -107,7 +108,7 @@ class MemcachedEngine extends BaseCacheEngine
 
         $ttl = $this->convertToSeconds($ttl);
 
-        $this->memCached->set($this->fixKey($key), serialize($value), is_null($ttl) ? 0 : $ttl);
+        $this->memCached->set($this->fixKey($key), $value, is_null($ttl) ? 0 : $ttl);
         $this->logger->info("[Memcached] Set '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
@@ -171,5 +172,74 @@ class MemcachedEngine extends BaseCacheEngine
 
         $this->memCached->get($this->fixKey($key));
         return ($this->memCached->getResultCode() === Memcached::RES_SUCCESS);
+    }
+
+    public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
+    {
+        $this->lazyLoadMemCachedServers();
+
+        $ttl = $this->convertToSeconds($ttl);
+
+        if ($this->memCached->get($this->fixKey($key)) === false) {
+            $this->memCached->set($this->fixKey($key), 0, is_null($ttl) ? 0 : $ttl);
+        }
+
+        $result = $this->memCached->increment($this->fixKey($key), $value);
+        $this->logger->info("[Memcached] Increment '$key' result " . $this->memCached->getResultCode());
+        if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
+            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
+        }
+
+        return $result;
+    }
+
+    public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
+    {
+        $this->lazyLoadMemCachedServers();
+
+        $ttl = $this->convertToSeconds($ttl);
+
+        if ($this->memCached->get($this->fixKey($key)) === false) {
+            $this->memCached->set($this->fixKey($key), 0, is_null($ttl) ? 0 : $ttl);
+        }
+
+        $result = $this->memCached->decrement($this->fixKey($key), $value);
+        $this->logger->info("[Memcached] Decrement '$key' result " . $this->memCached->getResultCode());
+        if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
+            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
+        }
+
+        return $result;
+    }
+
+    public function add(string $key, $value, DateInterval|int|null $ttl = null): array
+    {
+        $this->lazyLoadMemCachedServers();
+
+        $ttl = $this->convertToSeconds($ttl);
+        $fixKey = $this->fixKey($key);
+
+        if ($this->memCached->get($fixKey) === false) {
+            $this->memCached->set($fixKey, [], is_null($ttl) ? 0 : $ttl);
+        }
+
+        do {
+            $data = $this->memCached->get($fixKey, null, Memcached::GET_EXTENDED);
+            $casToken = $data['cas'];
+            $currentValue = $data['value'];
+
+            if ($currentValue === false) {
+                $currentValue = [];
+            }
+
+            if (!is_array($currentValue)) {
+                $currentValue = [$currentValue];
+            }
+
+            $currentValue[] = $value;
+            $success = $this->memCached->cas($casToken, $fixKey, $currentValue, is_null($ttl) ? 0 : $ttl);
+        } while (!$success);
+
+        return $currentValue;
     }
 }

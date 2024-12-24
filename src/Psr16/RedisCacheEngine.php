@@ -2,6 +2,7 @@
 
 namespace ByJG\Cache\Psr16;
 
+use ByJG\Cache\AtomicOperationInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
 use Psr\Container\ContainerExceptionInterface;
@@ -11,7 +12,7 @@ use Psr\Log\NullLogger;
 use Redis;
 use RedisException;
 
-class RedisCacheEngine extends BaseCacheEngine
+class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterface
 {
 
     /**
@@ -84,10 +85,29 @@ class RedisCacheEngine extends BaseCacheEngine
     {
         $this->lazyLoadRedisServer();
 
-        $value = $this->redis->get($this->fixKey($key));
-        $this->logger->info("[Redis Cache] Get '$key' result ");
+        $fixKey = $this->fixKey($key);
+        $type = $this->redis->type($fixKey);
 
-        return ($value === false ? $default : unserialize($value));
+        if ($type === Redis::REDIS_STRING) {
+            $value = $this->redis->get($fixKey);
+            if (is_string($value) && preg_match('/^[Oa]:\d+:["{]/', $value)) {
+                $value = unserialize($value);
+            }
+        } else if ($type === Redis::REDIS_LIST) {
+            $value = $this->redis->lRange($fixKey, 0, -1);
+        } else {
+            $value = $default;
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $k => $v) {
+                if (is_string($v) && preg_match('/^[Oa]:\d+:["{]/', $v)) {
+                    $value[$k] = unserialize($v);
+                }
+            }
+        }
+
+        return $value;
     }
 
     /**
@@ -106,7 +126,7 @@ class RedisCacheEngine extends BaseCacheEngine
 
         $ttl = $this->convertToSeconds($ttl);
 
-        $this->redis->set($this->fixKey($key), serialize($value), $ttl);
+        $this->redis->set($this->fixKey($key), is_object($value) || is_array($value) ? serialize($value) : $value, $ttl);
         $this->logger->info("[Redis Cache] Set '$key' result ");
 
         return true;
@@ -177,5 +197,57 @@ class RedisCacheEngine extends BaseCacheEngine
         } catch (\Exception $ex) {
             return false;
         }
+    }
+
+    public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
+    {
+        $this->lazyLoadRedisServer();
+
+        $result = $this->redis->incr($this->fixKey($key), $value);
+
+        if ($ttl) {
+            $this->redis->expire($this->fixKey($key), $this->convertToSeconds($ttl));
+        }
+
+        return is_int($result) ? $result : -1;
+    }
+
+    public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
+    {
+        $this->lazyLoadRedisServer();
+
+        $result = $this->redis->decr($this->fixKey($key), $value);
+
+        if ($ttl) {
+            $this->redis->expire($this->fixKey($key), $this->convertToSeconds($ttl));
+        }
+
+        return is_int($result) ? $result : -1;
+    }
+
+    public function add(string $key, $value, DateInterval|int|null $ttl = null): array
+    {
+        $this->lazyLoadRedisServer();
+
+        $fixKey = $this->fixKey($key);
+        $type = $this->redis->type($fixKey);
+
+        if ($type === Redis::REDIS_STRING) {
+            $currValue = $this->redis->get($fixKey);
+            if (is_string($currValue) && preg_match('/^[Oa]:\d+:["{]/', $currValue)) {
+                $currValue = unserialize($currValue);
+            }
+            if (is_object($currValue)) {
+                $currValue = [$currValue];
+            }
+            $this->redis->del($fixKey);
+            foreach ((array)$currValue as $items) {
+                $this->add($key, $items);
+            }
+        }
+
+        $result = $this->redis->rPush($fixKey, is_object($value) || is_array($value) ? serialize($value) : $value);
+
+        return $result ? $this->get($key) : [];
     }
 }
