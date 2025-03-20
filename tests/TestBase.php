@@ -4,7 +4,7 @@ namespace Tests;
 
 use PHPUnit\Framework\TestCase;
 
-abstract class BaseCacheTest extends TestCase
+abstract class TestBase extends TestCase
 {
     /**
      * @var \ByJG\Cache\Psr16\BaseCacheEngine

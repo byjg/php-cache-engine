@@ -9,7 +9,7 @@ use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use PHPUnit\Framework\Attributes\DataProvider;
 
-class CachePSR16Test extends BaseCacheTest
+class CachePSR16TestBase extends TestBase
 {
     /**
      * @param BaseCacheEngine $cacheEngine
