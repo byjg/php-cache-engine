@@ -13,19 +13,19 @@ $server = 'localhost:5678'
 ## PSR-16 Constructor
 
 ```php
-$cache = new \ByJG\Cache\Psr16\RedisCacheEngine($server, $password)
+$cache = new \ByJG\Cache\Psr16\RedisCacheEngine($server, $password, $logger)
 ```
 
 ## PSR-6 Constructor
 
 ```php
-$cachePool = \ByJG\Cache\Factory::createRedisCacheEngine($server, $password)
+$cachePool = \ByJG\Cache\Factory::createRedisPool($server, $password, $bufferSize, $logger)
 ```
 
 or
 
 ```php
-$cachePool = new \ByJG\Cache\Psr6\CachePool(new \ByJG\Cache\Psr16\RedisCacheEngine($server, $password));
+$cachePool = new \ByJG\Cache\Psr6\CachePool(new \ByJG\Cache\Psr16\RedisCacheEngine($server, $password, $logger));
 ```
 
 

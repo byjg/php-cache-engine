@@ -114,6 +114,7 @@ class CachePool implements CacheItemPoolInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function getItem(string $key): CacheItemInterface
     {
         // Get the element from the buffer if still remains valid!
@@ -140,6 +141,7 @@ class CachePool implements CacheItemPoolInterface
      * @return array
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function getItems(array $keys = array()): iterable
     {
         $result = [];
@@ -157,6 +159,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function hasItem(string $key): bool
     {
         return $this->getItem($key)->isHit();
@@ -165,6 +168,7 @@ class CachePool implements CacheItemPoolInterface
     /**
      * Psr implementation of clear()
      */
+    #[\Override]
     public function clear(): bool
     {
         $this->_cacheEngine->clear();
@@ -180,6 +184,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function deleteItem(string $key): bool
     {
         return $this->deleteItems([$key]);
@@ -193,6 +198,7 @@ class CachePool implements CacheItemPoolInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function deleteItems(array $keys): bool
     {
         foreach ($keys as $key) {
@@ -208,6 +214,7 @@ class CachePool implements CacheItemPoolInterface
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function save(CacheItemInterface $item): bool
     {
         if (!($item instanceof CacheItem)) {
@@ -235,6 +242,7 @@ class CachePool implements CacheItemPoolInterface
      * @param CacheItemInterface $item
      * @return bool
      */
+    #[\Override]
     public function saveDeferred(CacheItemInterface $item): bool
     {
         $this->deferredItem[] = $item;
@@ -246,6 +254,7 @@ class CachePool implements CacheItemPoolInterface
      *
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function commit(): bool
     {
         foreach ($this->deferredItem as $item) {

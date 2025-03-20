@@ -62,7 +62,7 @@ class Factory
         );
     }
 
-    public static function createRedisCacheEngine(?string $servers = null, ?string $password = null, int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
+    public static function createRedisPool(?string $servers = null, ?string $password = null, int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
     {
         return new CachePool(
             new RedisCacheEngine($servers, $password, $logger),

@@ -6,6 +6,7 @@ use ByJG\Cache\CacheAvailabilityInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use DateInterval;
 use DateTime;
+use Override;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -21,6 +22,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @return iterable<string, mixed>
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[Override]
     public function getMultiple(string|iterable $keys, mixed $default = null): iterable
     {
         if (is_string($keys)) {
@@ -40,6 +42,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[Override]
     public function setMultiple(iterable $values, DateInterval|int|null $ttl = null): bool
     {
         foreach ($values as $key => $value) {
@@ -53,6 +56,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
      * @return bool
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[Override]
     public function deleteMultiple(iterable $keys): bool
     {
         foreach ($keys as $key) {
@@ -61,12 +65,14 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
         return true;
     }
 
+    #[Override]
     abstract public function isAvailable(): bool;
 
     protected function addToNow(DateInterval|int|null $ttl): int|null
     {
         if (is_numeric($ttl)) {
-            return strtotime("+$ttl second");
+            $timestamp = strtotime("+$ttl second");
+            return $timestamp !== false ? $timestamp : null;
         }
 
         if ($ttl instanceof DateInterval) {

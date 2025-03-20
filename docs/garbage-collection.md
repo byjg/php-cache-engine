@@ -10,18 +10,18 @@ is based on the Best Effort. It means an expired key is removed only when you tr
 If the cache engine has a low hit rate, it is recommended to run a garbage collection process
 to avoid the cache to grow indefinitely.
 
-The classes that implement the `GarbageCollectionInterface` have the method `collectGarbage()`.
+The classes that implement the `GarbageCollectorInterface` have the method `collectGarbage()`.
 
 Some engines that support garbage collection are:
 - FileSystemCacheEngine
 - ArrayCacheEngine
-- TmpfsCacheEngine
+- TmpfsCacheEngine (inherits from FileSystemCacheEngine)
 
 ## Example
 
 ```php
 <?php
-/** @var \ByJG\Cache\GarbageCollectionInterface $cache */
+/** @var \ByJG\Cache\GarbageCollectorInterface $cache */
 $cache->collectGarbage();
 ```
 

@@ -79,6 +79,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
      * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         $this->lazyLoadMemCachedServers();
@@ -102,6 +103,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
      * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
+    #[\Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->lazyLoadMemCachedServers();
@@ -125,6 +127,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
      * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $this->lazyLoadMemCachedServers();
@@ -133,6 +136,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return true;
     }
 
+    #[\Override]
     public function isAvailable(): bool
     {
         if (!class_exists('\Memcached')) {
@@ -151,6 +155,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
      * @return bool
      * @throws StorageErrorException
      */
+    #[\Override]
     public function clear(): bool
     {
         $this->lazyLoadMemCachedServers();
@@ -166,6 +171,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
      * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
+    #[\Override]
     public function has(string $key): bool
     {
         $this->lazyLoadMemCachedServers();
@@ -174,6 +180,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return ($this->memCached->getResultCode() === Memcached::RES_SUCCESS);
     }
 
+    #[\Override]
     public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
         $this->lazyLoadMemCachedServers();
@@ -193,6 +200,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return $result;
     }
 
+    #[\Override]
     public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
         $this->lazyLoadMemCachedServers();
@@ -212,6 +220,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return $result;
     }
 
+    #[\Override]
     public function add(string $key, $value, DateInterval|int|null $ttl = null): array
     {
         $this->lazyLoadMemCachedServers();

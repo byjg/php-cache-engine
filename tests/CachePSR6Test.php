@@ -5,14 +5,16 @@ namespace Tests;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
 use DateInterval;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Psr\SimpleCache\InvalidArgumentException;
 
-class CachePSR6Test extends BaseCacheTest
+class CachePSR6Test extends TestBase
 {
     /**
-     * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param BaseCacheEngine $cacheEngine
+     * @throws InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testGetOneItem(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -45,10 +47,10 @@ class CachePSR6Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param BaseCacheEngine $cacheEngine
+     * @throws InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testGetMultipleItems(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -89,10 +91,10 @@ class CachePSR6Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param BaseCacheEngine $cacheEngine
+     * @throws InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testTtl(BaseCacheEngine $cacheEngine)
     {
         $timeList = [
@@ -137,10 +139,10 @@ class CachePSR6Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
-     * @param \ByJG\Cache\Psr16\BaseCacheEngine $cacheEngine
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @param BaseCacheEngine $cacheEngine
+     * @throws InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testCacheObject(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;

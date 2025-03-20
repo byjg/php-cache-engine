@@ -46,6 +46,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getKey(): string
     {
         return $this->key;
@@ -54,6 +55,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function get(): mixed
     {
         return $this->isHit() ? $this->value : null;
@@ -61,6 +63,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function set(mixed $value = null): static
     {
         $this->value = $value;
@@ -70,6 +73,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function isHit(): bool
     {
         return $this->hit;
@@ -77,6 +81,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function expiresAt(?DateTimeInterface $expiration): static
     {
         if (empty($expiration)) {
@@ -90,6 +95,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function expiresAfter(int|\DateInterval|null $time): static
     {
         $this->expiration = new DateTime('now +1 year');

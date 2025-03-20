@@ -81,6 +81,7 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
      * @throws NotFoundExceptionInterface
      * @throws RedisException
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         $this->lazyLoadRedisServer();
@@ -120,6 +121,7 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
      * @throws NotFoundExceptionInterface
      * @throws RedisException
      */
+    #[\Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->lazyLoadRedisServer();
@@ -138,6 +140,7 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
      * @throws RedisException
      * @throws ContainerExceptionInterface
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $this->lazyLoadRedisServer();
@@ -153,10 +156,11 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
      * @throws RedisException
      * @throws ContainerExceptionInterface
      */
+    #[\Override]
     public function clear(): bool
     {
         $keys = $this->redis->keys('cache:*');
-        foreach ((array)$keys as $key) {
+        foreach ($keys as $key) {
             if (preg_match('/^cache:(?<key>.*)/', $key, $matches)) {
                 $this->delete($matches['key']);
             }
@@ -170,21 +174,14 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
      * @throws RedisException
      * @throws ContainerExceptionInterface
      */
+    #[\Override]
     public function has(string $key): bool
     {
         $result = $this->redis->exists($this->fixKey($key));
-
-        if (is_numeric($result)) {
-            return $result !== 0;
-        }
-
-        if ($result instanceof Redis) {
-            return true;
-        }
-
-        return $result;
+        return (bool)$result;
     }
 
+    #[\Override]
     public function isAvailable(): bool
     {
         if (!class_exists('\Redis')) {
@@ -199,6 +196,7 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
         }
     }
 
+    #[\Override]
     public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
         $this->lazyLoadRedisServer();
@@ -209,9 +207,10 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
             $this->redis->expire($this->fixKey($key), $this->convertToSeconds($ttl));
         }
 
-        return is_int($result) ? $result : -1;
+        return $result;
     }
 
+    #[\Override]
     public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
         $this->lazyLoadRedisServer();
@@ -222,9 +221,10 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
             $this->redis->expire($this->fixKey($key), $this->convertToSeconds($ttl));
         }
 
-        return is_int($result) ? $result : -1;
+        return $result;
     }
 
+    #[\Override]
     public function add(string $key, $value, DateInterval|int|null $ttl = null): array
     {
         $this->lazyLoadRedisServer();
