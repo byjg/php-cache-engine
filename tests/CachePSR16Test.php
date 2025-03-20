@@ -7,14 +7,15 @@ use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\GarbageCollectorInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CachePSR16Test extends BaseCacheTest
 {
     /**
-     * @dataProvider CachePoolProvider
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testGetOneItem(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -47,10 +48,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testGetMultipleItems(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -88,10 +89,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testTtl(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -125,10 +126,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testCacheObject(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -158,10 +159,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testCacheArray(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -196,10 +197,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
      * @param BaseCacheEngine $cacheEngine
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testClear(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -238,8 +239,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testCacheContainerKeyNonExistent(BaseCacheEngine $cacheEngine)
     {
         if ($cacheEngine->isAvailable()) {
@@ -254,8 +257,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testCacheContainerKey(BaseCacheEngine $cacheEngine)
     {
         if ($cacheEngine->isAvailable() && !($cacheEngine instanceof NoCacheEngine)) {
@@ -279,8 +284,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testGarbageCollector(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -310,8 +317,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testAtomicIncrement(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -330,8 +339,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testAtomicDecrement(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
@@ -350,8 +361,10 @@ class CachePSR16Test extends BaseCacheTest
     }
 
     /**
-     * @dataProvider CachePoolProvider
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[DataProvider('CachePoolProvider')]
     public function testAtomicAdd(BaseCacheEngine $cacheEngine)
     {
         $this->cacheEngine = $cacheEngine;
