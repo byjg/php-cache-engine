@@ -8,7 +8,7 @@ use DateInterval;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\SimpleCache\InvalidArgumentException;
 
-class CachePSR6TestBase extends TestBase
+class CachePSR6MainTest extends MainTest
 {
     /**
      * @param BaseCacheEngine $cacheEngine

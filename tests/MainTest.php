@@ -2,14 +2,23 @@
 
 namespace Tests;
 
+use ByJG\Cache\Psr16\ArrayCacheEngine;
+use ByJG\Cache\Psr16\BaseCacheEngine;
+use ByJG\Cache\Psr16\FileSystemCacheEngine;
+use ByJG\Cache\Psr16\MemcachedEngine;
+use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\Cache\Psr16\RedisCacheEngine;
+use ByJG\Cache\Psr16\SessionCacheEngine;
+use ByJG\Cache\Psr16\ShmopCacheEngine;
+use ByJG\Cache\Psr16\TmpfsCacheEngine;
 use PHPUnit\Framework\TestCase;
 
-abstract class TestBase extends TestCase
+class MainTest extends TestCase
 {
     /**
-     * @var \ByJG\Cache\Psr16\BaseCacheEngine
+     * @var BaseCacheEngine|null
      */
-    protected $cacheEngine = null;
+    protected ?BaseCacheEngine $cacheEngine = null;
 
     #[\Override]
     protected function tearDown(): void
@@ -29,31 +38,31 @@ abstract class TestBase extends TestCase
 
         return [
             'Array'         => [
-                new \ByJG\Cache\Psr16\ArrayCacheEngine()
+                new ArrayCacheEngine()
             ],
             'FileSystem'    => [
-                new \ByJG\Cache\Psr16\FileSystemCacheEngine()
+                new FileSystemCacheEngine()
             ],
             'Tmpfs'    => [
-                new \ByJG\Cache\Psr16\TmpfsCacheEngine()
+                new TmpfsCacheEngine()
             ],
             'ShmopCache'    => [
-                new \ByJG\Cache\Psr16\ShmopCacheEngine()
+                new ShmopCacheEngine()
             ],
             'SessionCache'  => [
-                new \ByJG\Cache\Psr16\SessionCacheEngine()
+                new SessionCacheEngine()
             ],
             'NoCacheEngine' => [
-                new \ByJG\Cache\Psr16\NoCacheEngine()
+                new NoCacheEngine()
             ],
             'Memcached'     => [
-                new \ByJG\Cache\Psr16\MemcachedEngine($memcachedServer)
+                new MemcachedEngine($memcachedServer)
             ],
             'Redis'         => [
-                new \ByJG\Cache\Psr16\RedisCacheEngine($redisCacheServer, $redisPassword)
+                new RedisCacheEngine($redisCacheServer, $redisPassword)
             ],
             'Memory'         => [
-                new \ByJG\Cache\Psr16\TmpfsCacheEngine()
+                new TmpfsCacheEngine()
             ]
         ];
     }
