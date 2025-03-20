@@ -40,6 +40,7 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function has(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
@@ -63,6 +64,7 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         if ($this->has($key)) {
@@ -88,6 +90,7 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
      *
      *   MUST be thrown if the $key string is not a legal value.
      */
+    #[\Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $key = $this->getKeyFromContainer($key);
@@ -102,6 +105,7 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
         return true;
     }
 
+    #[\Override]
     public function clear(): bool
     {
         $this->cache = [];
@@ -114,6 +118,7 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
      * @param string $key
      * @return bool
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
@@ -123,11 +128,13 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
         return true;
     }
 
+    #[\Override]
     public function isAvailable(): bool
     {
         return true;
     }
 
+    #[\Override]
     public function collectGarbage()
     {
         foreach ($this->cache["ttl"] as $key => $ttl) {
@@ -138,6 +145,7 @@ class ArrayCacheEngine extends BaseCacheEngine implements GarbageCollectorInterf
         }
     }
 
+    #[\Override]
     public function getTtl(string $key): ?int
     {
         $key = $this->getKeyFromContainer($key);

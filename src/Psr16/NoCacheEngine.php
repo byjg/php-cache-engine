@@ -17,6 +17,7 @@ class NoCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         $key = $this->getKeyFromContainer($key);
@@ -32,6 +33,7 @@ class NoCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $key = $this->getKeyFromContainer($key);
@@ -45,6 +47,7 @@ class NoCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);
@@ -69,6 +72,7 @@ class NoCacheEngine extends BaseCacheEngine
         return;
     }
 
+    #[\Override]
     public function isAvailable(): bool
     {
         return true;
@@ -79,6 +83,7 @@ class NoCacheEngine extends BaseCacheEngine
      *
      * @return bool True on success and false on failure.
      */
+    #[\Override]
     public function clear(): bool
     {
         return true;
@@ -97,6 +102,7 @@ class NoCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function has(string $key): bool
     {
         $key = $this->getKeyFromContainer($key);

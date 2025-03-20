@@ -47,6 +47,7 @@ class SessionCacheEngine extends BaseCacheEngine
      * @throws ContainerExceptionInterface
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
         $this->checkSession();
@@ -65,6 +66,7 @@ class SessionCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $this->checkSession();
@@ -81,6 +83,7 @@ class SessionCacheEngine extends BaseCacheEngine
         return true;
     }
 
+    #[\Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->checkSession();
@@ -94,12 +97,14 @@ class SessionCacheEngine extends BaseCacheEngine
         return true;
     }
 
+    #[\Override]
     public function clear(): bool
     {
         session_destroy();
         return true;
     }
 
+    #[\Override]
     public function has(string $key): bool
     {
         $keyName = $this->keyName($key);
@@ -116,6 +121,7 @@ class SessionCacheEngine extends BaseCacheEngine
         return false;
     }
 
+    #[\Override]
     public function isAvailable(): bool
     {
         try {

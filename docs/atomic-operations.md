@@ -15,10 +15,10 @@ The atomic operations are:
 The engines that support atomic operations have to implement the `AtomicOperationInterface`.
 
 Some engines that support atomic operations are:
-- RedisCachedEngine
+- RedisCacheEngine
 - MemcachedEngine
-- TmpfsCacheEngine
 - FileSystemCacheEngine
+- TmpfsCacheEngine (inherits from FileSystemCacheEngine)
 
 ## Increment
 

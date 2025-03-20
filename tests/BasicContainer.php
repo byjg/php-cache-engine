@@ -11,6 +11,7 @@ class BasicContainer implements ContainerInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function get(string $id)
     {
         if ($id == "test-key") {
@@ -23,6 +24,7 @@ class BasicContainer implements ContainerInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function has(string $id): bool
     {
         if ($id == "test-key") {

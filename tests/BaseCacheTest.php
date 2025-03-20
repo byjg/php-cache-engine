@@ -11,6 +11,7 @@ abstract class BaseCacheTest extends TestCase
      */
     protected $cacheEngine = null;
 
+    #[\Override]
     protected function tearDown(): void
     {
         if (empty($this->cacheEngine)) {
@@ -20,7 +21,7 @@ abstract class BaseCacheTest extends TestCase
         $this->cacheEngine = null;
     }
 
-    public function CachePoolProvider()
+    public static function CachePoolProvider()
     {
         $memcachedServer = ['127.0.0.1:11211'];
         $redisCacheServer = '127.0.0.1:6379';
