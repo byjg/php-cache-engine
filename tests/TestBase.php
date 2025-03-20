@@ -13,7 +13,7 @@ use ByJG\Cache\Psr16\ShmopCacheEngine;
 use ByJG\Cache\Psr16\TmpfsCacheEngine;
 use PHPUnit\Framework\TestCase;
 
-class MainTest extends TestCase
+abstract class TestBase extends TestCase
 {
     /**
      * @var BaseCacheEngine|null
