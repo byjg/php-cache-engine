@@ -21,6 +21,10 @@ jobs:
           - "8.2"
           - "8.1"
 
+    env:
+      MEMCACHED_SERVER: "memcached:11211"
+      REDIS_SERVER: "redis:6379"
+
     # Service containers to run 
     services:
       memcached:

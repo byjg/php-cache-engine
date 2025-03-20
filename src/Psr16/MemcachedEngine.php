@@ -143,13 +143,12 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
             return false;
         }
 
-//        try {
+        try {
             $this->lazyLoadMemCachedServers();
-//            return true;
-//        } catch (StorageErrorException $ex) {
-//            return false;
-//        }
-        return true;
+            return true;
+        } catch (StorageErrorException $ex) {
+            return false;
+        }
     }
 
     /**

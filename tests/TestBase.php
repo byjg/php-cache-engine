@@ -32,9 +32,21 @@ abstract class TestBase extends TestCase
 
     public static function CachePoolProvider()
     {
-        $memcachedServer = ['127.0.0.1:11211'];
-        $redisCacheServer = '127.0.0.1:6379';
-        $redisPassword = '';
+        if (getenv('MEMCACHED_SERVER')) {
+            $memcachedServer = [getenv('MEMCACHED_SERVER')];
+        } else {
+            $memcachedServer = ['127.0.0.1:11211'];
+        }
+        if (getenv('REDIS_SERVER')) {
+            $redisCacheServer = getenv('REDIS_SERVER');
+        } else {
+            $redisCacheServer = '127.0.0.1:6379';
+        }
+        if (getenv('REDIS_PASSWORD')) {
+            $redisPassword = getenv('REDIS_PASSWORD');
+        } else {
+            $redisPassword = '';
+        }
 
         return [
             'Array'         => [
