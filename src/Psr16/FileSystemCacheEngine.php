@@ -3,10 +3,12 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\AtomicOperationInterface;
+use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\GarbageCollectorInterface;
 use Closure;
 use DateInterval;
 use Exception;
+use Override;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -40,9 +42,9 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      * @return mixed Description
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    #[\Override]
+    #[Override]
     public function get(string $key, mixed $default = null): mixed
     {
         // Check if file is Locked
@@ -71,7 +73,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      *
      *   MUST be thrown if the $key string is not a legal value.
      */
-    #[\Override]
+    #[Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $fileKey = $this->fixKey($key);
@@ -96,7 +98,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      * @param string $key
      * @return bool
      */
-    #[\Override]
+    #[Override]
     public function delete(string $key): bool
     {
         $this->set($key, null);
@@ -106,9 +108,9 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    #[\Override]
+    #[Override]
     public function isAvailable(): bool
     {
         return is_writable(dirname($this->fixKey('test')));
@@ -117,7 +119,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     protected function fixKey(string $key): string
     {
@@ -135,9 +137,9 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      * @return bool True on success and false on failure.
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    #[\Override]
+    #[Override]
     public function clear(): bool
     {
         $patternKey = $this->fixKey('*');
@@ -161,9 +163,9 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      * @return bool
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
-     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
-    #[\Override]
+    #[Override]
     public function has(string $key): bool
     {
         $fileKey = $this->fixKey($key);
@@ -245,7 +247,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         return $returnValue;
     }
 
-    #[\Override]
+    #[Override]
     public function collectGarbage()
     {
         $patternKey = $this->fixKey('*');
@@ -264,7 +266,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     }
 
 
-    #[\Override]
+    #[Override]
     public function getTtl(string $key): ?int
     {
         $fileKey = $this->fixKey($key);
@@ -274,7 +276,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         return null;
     }
 
-    #[\Override]
+    #[Override]
     public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
         return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
@@ -282,7 +284,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         });
     }
 
-    #[\Override]
+    #[Override]
     public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
         return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
@@ -290,7 +292,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         });
     }
 
-    #[\Override]
+    #[Override]
     public function add(string $key, $value, DateInterval|int|null $ttl = null): array
     {
         return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {

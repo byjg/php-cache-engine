@@ -85,7 +85,8 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @param DateInterval|int|null $ttl
+     * @return DateInterval|int|null
      */
     protected function convertToSeconds(DateInterval|int|null $ttl): DateInterval|int|null
     {
@@ -115,7 +116,7 @@ abstract class BaseCacheEngine implements CacheInterface, CacheAvailabilityInter
         return $this->container->get($key);
     }
 
-    public function withKeysFromContainer(?ContainerInterface $container)
+    public function withKeysFromContainer(?ContainerInterface $container): static
     {
         $this->container = $container;
         return $this;

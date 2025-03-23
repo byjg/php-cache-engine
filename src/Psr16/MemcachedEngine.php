@@ -159,8 +159,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
     public function clear(): bool
     {
         $this->lazyLoadMemCachedServers();
-        $result = $this->memCached->flush();
-        return $result;
+        return $this->memCached->flush();
     }
 
     /**
@@ -180,6 +179,12 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return ($this->memCached->getResultCode() === Memcached::RES_SUCCESS);
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws StorageErrorException
+     */
     #[\Override]
     public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
@@ -200,6 +205,12 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return $result;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws StorageErrorException
+     */
     #[\Override]
     public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
@@ -220,6 +231,12 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         return $result;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws ContainerExceptionInterface
+     * @throws StorageErrorException
+     */
     #[\Override]
     public function add(string $key, $value, DateInterval|int|null $ttl = null): array
     {
