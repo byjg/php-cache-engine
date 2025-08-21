@@ -92,6 +92,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
                 }
 
                 if ($host === null || $port === null) {
+                    $this->logger->warning("[Memcached] Invalid server configuration skipped: " . json_encode($server));
                     continue; // skip invalid entry
                 }
 
