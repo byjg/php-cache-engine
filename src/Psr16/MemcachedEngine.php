@@ -72,6 +72,8 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
                     }
                     if (is_int($opt)) {
                         $this->memCached->setOption($opt, $val);
+                    } else {
+                        $this->logger->warning("[Memcached] Failed to set option {$opt} with value " . json_encode($val));
                     }
                 }
             }
