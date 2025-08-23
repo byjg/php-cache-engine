@@ -25,7 +25,9 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
 
     protected ?array $servers = null;
 
-    public function __construct(?array $servers = null, $logger = null)
+    protected ?array $options = null;
+
+    public function __construct(?array $servers = null, $logger = null, ?array $options = null)
     {
         $this->servers = (array)$servers;
         if (is_null($servers)) {
@@ -34,10 +36,12 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
             ];
         }
 
-        $this->logger = $logger;
-        if (is_null($logger)) {
+        $this->logger = $logger instanceof LoggerInterface ? $logger : null;
+        if (is_null($this->logger)) {
             $this->logger = new NullLogger();
         }
+
+        $this->options = $options;
     }
 
     /**
@@ -58,13 +62,49 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
     {
         if (is_null($this->memCached)) {
             $this->memCached = new Memcached();
-            foreach ($this->servers as $server) {
-                $data = explode(":", $server);
-                $this->memCached->addServer($data[0], intval($data[1]));
 
+            // Apply options if provided
+            if (is_array($this->options)) {
+                foreach ($this->options as $opt => $val) {
+                    // Accept both numeric keys (constants) and string keys like 'OPT_CONNECT_TIMEOUT'
+                    if (is_string($opt) && defined(Memcached::class . '::' . $opt)) {
+                        $opt = constant(Memcached::class . '::' . $opt);
+                    }
+                    if (is_int($opt)) {
+                        $this->memCached->setOption($opt, $val);
+                    } else {
+                        $this->logger->warning("[Memcached] Failed to set option {$opt} with value " . json_encode($val));
+                    }
+                }
+            }
+
+            // Add servers. Accept formats:
+            // - ['host:port', ...]
+            // - [['host', port], ...]
+            foreach ($this->servers as $server) {
+                $host = null;
+                $port = null;
+                if (is_string($server)) {
+                    $data = explode(":", $server);
+                    $host = $data[0] ?? '127.0.0.1';
+                    $port = isset($data[1]) ? intval($data[1]) : 11211;
+                } elseif (is_array($server) && isset($server[0])) {
+                    $host = (string)$server[0];
+                    $port = isset($server[1]) ? intval($server[1]) : 11211;
+                }
+
+                if ($host === null || $port === null) {
+                    $this->logger->warning("[Memcached] Invalid server configuration skipped: " . json_encode($server));
+                    continue; // skip invalid entry
+                }
+
+                $this->memCached->addServer($host, $port);
+
+                // Server health check
                 $stats = $this->memCached->getStats();
-                if (!isset($stats[$server]) || $stats[$server]['pid'] === -1) {
-                    throw new StorageErrorException("Memcached server $server is down");
+                $key = $host . ':' . $port;
+                if (!isset($stats[$key]) || (isset($stats[$key]['pid']) && $stats[$key]['pid'] === -1)) {
+                    throw new StorageErrorException("Memcached server {$key} is down");
                 }
             }
         }

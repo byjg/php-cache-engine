@@ -54,10 +54,10 @@ class Factory
         );
     }
 
-    public static function createMemcachedPool(?array $servers = null, int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
+    public static function createMemcachedPool(?array $servers = null, int $bufferSize = 10, ?LoggerInterface $logger = null, ?array $options = null): CachePool
     {
         return new CachePool(
-            new MemcachedEngine($servers, $logger),
+            new MemcachedEngine($servers, $logger, $options),
             $bufferSize
         );
     }
