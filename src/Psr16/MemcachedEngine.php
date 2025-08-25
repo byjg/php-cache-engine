@@ -52,6 +52,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
     protected function fixKey(string $key): string
     {
         $key = $this->getKeyFromContainer($key);
+        $key = preg_replace('/[^A-Za-z0-9_\-]/', '-', $key);
         return "cache-" . $key;
     }
 
