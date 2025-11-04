@@ -1,22 +1,33 @@
-# Class TmpfsCacheEngine
+---
+sidebar_position: 9
+---
 
-This class uses the Tmpfs as the cache engine.
+# TmpfsCacheEngine
+
+This class uses tmpfs as the cache engine.
 
 ## Defining the Path
 
-The TmpfsCacheEngine allows to store the cache files in the `/dev/shm` tmpfs.
+The TmpfsCacheEngine stores cache files in the `/dev/shm` tmpfs (temporary file system in RAM).
 
+:::info
+This engine extends FileSystemCacheEngine and automatically uses `/dev/shm` as the storage path for better performance.
+:::
 
 ## PSR-16 Constructor
 
 ```php
-$cache = new \ByJG\Cache\Psr16\TmpfsCacheEngine($prefix, $logger)
+$cache = new \ByJG\Cache\Psr16\TmpfsCacheEngine($prefix, $logger);
 ```
+
+**Parameters:**
+- `$prefix` (string, default: 'cache'): Prefix to avoid cache key collisions
+- `$logger` (LoggerInterface|null, default: null): PSR-3 logger instance
 
 ## PSR-6 Constructor
 
 ```php
-$cachePool = \ByJG\Cache\Factory::createTmpfsCachePool($prefix, $logger)
+$cachePool = \ByJG\Cache\Factory::createTmpfsCachePool($prefix, $logger);
 ```
 
 or

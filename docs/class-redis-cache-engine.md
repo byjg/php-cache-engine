@@ -1,6 +1,10 @@
-# Class RedisCacheEngine
+---
+sidebar_position: 7
+---
 
-This class uses the Redis as the cache engine.
+# RedisCacheEngine
+
+This class uses Redis as the cache engine.
 
 ## Defining the Servers
 

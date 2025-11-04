@@ -1,7 +1,11 @@
-# Class ArrayCacheEngine
+---
+sidebar_position: 4
+---
 
-This class is a simple cache engine that uses an array to store the values. 
-It does not persist between requests. 
+# ArrayCacheEngine
+
+This class is a simple cache engine that uses an array to store the values.
+It does not persist between requests.
 
 It is ideal to use on unit tests or when you need a simple cache engine.
 

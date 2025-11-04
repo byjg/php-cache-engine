@@ -31,7 +31,7 @@ $cache->set('key', 'value', 3600); // Cache for 1 hour
 $value = $cache->get('key');
 
 // PSR-6 Cache Pool
-$pool = \ByJG\Cache\Factory::createFilesystemPool();
+$pool = \ByJG\Cache\Factory::createFilePool();
 $item = $pool->getItem('key');
 if (!$item->isHit()) {
     $item->set('value');

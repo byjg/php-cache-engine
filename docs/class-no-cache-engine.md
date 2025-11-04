@@ -1,6 +1,10 @@
-# Class NoCacheEngine
+---
+sidebar_position: 3
+---
 
-This class don't cache. Use it for disable the cache without change your code.
+# NoCacheEngine
+
+This class doesn't cache. Use it to disable the cache without changing your code.
 
 
 ## PSR-16 Constructor

@@ -1,6 +1,10 @@
-# Class MemcachedEngine
+---
+sidebar_position: 6
+---
 
-This class uses the Memcached as the cache engine.
+# MemcachedEngine
+
+This class uses Memcached as the cache engine.
 
 ## Defining the Servers
 
