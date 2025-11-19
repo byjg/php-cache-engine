@@ -12,13 +12,20 @@ on:
 jobs:
   Build:
     runs-on: 'ubuntu-latest'
-    container: 'byjg/php:${{ matrix.php-version }}-cli'
+    container:
+      image: 'byjg/php:${{ matrix.php-version }}-cli'
+      options: --user root --privileged
     strategy:
       matrix:
         php-version:
+          - "8.4"
           - "8.3"
           - "8.2"
           - "8.1"
+
+    env:
+      MEMCACHED_SERVER: "memcached:11211"
+      REDIS_SERVER: "redis:6379"
 
     # Service containers to run 
     services:
@@ -37,10 +44,10 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: composer install
-      - run: ./vendor/bin/phpunit --stderr
       - run: ./vendor/bin/psalm
+      - run: ./vendor/bin/phpunit
 
   Documentation:
     if: github.ref == 'refs/heads/master'

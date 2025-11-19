@@ -86,6 +86,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function get(string $key, mixed $default = null): mixed
     {
        if ($default === false) {
@@ -144,6 +145,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @throws NotFoundExceptionInterface
      * @throws StorageErrorException
      */
+    #[\Override]
     public function set(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
     {
         $this->logger->info("[Shmop Cache] set '$key'");
@@ -191,6 +193,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function delete(string $key): bool
     {
         $this->logger->info("[Shmop Cache] release '$key'");
@@ -226,6 +229,7 @@ class ShmopCacheEngine extends BaseCacheEngine
         }
     }
 
+    #[\Override]
     public function clear(): bool
     {
         $patternKey = sys_get_temp_dir() . '/shmop-*.cache';
@@ -241,6 +245,7 @@ class ShmopCacheEngine extends BaseCacheEngine
      * @throws InvalidArgumentException
      * @throws NotFoundExceptionInterface
      */
+    #[\Override]
     public function has(string $key): bool
     {
         $file = $this->getFilenameToken($key);
@@ -260,6 +265,7 @@ class ShmopCacheEngine extends BaseCacheEngine
     }
 
 
+    #[\Override]
     public function isAvailable(): bool
     {
         return function_exists('shmop_open');

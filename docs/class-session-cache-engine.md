@@ -1,6 +1,10 @@
-# Class SessionCacheEngine
+---
+sidebar_position: 8
+---
 
-This class uses the PHP Session as the cache engine. 
+# SessionCacheEngine
+
+This class uses the PHP Session as the cache engine.
 This will persist the cache between requests while the user session is active.
 
 The cache is not shared between different users.

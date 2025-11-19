@@ -25,7 +25,7 @@ class CacheItem implements CacheItemInterface
     protected bool $hit;
     
     /**
-     * @var DateTime
+     * @var DateTimeInterface
      */
     protected DateTimeInterface $expiration;
 
@@ -46,6 +46,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function getKey(): string
     {
         return $this->key;
@@ -54,6 +55,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function get(): mixed
     {
         return $this->isHit() ? $this->value : null;
@@ -61,6 +63,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function set(mixed $value = null): static
     {
         $this->value = $value;
@@ -70,6 +73,7 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function isHit(): bool
     {
         return $this->hit;
@@ -77,10 +81,12 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function expiresAt(?DateTimeInterface $expiration): static
     {
         if (empty($expiration)) {
-            $this->expiration = new DateTime('now +1 year');
+            // We need to set a especific date far from now
+            $this->expiration = new DateTime('now +99 year');
             return $this;
         }
 
@@ -90,23 +96,25 @@ class CacheItem implements CacheItemInterface
     /**
      * {@inheritdoc}
      */
+    #[\Override]
     public function expiresAfter(int|\DateInterval|null $time): static
     {
-        $this->expiration = new DateTime('now +1 year');
         if (is_numeric($time)) {
-            $this->expiration = new DateTime('now +' . $time . ' seconds');
+            $this->expiresAt(new DateTime('now +' . $time . ' seconds'));
         } else if ($time instanceof DateInterval) {
             $expiration = new DateTime();
             $expiration->add($time);
-            $this->expiration = $expiration;
+            $this->expiresAt($expiration);
+        } else {
+            $this->expiresAt(null);
         }
         return $this;
     }
 
     /**
-     * @return DateTime
+     * @return ?DateTime
      */
-    public function getExpiresAt(): DateTime
+    public function getExpiresAt(): ?DateTime
     {
         return $this->expiration;
     }

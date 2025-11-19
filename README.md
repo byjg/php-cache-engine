@@ -1,84 +1,78 @@
-# Cache Engine
-
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
 
+# PHP Cache Engine
 
-A multipurpose cache engine PSR-6 and PSR-16 implementation with several drivers.
+A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.
 
-## PSR-16
- 
-PSR-16 defines a Simple Cache interface with less verbosity than PSR-6. Below a list
-of engines available in this library that is PSR-16 compliant:
+## Key Features
 
-PSR-16 Getting Started: [here](docs/basic-usage-psr16-simplecache.md)
+- **PSR-16 Simple Cache interface** - Simple, straightforward caching API
+- **PSR-6 Cache Pool interface** - More verbose caching with fine-grained control
+- **Multiple storage backends** - Choose from memory, file system, Redis, Memcached and more
+- **Atomic operations** - Support for increment, decrement and add operations in compatible engines
+- **Garbage collection** - Automatic cleanup of expired items 
+- **PSR-11 container support** - Retrieve cache keys via dependency container
+- **Logging capabilities** - PSR-3 compatible logging of cache operations
 
-## PSR-6
+## Quick Start
 
-The PSR-6 implementation use the engines defined above. PSR-6 is more verbosity and
-have an extra layer do get and set the cache values.
-
-You can use one of the factory methods to create a instance of the CachePool implementation:
-
-PSR-6 Getting Started: [here](docs/basic-usage-psr6-cachepool.md)
-
-## List of Cache Engines
-
-| Class                                                                                            | Description                                                            |
-|:-------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------|
-| [\ByJG\Cache\Psr16\NoCacheEngine](docs/class-no-cache-engine.md)                                 | Do nothing. Use it for disable the cache without change your code      |
-| [\ByJG\Cache\Psr16\ArrayCacheEngine](docs/class-array-cache-engine.md)                           | Local cache only using array. It does not persists between requests    |
-| [\ByJG\AnyDataset\NoSql\Cache\KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql) | Use S3-Like or ClouflareKV as a store for the cache (other repository) |
-| [\ByJG\Cache\Psr16\FileSystemCacheEngine](docs/class-filesystem-cache-engine.md)                 | Save the cache result in the local file system                         |
-| [\ByJG\Cache\Psr16\MemcachedEngine](docs/class-memcached-engine.md)                              | Uses the Memcached as the cache engine                                 |
-| [\ByJG\Cache\Psr16\TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                           | Uses the Tmpfs as the cache engine                                     |
-| [\ByJG\Cache\Psr16\RedisCachedEngine](docs/class-redis-cache-engine.md)                          | uses the Redis as cache                                                |
-| [\ByJG\Cache\Psr16\SessionCachedEngine](docs/class-session-cache-engine.md)                      | uses the PHP session as cache                                          |
-| [\ByJG\Cache\Psr16\ShmopCacheEngine](docs/class-shmop-cache-engine.md) (deprecated)              | uses the shared memory area for cache. Use TmpfsCacheEngine.           |
-
-
-## Logging cache commands
- 
-You can add a PSR Log compatible to the constructor in order to get Log of the operations
-
-See log examples [here](docs/setup-log-handler.md)
-
-## Use a PSR-11 container to retrieve the cache keys
-
-You can use a PSR-11 compatible to retrieve the cache keys. 
-
-See more [here](docs/psr11-usage.md)
-
-## Beyond the PSR protocol
-
-The PSR protocol is a good way to standardize the cache access, 
-but sometimes you need to go beyond the protocol.
-
-Some cache engines have additional features that are not covered by the PSR protocol.
-
-Some examples are:
-- [Atomic Operations](docs/atomic-operations.md)
-- [Garbage Collection](docs/garbage-collection.md)
-
-## Install
-
-Just type: 
-
-```
+```bash
 composer require "byjg/cache-engine"
 ```
 
+```php
+// PSR-16 Simple Cache
+$cache = new \ByJG\Cache\Psr16\FileSystemCacheEngine();
+$cache->set('key', 'value', 3600); // Cache for 1 hour
+$value = $cache->get('key');
 
-## Running Unit Testes
+// PSR-6 Cache Pool
+$pool = \ByJG\Cache\Factory::createFilePool();
+$item = $pool->getItem('key');
+if (!$item->isHit()) {
+    $item->set('value');
+    $item->expiresAfter(3600);
+    $pool->save($item);
+}
+$value = $item->get();
+```
+
+## Documentation
+
+### Getting Started
+- [PSR-16 Simple Cache Usage](docs/basic-usage-psr16-simplecache.md)
+- [PSR-6 Cache Pool Usage](docs/basic-usage-psr6-cachepool.md)
+
+### Available Cache Engines
+| Engine                                                              | Description                                             |
+|:--------------------------------------------------------------------|:--------------------------------------------------------|
+| [NoCacheEngine](docs/class-no-cache-engine.md)                      | No-op engine for disabling cache without code changes   |
+| [ArrayCacheEngine](docs/class-array-cache-engine.md)                | In-memory array cache (non-persistent between requests) |
+| [FileSystemCacheEngine](docs/class-filesystem-cache-engine.md)      | File system based caching                               |
+| [MemcachedEngine](docs/class-memcached-engine.md)                   | Memcached distributed caching                           |
+| [RedisCacheEngine](docs/class-redis-cache-engine.md)                | Redis-based caching                                     |
+| [SessionCacheEngine](docs/class-session-cache-engine.md)            | PHP session-based caching                               |
+| [TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                | Tmpfs-based caching                                     |
+| [ShmopCacheEngine](docs/class-shmop-cache-engine.md)                | Shared memory caching (deprecated)                      |
+| [KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql) | S3-Like or CloudflareKV storage (separate package)      |
+
+### Advanced Features
+- [Atomic Operations](docs/atomic-operations.md)
+- [Garbage Collection](docs/garbage-collection.md)
+- [Logging](docs/setup-log-handler.md)
+- [PSR-11 Container Usage](docs/psr11-usage.md)
+
+## Running Unit Tests
 
 ```
 vendor/bin/phpunit --stderr
 ```
 
-**Note:** the parameter `--stderr` after `phpunit` is to permit run the tests on SessionCacheEngine.  
+**Note:** The `--stderr` parameter is required for SessionCacheEngine tests to run properly.
 
 ## Dependencies
 
@@ -89,5 +83,6 @@ flowchart TD
     byjg/cache-engine --> psr/simple-cache
     byjg/cache-engine --> psr/container
 ```
+
 ----
 [Open source ByJG](http://opensource.byjg.com)

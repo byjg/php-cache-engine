@@ -1,18 +1,22 @@
-# Basic Usage - Psr6 Cache Pool
+---
+sidebar_position: 2
+---
 
-## Get an element from cache (using Factory...)
+# Basic Usage - PSR-6 Cache Pool
+
+## Get an element from cache (using Factory)
 
 ```php
 <?php
 $pool = \ByJG\Cache\Factory::createMemcachedPool();
 $item = $pool->getItem('mykey');
 if (!$item->isHit()) {
-    // Do the operations will be cached
+    // Do the operations that will be cached
     // ....
     // And set variable '$value'
     $value = "...";
     $item->set($value);
-    $item->expiresAfter(3600);
+    $item->expiresAfter(3600); // Cache for 1 hour
 
     $pool->save($item);
 }

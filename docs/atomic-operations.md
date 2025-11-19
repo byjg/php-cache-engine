@@ -1,24 +1,28 @@
+---
+sidebar_position: 11
+---
+
 # Atomic Operations
 
 Some cache engines allow you to do atomic operations such as incrementing or decrementing a value.
 
-Besides this is not cache operation, it is a common operation in cache engines.
+Although this is not a traditional cache operation, it is a common operation in cache engines.
 
-The advantage of using atomic operations is that you can avoid race conditions when multiple processes 
+The advantage of using atomic operations is that you can avoid race conditions when multiple processes
 are trying to update the same value.
 
-The atomic operations are:
-- Increment: Increment a value by a given number
-- Decrement: Decrement a value by a given number
-- Add: Add a value to a list in the cache
+**Available atomic operations:**
+- **Increment**: Increment a value by a given number
+- **Decrement**: Decrement a value by a given number
+- **Add**: Add a value to a list in the cache
 
-The engines that support atomic operations have to implement the `AtomicOperationInterface`.
+The engines that support atomic operations implement the `AtomicOperationInterface`.
 
-Some engines that support atomic operations are:
-- RedisCachedEngine
+**Engines that support atomic operations:**
+- RedisCacheEngine
 - MemcachedEngine
-- TmpfsCacheEngine
 - FileSystemCacheEngine
+- TmpfsCacheEngine (inherits from FileSystemCacheEngine)
 
 ## Increment
 

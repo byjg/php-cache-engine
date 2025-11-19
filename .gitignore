@@ -5,3 +5,5 @@ vendor
 config/cacheconfig.php
 .idea
 .phpunit.result.cache
+/phpunit.xml.dist.bak
+/.claude/settings.local.json
