@@ -1,6 +1,6 @@
 {
   "name": "byjg/cache-engine",
-  "description": "A multi-purpose cache engine PSR-6 and PSR-16 implementation with several drivers.",
+  "description": "A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.",
   "autoload": {
     "psr-4": {
       "ByJG\\Cache\\": "src/"
@@ -12,15 +12,15 @@
     }
   },
   "require": {
-    "php": ">=8.1 <8.5",
+    "php": ">=8.1 <8.6",
     "psr/cache": "^1.0|^2.0|^3.0",
     "psr/log": "^1.0|^2.0|^3.0",
     "psr/simple-cache": "^1.0|^2.0",
     "psr/container": "^1.0|^1.1|^2.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^10.5|^11.5",
-    "vimeo/psalm": "^5.9|^6.2"
+    "phpunit/phpunit": "^9.6|^10.5|^11.5",
+    "vimeo/psalm": "^5.9|^6.13"
   },
   "suggest": {
     "ext-memcached": "*",
@@ -33,7 +33,9 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "psalm": "vendor/bin/psalm"
+    "psalm": "vendor/bin/psalm --threads=1"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "prefer-stable": true,
+  "minimum-stability": "dev"
 }
