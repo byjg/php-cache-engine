@@ -159,12 +159,13 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
     #[\Override]
     public function clear(): bool
     {
-        $keys = $this->redis->keys('cache:*');
-        foreach ($keys as $key) {
-            if (preg_match('/^cache:(?<key>.*)/', $key, $matches)) {
-                $this->delete($matches['key']);
+        $iterator = null;
+        do {
+            $keys = $this->redis->scan($iterator, 'cache:*');
+            foreach($keys as $key) {
+                $this->delete(substr($key, 6));
             }
-        }
+        } while($iterator !== 0);
         return true;
     }
 
