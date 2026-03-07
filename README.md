@@ -1,4 +1,10 @@
+---
+tags: [php, databases, cache]
+---
+
 # Cache Engine
+
+A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
@@ -6,8 +12,6 @@
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
-
-A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.
 
 ## Key Features
 
@@ -45,27 +49,27 @@ $value = $item->get();
 ## Documentation
 
 ### Getting Started
-- [PSR-16 Simple Cache Usage](docs/basic-usage-psr16-simplecache.md)
-- [PSR-6 Cache Pool Usage](docs/basic-usage-psr6-cachepool.md)
+- [PSR-16 Simple Cache Usage](basic-usage-psr16-simplecache)
+- [PSR-6 Cache Pool Usage](basic-usage-psr6-cachepool)
 
 ### Available Cache Engines
 | Engine                                                              | Description                                             |
 |:--------------------------------------------------------------------|:--------------------------------------------------------|
-| [NoCacheEngine](docs/class-no-cache-engine.md)                      | No-op engine for disabling cache without code changes   |
-| [ArrayCacheEngine](docs/class-array-cache-engine.md)                | In-memory array cache (non-persistent between requests) |
-| [FileSystemCacheEngine](docs/class-filesystem-cache-engine.md)      | File system based caching                               |
-| [MemcachedEngine](docs/class-memcached-engine.md)                   | Memcached distributed caching                           |
-| [RedisCacheEngine](docs/class-redis-cache-engine.md)                | Redis-based caching                                     |
-| [SessionCacheEngine](docs/class-session-cache-engine.md)            | PHP session-based caching                               |
-| [TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                | Tmpfs-based caching                                     |
-| [ShmopCacheEngine](docs/class-shmop-cache-engine.md)                | Shared memory caching (deprecated)                      |
+| [NoCacheEngine](class-no-cache-engine)                      | No-op engine for disabling cache without code changes   |
+| [ArrayCacheEngine](class-array-cache-engine)                | In-memory array cache (non-persistent between requests) |
+| [FileSystemCacheEngine](class-filesystem-cache-engine)      | File system based caching                               |
+| [MemcachedEngine](class-memcached-engine)                   | Memcached distributed caching                           |
+| [RedisCacheEngine](class-redis-cache-engine)                | Redis-based caching                                     |
+| [SessionCacheEngine](class-session-cache-engine)            | PHP session-based caching                               |
+| [TmpfsCacheEngine](class-tmpfs-cache-engine)                | Tmpfs-based caching                                     |
+| [ShmopCacheEngine](class-shmop-cache-engine)                | Shared memory caching (deprecated)                      |
 | [KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql) | S3-Like or CloudflareKV storage (separate package)      |
 
 ### Advanced Features
-- [Atomic Operations](docs/atomic-operations.md)
-- [Garbage Collection](docs/garbage-collection.md)
-- [Logging](docs/setup-log-handler.md)
-- [PSR-11 Container Usage](docs/psr11-usage.md)
+- [Atomic Operations](atomic-operations)
+- [Garbage Collection](garbage-collection)
+- [Logging](setup-log-handler)
+- [PSR-11 Container Usage](psr11-usage)
 
 ## Running Unit Tests
 
