@@ -1,4 +1,11 @@
+---
+sidebar_key: cache-engine
+tags: [php, databases, cache]
+---
+
 # Cache Engine
+
+A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
@@ -6,8 +13,6 @@
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
-
-A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.
 
 ## Key Features
 
