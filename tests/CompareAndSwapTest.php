@@ -4,8 +4,6 @@ namespace Tests;
 
 use ByJG\Cache\CompareAndSwapInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
-use ByJG\Cache\Psr16\MemcachedEngine;
-use ByJG\Cache\Psr16\RedisCacheEngine;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -17,8 +15,8 @@ class CompareAndSwapTest extends TestCase
     public static function engineProvider(): array
     {
         return [
-            'redis' => [new RedisCacheEngine()],
-            'memcached' => [new MemcachedEngine()],
+            'redis' => [EngineFactory::REDIS],
+            'memcached' => [EngineFactory::MEMCACHED],
         ];
     }
 
@@ -35,13 +33,12 @@ class CompareAndSwapTest extends TestCase
      * Skips instead of failing so the suite still runs without the docker-compose services up,
      * which is how the rest of this test suite treats an unreachable backend.
      */
-    private function engineOrSkip(BaseCacheEngine $engine): CompareAndSwapInterface
+    private function engineOrSkip(string $engineName): BaseCacheEngine&CompareAndSwapInterface
     {
+        $engine = EngineFactory::make($engineName);
         if (!$engine->isAvailable()) {
             $this->markTestSkipped(get_class($engine) . ' is not available');
         }
-
-        $this->assertInstanceOf(CompareAndSwapInterface::class, $engine);
 
         $this->started[] = $engine;
         $engine->delete('cas-key');
@@ -50,60 +47,60 @@ class CompareAndSwapTest extends TestCase
     }
 
     #[DataProvider('engineProvider')]
-    public function testSetIfAbsentSucceedsOnlyForTheFirstCaller(BaseCacheEngine $engine): void
+    public function testSetIfAbsentSucceedsOnlyForTheFirstCaller(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $this->assertTrue($cas->setIfAbsent('cas-key', 'token-a', 30));
-        $this->assertFalse($cas->setIfAbsent('cas-key', 'token-b', 30));
+        $this->assertTrue($engine->setIfAbsent('cas-key', 'token-a', 30));
+        $this->assertFalse($engine->setIfAbsent('cas-key', 'token-b', 30));
         $this->assertEquals('token-a', $engine->get('cas-key'), 'The loser must not have overwritten the winner');
     }
 
     #[DataProvider('engineProvider')]
-    public function testSetIfAbsentSucceedsAgainOnceTheTtlHasPassed(BaseCacheEngine $engine): void
+    public function testSetIfAbsentSucceedsAgainOnceTheTtlHasPassed(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $this->assertTrue($cas->setIfAbsent('cas-key', 'token-a', 1));
-        $this->assertFalse($cas->setIfAbsent('cas-key', 'token-b', 1));
+        $this->assertTrue($engine->setIfAbsent('cas-key', 'token-a', 1));
+        $this->assertFalse($engine->setIfAbsent('cas-key', 'token-b', 1));
 
         sleep(2);
 
-        $this->assertTrue($cas->setIfAbsent('cas-key', 'token-b', 30));
+        $this->assertTrue($engine->setIfAbsent('cas-key', 'token-b', 30));
         $this->assertEquals('token-b', $engine->get('cas-key'));
     }
 
     #[DataProvider('engineProvider')]
-    public function testSetIfAbsentAppliesTheTtlWithTheWrite(BaseCacheEngine $engine): void
+    public function testSetIfAbsentAppliesTheTtlWithTheWrite(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $cas->setIfAbsent('cas-key', 'token-a', 1);
+        $engine->setIfAbsent('cas-key', 'token-a', 1);
         sleep(2);
 
         $this->assertNull($engine->get('cas-key'), 'The key must expire on its own, with no second command');
     }
 
     #[DataProvider('engineProvider')]
-    public function testDeleteIfEqualsOnlyRemovesTheMatchingValue(BaseCacheEngine $engine): void
+    public function testDeleteIfEqualsOnlyRemovesTheMatchingValue(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $cas->setIfAbsent('cas-key', 'token-a', 30);
+        $engine->setIfAbsent('cas-key', 'token-a', 30);
 
-        $this->assertFalse($cas->deleteIfEquals('cas-key', 'token-b'));
+        $this->assertFalse($engine->deleteIfEquals('cas-key', 'token-b'));
         $this->assertEquals('token-a', $engine->get('cas-key'), 'A non-matching caller must not delete');
 
-        $this->assertTrue($cas->deleteIfEquals('cas-key', 'token-a'));
+        $this->assertTrue($engine->deleteIfEquals('cas-key', 'token-a'));
         $this->assertNull($engine->get('cas-key'));
     }
 
     #[DataProvider('engineProvider')]
-    public function testDeleteIfEqualsOnAMissingKeyReturnsFalse(BaseCacheEngine $engine): void
+    public function testDeleteIfEqualsOnAMissingKeyReturnsFalse(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $this->assertFalse($cas->deleteIfEquals('cas-key', 'token-a'));
+        $this->assertFalse($engine->deleteIfEquals('cas-key', 'token-a'));
     }
 
     /**
@@ -111,26 +108,26 @@ class CompareAndSwapTest extends TestCase
      * delete the key that somebody else has legitimately taken over in the meantime.
      */
     #[DataProvider('engineProvider')]
-    public function testAnExpiredOwnerCannotDeleteTheNewOwnersValue(BaseCacheEngine $engine): void
+    public function testAnExpiredOwnerCannotDeleteTheNewOwnersValue(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $cas->setIfAbsent('cas-key', 'stale-owner', 1);
+        $engine->setIfAbsent('cas-key', 'stale-owner', 1);
         sleep(2);
-        $this->assertTrue($cas->setIfAbsent('cas-key', 'new-owner', 30));
+        $this->assertTrue($engine->setIfAbsent('cas-key', 'new-owner', 30));
 
-        $this->assertFalse($cas->deleteIfEquals('cas-key', 'stale-owner'));
-        $this->assertFalse($cas->expireIfEquals('cas-key', 'stale-owner', 30));
+        $this->assertFalse($engine->deleteIfEquals('cas-key', 'stale-owner'));
+        $this->assertFalse($engine->expireIfEquals('cas-key', 'stale-owner', 30));
         $this->assertEquals('new-owner', $engine->get('cas-key'));
     }
 
     #[DataProvider('engineProvider')]
-    public function testExpireIfEqualsExtendsTheLifetimeOfAMatchingValue(BaseCacheEngine $engine): void
+    public function testExpireIfEqualsExtendsTheLifetimeOfAMatchingValue(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $cas->setIfAbsent('cas-key', 'token-a', 1);
-        $this->assertTrue($cas->expireIfEquals('cas-key', 'token-a', 30));
+        $engine->setIfAbsent('cas-key', 'token-a', 1);
+        $this->assertTrue($engine->expireIfEquals('cas-key', 'token-a', 30));
 
         sleep(2);
 
@@ -138,12 +135,12 @@ class CompareAndSwapTest extends TestCase
     }
 
     #[DataProvider('engineProvider')]
-    public function testExpireIfEqualsIsRejectedForANonMatchingValue(BaseCacheEngine $engine): void
+    public function testExpireIfEqualsIsRejectedForANonMatchingValue(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $cas->setIfAbsent('cas-key', 'token-a', 1);
-        $this->assertFalse($cas->expireIfEquals('cas-key', 'token-b', 30));
+        $engine->setIfAbsent('cas-key', 'token-a', 1);
+        $this->assertFalse($engine->expireIfEquals('cas-key', 'token-b', 30));
 
         sleep(2);
 
@@ -151,14 +148,14 @@ class CompareAndSwapTest extends TestCase
     }
 
     #[DataProvider('engineProvider')]
-    public function testSetIfAbsentRoundTripsNonScalarValues(BaseCacheEngine $engine): void
+    public function testSetIfAbsentRoundTripsNonScalarValues(string $engineName): void
     {
-        $cas = $this->engineOrSkip($engine);
+        $engine = $this->engineOrSkip($engineName);
 
-        $this->assertTrue($cas->setIfAbsent('cas-key', ['a' => 1, 'b' => 2], 30));
+        $this->assertTrue($engine->setIfAbsent('cas-key', ['a' => 1, 'b' => 2], 30));
         $this->assertEquals(['a' => 1, 'b' => 2], $engine->get('cas-key'));
 
-        $this->assertFalse($cas->deleteIfEquals('cas-key', ['a' => 1]));
-        $this->assertTrue($cas->deleteIfEquals('cas-key', ['a' => 1, 'b' => 2]));
+        $this->assertFalse($engine->deleteIfEquals('cas-key', ['a' => 1]));
+        $this->assertTrue($engine->deleteIfEquals('cas-key', ['a' => 1, 'b' => 2]));
     }
 }

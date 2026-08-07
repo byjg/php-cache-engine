@@ -4,8 +4,6 @@ namespace Tests;
 
 use ByJG\Cache\CompareAndSwapInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
-use ByJG\Cache\Psr16\MemcachedEngine;
-use ByJG\Cache\Psr16\RedisCacheEngine;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
@@ -26,8 +24,8 @@ class ConcurrencyTest extends TestCase
     public static function engineProvider(): array
     {
         return [
-            'redis' => [RedisCacheEngine::class],
-            'memcached' => [MemcachedEngine::class],
+            'redis' => [EngineFactory::REDIS],
+            'memcached' => [EngineFactory::MEMCACHED],
         ];
     }
 
@@ -82,11 +80,11 @@ class ConcurrencyTest extends TestCase
      * back results: the children inherit the parent's open socket and close it as they exit, which
      * leaves the parent's own connection dead. That is a property of forking, not of the engine.
      */
-    private function engineOrSkip(string $engineClass): BaseCacheEngine
+    private function engineOrSkip(string $engineName): BaseCacheEngine&CompareAndSwapInterface
     {
-        $engine = new $engineClass();
+        $engine = EngineFactory::make($engineName);
         if (!$engine->isAvailable()) {
-            $this->markTestSkipped("$engineClass is not available");
+            $this->markTestSkipped("$engineName is not available");
         }
 
         return $engine;
@@ -97,13 +95,12 @@ class ConcurrencyTest extends TestCase
      * A has()-then-set() implementation lets several win here.
      */
     #[DataProvider('engineProvider')]
-    public function testExactlyOneProcessWinsSetIfAbsent(string $engineClass): void
+    public function testExactlyOneProcessWinsSetIfAbsent(string $engineName): void
     {
-        $this->engineOrSkip($engineClass)->delete('race-lock');
+        $this->engineOrSkip($engineName)->delete('race-lock');
 
-        $codes = $this->fork(function (int $i) use ($engineClass): bool {
-            /** @var CompareAndSwapInterface $engine */
-            $engine = new $engineClass();
+        $codes = $this->fork(function (int $i) use ($engineName): bool {
+            $engine = EngineFactory::make($engineName);
             return $engine->setIfAbsent('race-lock', "token-$i", 60);
         });
 
@@ -117,19 +114,19 @@ class ConcurrencyTest extends TestCase
      * increment and resets the counter, so the value 1 gets issued twice.
      */
     #[DataProvider('engineProvider')]
-    public function testIncrementNeverIssuesTheSameValueTwice(string $engineClass): void
+    public function testIncrementNeverIssuesTheSameValueTwice(string $engineName): void
     {
-        $this->engineOrSkip($engineClass)->delete('race-counter');
+        $this->engineOrSkip($engineName)->delete('race-counter');
 
-        $this->fork(function () use ($engineClass): bool {
-            $engine = new $engineClass();
+        $this->fork(function () use ($engineName): bool {
+            $engine = EngineFactory::make($engineName);
             $engine->increment('race-counter');
             return true;
         });
 
         $this->assertEquals(
             self::CHILDREN,
-            $this->engineOrSkip($engineClass)->get('race-counter'),
+            $this->engineOrSkip($engineName)->get('race-counter'),
             'Every increment must be reflected exactly once in the final counter'
         );
     }
@@ -139,17 +136,17 @@ class ConcurrencyTest extends TestCase
      * updates landed between another process's read and its write.
      */
     #[DataProvider('engineProvider')]
-    public function testConcurrentAddLosesNothing(string $engineClass): void
+    public function testConcurrentAddLosesNothing(string $engineName): void
     {
-        $this->engineOrSkip($engineClass)->delete('race-list');
+        $this->engineOrSkip($engineName)->delete('race-list');
 
-        $this->fork(function (int $i) use ($engineClass): bool {
-            $engine = new $engineClass();
+        $this->fork(function (int $i) use ($engineName): bool {
+            $engine = EngineFactory::make($engineName);
             $engine->add('race-list', "item-$i");
             return true;
         });
 
-        $stored = $this->engineOrSkip($engineClass)->get('race-list');
+        $stored = $this->engineOrSkip($engineName)->get('race-list');
         $this->assertIsArray($stored);
         $this->assertCount(self::CHILDREN, $stored, 'Every appended item must still be present');
 
@@ -165,19 +162,19 @@ class ConcurrencyTest extends TestCase
      * mid-way through rebuilding, which both duplicates the original value and drops appends.
      */
     #[DataProvider('engineProvider')]
-    public function testConcurrentAddSurvivesTheConversionFromAPlainValue(string $engineClass): void
+    public function testConcurrentAddSurvivesTheConversionFromAPlainValue(string $engineName): void
     {
-        $setup = $this->engineOrSkip($engineClass);
+        $setup = $this->engineOrSkip($engineName);
         $setup->delete('race-convert');
         $setup->set('race-convert', 'seed');
 
-        $this->fork(function (int $i) use ($engineClass): bool {
-            $engine = new $engineClass();
+        $this->fork(function (int $i) use ($engineName): bool {
+            $engine = EngineFactory::make($engineName);
             $engine->add('race-convert', "item-$i");
             return true;
         });
 
-        $stored = $this->engineOrSkip($engineClass)->get('race-convert');
+        $stored = $this->engineOrSkip($engineName)->get('race-convert');
         $this->assertIsArray($stored);
 
         sort($stored);
@@ -191,22 +188,20 @@ class ConcurrencyTest extends TestCase
      * remove it, no matter how many others try at the same instant.
      */
     #[DataProvider('engineProvider')]
-    public function testOnlyTheOwnerCanDeleteUnderContention(string $engineClass): void
+    public function testOnlyTheOwnerCanDeleteUnderContention(string $engineName): void
     {
-        /** @var BaseCacheEngine&CompareAndSwapInterface $setup */
-        $setup = $this->engineOrSkip($engineClass);
+        $setup = $this->engineOrSkip($engineName);
         $setup->delete('race-owned');
         $setup->setIfAbsent('race-owned', 'the-owner', 60);
 
-        $codes = $this->fork(function (int $i) use ($engineClass): bool {
-            /** @var CompareAndSwapInterface $engine */
-            $engine = new $engineClass();
+        $codes = $this->fork(function (int $i) use ($engineName): bool {
+            $engine = EngineFactory::make($engineName);
             return $engine->deleteIfEquals('race-owned', "impostor-$i");
         });
 
         $this->assertSame(0, count(array_filter($codes, fn($code) => $code === 0)), 'No impostor may succeed');
 
-        $verify = $this->engineOrSkip($engineClass);
+        $verify = $this->engineOrSkip($engineName);
         $this->assertEquals('the-owner', $verify->get('race-owned'), 'The key must be untouched');
         $verify->delete('race-owned');
     }
