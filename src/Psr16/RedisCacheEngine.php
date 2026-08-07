@@ -233,6 +233,8 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
     #[\Override]
     public function clear(): bool
     {
+        $this->lazyLoadRedisServer();
+
         $iterator = null;
         do {
             $keys = $this->redis->scan($iterator, 'cache:*');
@@ -252,6 +254,8 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
     #[\Override]
     public function has(string $key): bool
     {
+        $this->lazyLoadRedisServer();
+
         $result = $this->redis->exists($this->fixKey($key));
         return (bool)$result;
     }
