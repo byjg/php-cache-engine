@@ -93,6 +93,26 @@ process already converted it.
 `increment()` and `decrement()` set the expiry with a follow-up `EXPIRE`. A crash between the two
 left a counter with no expiry at all. Both now apply it inside the script.
 
+### `psr/simple-cache` 3.0 is now allowed
+
+The engines already declare the PSR-16 3.0 signatures, but the constraint stopped at `^2.0`, so the
+package could not be installed alongside anything requiring `psr/simple-cache ^3.0`. The constraint
+is now `^2.0|^3.0`.
+
+### Redis: `has()` and `clear()` never opened the connection
+
+Both read `$this->redis` without calling `lazyLoadRedisServer()` first. Every other public method
+established the connection; these two were missed. Calling either as the first operation on a new
+instance died with:
+
+```
+Error: Call to a member function exists() on null
+```
+
+It went unnoticed because in practice something else — `isAvailable()`, `get()`, `set()` — almost
+always ran first and left the connection open. A regression test now exercises each entry point on
+an instance that has never been touched.
+
 ### FileSystem: expiry dropped outside the lock
 
 `putContents()` deleted the `.ttl` file before acquiring the lock, leaving the value briefly
