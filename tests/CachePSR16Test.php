@@ -6,7 +6,9 @@ use ByJG\Cache\AtomicOperationInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\GarbageCollectorInterface;
 use ByJG\Cache\Psr16\BaseCacheEngine;
+use ByJG\Cache\Psr16\MemcachedEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
+use ByJG\Cache\Psr16\RedisCacheEngine;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class CachePSR16Test extends TestBase
@@ -394,6 +396,59 @@ class CachePSR16Test extends TestBase
 
         } else {
             $this->markTestIncomplete('Does not support atomic add or it is native');
+        }
+    }
+
+    /**
+     * Every public method has to establish the connection on its own. RedisCacheEngine::has() and
+     * clear() read $this->redis without calling lazyLoadRedisServer() first, so either one used as
+     * the very first operation on a new instance died with "call to a member function on null".
+     *
+     * Each assertion needs an instance that has never been touched, so the engines are constructed
+     * here rather than taken from the shared data provider.
+     */
+    public function testEveryEntryPointConnectsOnItsOwn()
+    {
+        if (!(new RedisCacheEngine())->isAvailable()) {
+            $this->markTestSkipped('Redis is not available');
+        }
+
+        $this->assertFalse((new RedisCacheEngine())->has('never-touched-key'));
+        $this->assertTrue((new RedisCacheEngine())->clear());
+
+        $this->assertFalse((new MemcachedEngine())->has('never-touched-key'));
+        $this->assertTrue((new MemcachedEngine())->clear());
+    }
+
+    /**
+     * The TTL argument of the atomic operations has to mean the same thing it means everywhere
+     * else: seconds from now. FileSystem used to hand it straight to the expiry file, which stores
+     * an absolute timestamp, so a value written with a TTL of 60 expired in January 1970 and the
+     * key was already unreadable by the time the caller looked at it.
+     *
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    #[DataProvider('CachePoolProvider')]
+    public function testAtomicOperationsHonourTheTtl(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $this->assertEquals(1, $cacheEngine->increment('ttl-counter', 1, 30));
+            $this->assertEquals(2, $cacheEngine->increment('ttl-counter', 1, 30));
+            $this->assertEquals(2, $cacheEngine->get('ttl-counter'), 'A 30s TTL must still be alive');
+
+            $this->assertEquals(['x'], $cacheEngine->add('ttl-list', 'x', 30));
+            $this->assertEquals(['x'], $cacheEngine->get('ttl-list'), 'A 30s TTL must still be alive');
+
+            $cacheEngine->increment('expiring-counter', 1, 1);
+            $cacheEngine->add('expiring-list', 'x', 1);
+            sleep(2);
+            $this->assertNull($cacheEngine->get('expiring-counter'), 'A 1s TTL must have elapsed');
+            $this->assertNull($cacheEngine->get('expiring-list'), 'A 1s TTL must have elapsed');
+        } else {
+            $this->markTestIncomplete('Does not support atomic operations or it is native');
         }
     }
 }
