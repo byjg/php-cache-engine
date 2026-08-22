@@ -19,8 +19,7 @@
     "psr/container": "^1.0|^1.1|^2.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^12.5",
-    "vimeo/psalm": "^6.16"
+    "phpunit/phpunit": "^12.5"
   },
   "suggest": {
     "ext-memcached": "*",
@@ -33,7 +32,10 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "psalm": "vendor/bin/psalm --threads=1"
+    "psalm": [
+      "@composer --working-dir=tools/psalm update --no-interaction",
+      "tools/psalm/vendor/bin/psalm --threads=1"
+    ]
   },
   "license": "MIT",
   "prefer-stable": true,
