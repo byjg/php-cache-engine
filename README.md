@@ -11,7 +11,7 @@ A powerful, versatile cache implementation providing both PSR-6 and PSR-16 inter
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
-[![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
 
 ## Key Features
@@ -81,16 +81,6 @@ vendor/bin/phpunit --stderr
 ```
 
 **Note:** The `--stderr` parameter is required for SessionCacheEngine tests to run properly.
-
-## Dependencies
-
-```mermaid
-flowchart TD
-    byjg/cache-engine --> psr/cache
-    byjg/cache-engine --> psr/log
-    byjg/cache-engine --> psr/simple-cache
-    byjg/cache-engine --> psr/container
-```
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
