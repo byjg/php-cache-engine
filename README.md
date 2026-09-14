@@ -11,7 +11,7 @@ A powerful, versatile cache implementation providing both PSR-6 and PSR-16 inter
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
-[![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
 
 ## Key Features
@@ -20,6 +20,7 @@ A powerful, versatile cache implementation providing both PSR-6 and PSR-16 inter
 - **PSR-6 Cache Pool interface** - More verbose caching with fine-grained control
 - **Multiple storage backends** - Choose from memory, file system, Redis, Memcached and more
 - **Atomic operations** - Support for increment, decrement and add operations in compatible engines
+- **Compare and swap** - Conditional writes for correct distributed locking on Redis and Memcached
 - **Garbage collection** - Automatic cleanup of expired items 
 - **PSR-11 container support** - Retrieve cache keys via dependency container
 - **Logging capabilities** - PSR-3 compatible logging of cache operations
@@ -68,6 +69,7 @@ $value = $item->get();
 
 ### Advanced Features
 - [Atomic Operations](docs/atomic-operations.md)
+- [Compare and Swap](docs/compare-and-swap.md)
 - [Garbage Collection](docs/garbage-collection.md)
 - [Logging](docs/setup-log-handler.md)
 - [PSR-11 Container Usage](docs/psr11-usage.md)
@@ -79,16 +81,6 @@ vendor/bin/phpunit --stderr
 ```
 
 **Note:** The `--stderr` parameter is required for SessionCacheEngine tests to run properly.
-
-## Dependencies
-
-```mermaid
-flowchart TD
-    byjg/cache-engine --> psr/cache
-    byjg/cache-engine --> psr/log
-    byjg/cache-engine --> psr/simple-cache
-    byjg/cache-engine --> psr/container
-```
 
 ----
 [Open source ByJG](http://opensource.byjg.com)

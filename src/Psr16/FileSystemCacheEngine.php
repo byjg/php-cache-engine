@@ -211,11 +211,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     {
         $returnValue = true;
 
-        if (file_exists("$fileKey.ttl")) {
-            unlink("$fileKey.ttl");
-        }
-
         if (is_null($value)) {
+            if (file_exists("$fileKey.ttl")) {
+                unlink("$fileKey.ttl");
+            }
             if (file_exists($fileKey)) {
                 unlink($fileKey);
             }
@@ -226,13 +225,16 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         $waitIfLocked = 1;
         $lock = flock($fo, LOCK_EX, $waitIfLocked);
         try {
+            // Expiry is dropped and rewritten under the lock. Doing it before acquiring the lock
+            // left the value briefly immortal, and a reader arriving in that window saw a key that
+            // should already have expired.
+            if (file_exists("$fileKey.ttl")) {
+                unlink("$fileKey.ttl");
+            }
+
             if (!is_null($operation)) {
-                if (!file_exists($fileKey)) {
-                    $currentValue = 0;
-                } else {
-                    $content = file_get_contents($fileKey);
-                    $currentValue = !empty($content) ? unserialize($content) : $content;
-                }
+                $content = file_get_contents($fileKey);
+                $currentValue = !empty($content) ? unserialize($content) : 0;
                 $value = $returnValue = $operation($currentValue, $value);
             }
             file_put_contents($fileKey, serialize($value));
@@ -279,7 +281,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
-        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+        // addToNow() is what turns a relative TTL into the absolute timestamp the .ttl file holds.
+        // Passing the raw $ttl through wrote "60" as the expiry, i.e. a moment in 1970, so any
+        // counter created with a TTL was already expired by the time it was written.
+        return $this->putContents($this->fixKey($key), $value, $this->addToNow($ttl), function ($currentValue, $value) {
             return intval($currentValue) + $value;
         });
     }
@@ -287,7 +292,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
-        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+        return $this->putContents($this->fixKey($key), $value, $this->addToNow($ttl), function ($currentValue, $value) {
             return intval($currentValue) - $value;
         });
     }
@@ -295,7 +300,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function add(string $key, $value, DateInterval|int|null $ttl = null): array
     {
-        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+        return $this->putContents($this->fixKey($key), $value, $this->addToNow($ttl), function ($currentValue, $value) {
             if (empty($currentValue)) {
                 return [$value];
             }

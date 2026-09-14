@@ -24,6 +24,13 @@ The engines that support atomic operations implement the `AtomicOperationInterfa
 - FileSystemCacheEngine
 - TmpfsCacheEngine (inherits from FileSystemCacheEngine)
 
+These operations read and modify a value in one step. If what you need instead is a *conditional*
+write — "store this only if the key is free", "delete this only if it is still mine" — see
+[Compare and Swap](compare-and-swap.md).
+
+All three operations accept an optional TTL, expressed in seconds from now (or as a `DateInterval`),
+and apply it as part of the same operation.
+
 ## Increment
 
 The increment operation is used to increment a value by a given number.
@@ -57,4 +64,16 @@ $cache->add('my-key', 'value3');
 
 print_r($cache->get('my-key')); // ['value1', 'value2', 'value3']
 ```
+
+If the key already holds a plain value written by `set()`, the first `add()` converts it into a
+list and keeps the original value as the first element:
+
+```php
+<?php
+$cache->set('my-key', 'value1');
+$cache->add('my-key', 'value2');
+
+print_r($cache->get('my-key')); // ['value1', 'value2']
+```
+
 
