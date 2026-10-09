@@ -5,9 +5,7 @@ namespace Tests;
 use ByJG\Cache\Psr16\ArrayCacheEngine;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\FileSystemCacheEngine;
-use ByJG\Cache\Psr16\MemcachedEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
-use ByJG\Cache\Psr16\RedisCacheEngine;
 use ByJG\Cache\Psr16\SessionCacheEngine;
 use ByJG\Cache\Psr16\ShmopCacheEngine;
 use ByJG\Cache\Psr16\TmpfsCacheEngine;
@@ -32,22 +30,6 @@ abstract class TestBase extends TestCase
 
     public static function CachePoolProvider()
     {
-        if (getenv('MEMCACHED_SERVER')) {
-            $memcachedServer = [getenv('MEMCACHED_SERVER')];
-        } else {
-            $memcachedServer = ['127.0.0.1:11211'];
-        }
-        if (getenv('REDIS_SERVER')) {
-            $redisCacheServer = getenv('REDIS_SERVER');
-        } else {
-            $redisCacheServer = '127.0.0.1:6379';
-        }
-        if (getenv('REDIS_PASSWORD')) {
-            $redisPassword = getenv('REDIS_PASSWORD');
-        } else {
-            $redisPassword = '';
-        }
-
         return [
             'Array'         => [
                 new ArrayCacheEngine()
@@ -68,10 +50,10 @@ abstract class TestBase extends TestCase
                 new NoCacheEngine()
             ],
             'Memcached'     => [
-                new MemcachedEngine($memcachedServer)
+                EngineFactory::memcached()
             ],
             'Redis'         => [
-                new RedisCacheEngine($redisCacheServer, $redisPassword)
+                EngineFactory::redis()
             ],
             'Memory'         => [
                 new TmpfsCacheEngine()

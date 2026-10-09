@@ -3,6 +3,7 @@
 namespace ByJG\Cache\Psr16;
 
 use ByJG\Cache\AtomicOperationInterface;
+use ByJG\Cache\CompareAndSwapInterface;
 use ByJG\Cache\Exception\InvalidArgumentException;
 use ByJG\Cache\Exception\StorageErrorException;
 use DateInterval;
@@ -12,8 +13,13 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterface
+class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterface, CompareAndSwapInterface
 {
+    /**
+     * Memcached expires an item immediately when handed a negative expiration. That is the only
+     * way to retire a key through cas(), since the extension exposes no compare-and-delete.
+     */
+    private const EXPIRE_NOW = -1;
 
     /**
      *
@@ -231,16 +237,13 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
     {
         $this->lazyLoadMemCachedServers();
 
-        $ttl = $this->convertToSeconds($ttl);
+        $fixKey = $this->fixKey($key);
+        $this->seed($fixKey, 0, $ttl);
 
-        if ($this->memCached->get($this->fixKey($key)) === false) {
-            $this->memCached->set($this->fixKey($key), 0, is_null($ttl) ? 0 : $ttl);
-        }
-
-        $result = $this->memCached->increment($this->fixKey($key), $value);
+        $result = $this->memCached->increment($fixKey, $value);
         $this->logger->info("[Memcached] Increment '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
+            $this->logger->error("[Memcached] Increment '$key' failed with status " . $this->memCached->getResultCode());
         }
 
         return $result;
@@ -257,19 +260,32 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
     {
         $this->lazyLoadMemCachedServers();
 
-        $ttl = $this->convertToSeconds($ttl);
+        $fixKey = $this->fixKey($key);
+        $this->seed($fixKey, 0, $ttl);
 
-        if ($this->memCached->get($this->fixKey($key)) === false) {
-            $this->memCached->set($this->fixKey($key), 0, is_null($ttl) ? 0 : $ttl);
-        }
-
-        $result = $this->memCached->decrement($this->fixKey($key), $value);
+        $result = $this->memCached->decrement($fixKey, $value);
         $this->logger->info("[Memcached] Decrement '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
-            $this->logger->error("[Memcached] Set '$key' failed with status " . $this->memCached->getResultCode());
+            $this->logger->error("[Memcached] Decrement '$key' failed with status " . $this->memCached->getResultCode());
         }
 
         return $result;
+    }
+
+    /**
+     * Create the key only if it is absent, so a counter can be started without a race.
+     *
+     * increment()/decrement() fail on a missing key, which forces every caller to initialise it
+     * first. Doing that with get()-then-set() is what used to break: two processes could both read
+     * the key as absent, and the slower one's set(0) would land AFTER the faster one's increment,
+     * resetting the counter and handing out the same value twice. add() is resolved server-side in
+     * a single step, so exactly one caller creates the key and everybody else silently moves on.
+     */
+    private function seed(string $fixKey, mixed $initial, DateInterval|int|null $ttl): void
+    {
+        $ttl = $this->convertToSeconds($ttl);
+
+        $this->memCached->add($fixKey, $initial, is_null($ttl) ? 0 : $ttl);
     }
 
     /**
@@ -284,29 +300,80 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         $this->lazyLoadMemCachedServers();
 
         $ttl = $this->convertToSeconds($ttl);
+        $expiration = is_null($ttl) ? 0 : $ttl;
         $fixKey = $this->fixKey($key);
 
-        if ($this->memCached->get($fixKey) === false) {
-            $this->memCached->set($fixKey, [], is_null($ttl) ? 0 : $ttl);
-        }
-
-        do {
+        while (true) {
             $data = $this->memCached->get($fixKey, null, Memcached::GET_EXTENDED);
-            $casToken = $data['cas'];
-            $currentValue = $data['value'];
 
-            if ($currentValue === false) {
-                $currentValue = [];
+            // Absent: claim it with add(), which only succeeds for the first caller to get there.
+            // Whoever loses simply goes round again and finds the list the winner created.
+            if ($data === false) {
+                if ($this->memCached->add($fixKey, [$value], $expiration)) {
+                    return [$value];
+                }
+                continue;
             }
 
+            $currentValue = $data['value'];
             if (!is_array($currentValue)) {
                 $currentValue = [$currentValue];
             }
-
             $currentValue[] = $value;
-            $success = $this->memCached->cas($casToken, $fixKey, $currentValue, is_null($ttl) ? 0 : $ttl);
-        } while (!$success);
 
-        return $currentValue;
+            // cas() writes only while the item is untouched since the read above; if another
+            // append slipped in, the token is stale, the write is refused and we retry on top of it.
+            if ($this->memCached->cas($data['cas'], $fixKey, $currentValue, $expiration)) {
+                return $currentValue;
+            }
+        }
+    }
+
+    #[\Override]
+    public function setIfAbsent(string $key, mixed $value, DateInterval|int|null $ttl = null): bool
+    {
+        $this->lazyLoadMemCachedServers();
+
+        $ttl = $this->convertToSeconds($ttl);
+
+        // Memcached's own add() is the primitive this whole interface is named after.
+        return $this->memCached->add($this->fixKey($key), $value, is_null($ttl) ? 0 : $ttl);
+    }
+
+    #[\Override]
+    public function deleteIfEquals(string $key, mixed $value): bool
+    {
+        // No compare-and-delete exists, so retire the item by expiring it in the same cas() that
+        // proves we are still looking at the value we expect.
+        return $this->casIfEquals($key, $value, self::EXPIRE_NOW);
+    }
+
+    #[\Override]
+    public function expireIfEquals(string $key, mixed $value, DateInterval|int|null $ttl): bool
+    {
+        $ttl = $this->convertToSeconds($ttl);
+
+        return $this->casIfEquals($key, $value, is_null($ttl) ? 0 : $ttl);
+    }
+
+    /**
+     * Rewrite the item with a new expiration, but only while it still holds $value.
+     *
+     * The cas token read here is invalidated server-side by any competing write, so a caller whose
+     * item was replaced between the get() and the cas() is refused rather than silently clobbering
+     * the new owner's value.
+     */
+    private function casIfEquals(string $key, mixed $value, int $expiration): bool
+    {
+        $this->lazyLoadMemCachedServers();
+
+        $fixKey = $this->fixKey($key);
+        $data = $this->memCached->get($fixKey, null, Memcached::GET_EXTENDED);
+
+        if ($data === false || $data['value'] != $value) {
+            return false;
+        }
+
+        return $this->memCached->cas($data['cas'], $fixKey, $data['value'], $expiration);
     }
 }
