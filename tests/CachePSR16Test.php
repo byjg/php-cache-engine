@@ -9,6 +9,7 @@ use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\MemcachedEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Cache\Psr16\RedisCacheEngine;
+use ByJG\Cache\Psr16\SessionCacheEngine;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class CachePSR16Test extends TestBase
@@ -450,5 +451,163 @@ class CachePSR16Test extends TestBase
         } else {
             $this->markTestIncomplete('Does not support atomic operations or it is native');
         }
+    }
+
+    /**
+     * A TTL handed to increment()/decrement() applies to the key whether or not the call created
+     * it. Memcached only honoured it on creation, so a counter that already existed kept whatever
+     * expiry it had - none at all, here - and outlived the TTL the caller had just asked for.
+     *
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    #[DataProvider('CachePoolProvider')]
+    public function testAtomicOperationsApplyTheTtlToAnExistingKey(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $this->assertEquals(1, $cacheEngine->increment('existing-up'));
+            $cacheEngine->set('existing-down', 10);
+
+            $this->assertEquals(2, $cacheEngine->increment('existing-up', 1, 1));
+            $this->assertEquals(9, $cacheEngine->decrement('existing-down', 1, 1));
+            sleep(2);
+            $this->assertNull($cacheEngine->get('existing-up'), 'A 1s TTL must have elapsed');
+            $this->assertNull($cacheEngine->get('existing-down'), 'A 1s TTL must have elapsed');
+        } else {
+            $this->markTestIncomplete('Does not support atomic operations or it is native');
+        }
+    }
+
+    /**
+     * clear() and isAvailable() are about the whole engine, not about one key, so they must not
+     * resolve anything through the PSR-11 container. They used to: Redis deleted every scanned key
+     * through delete(), and FileSystem built its glob pattern and its probe path through fixKey(),
+     * so with a container set they died with "Key '...' not found in container".
+     *
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    #[DataProvider('CachePoolProvider')]
+    public function testClearWithKeysFromContainer(BaseCacheEngine $cacheEngine)
+    {
+        if ($cacheEngine->isAvailable()) {
+            $cacheEngine->withKeysFromContainer(new BasicContainer());
+            $cacheEngine->set("test-key", "something");
+
+            $this->assertTrue($cacheEngine->isAvailable());
+            $this->assertTrue($cacheEngine->clear());
+            $this->assertFalse($cacheEngine->has("test-key"));
+        } else {
+            $this->markTestIncomplete('Object is not fully functional');
+        }
+    }
+
+    /**
+     * Same reasoning as clear(): collecting garbage walks every entry of the engine.
+     *
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    #[DataProvider('CachePoolProvider')]
+    public function testGarbageCollectorWithKeysFromContainer(BaseCacheEngine $cacheEngine)
+    {
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof GarbageCollectorInterface)) {
+            $cacheEngine->withKeysFromContainer(new BasicContainer());
+            $cacheEngine->set("test-key", "something", 1);
+            $this->assertNotNull($cacheEngine->getTtl("test-key"));
+
+            sleep(2);
+            $cacheEngine->collectGarbage();
+            $this->assertNull($cacheEngine->getTtl("test-key"));
+        } else {
+            $this->markTestIncomplete('Does not support garbage collector or it is native');
+        }
+    }
+
+    /**
+     * Leaving the TTL out must not change the expiry a key already has. FileSystem used to drop
+     * it, so a counter created with a TTL became permanent on the first call that omitted it.
+     *
+     * Memcached's add() is the one exception and is left out on purpose: it appends through cas(),
+     * which has to send an expiration, and Memcached offers no way to read the time a key has left.
+     *
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    #[DataProvider('CachePoolProvider')]
+    public function testAtomicOperationsKeepTheExpiryWhenTheTtlIsOmitted(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $cacheEngine->increment('kept-up', 1, 1);
+            $cacheEngine->increment('kept-down', 5, 1);
+            $cacheEngine->add('kept-list', 'x', 1);
+
+            $this->assertEquals(2, $cacheEngine->increment('kept-up'));
+            $this->assertEquals(4, $cacheEngine->decrement('kept-down'));
+            $this->assertEquals(['x', 'y'], $cacheEngine->add('kept-list', 'y'));
+            sleep(2);
+            $this->assertNull($cacheEngine->get('kept-up'), 'The 1s TTL must still apply');
+            $this->assertNull($cacheEngine->get('kept-down'), 'The 1s TTL must still apply');
+            if (!($cacheEngine instanceof MemcachedEngine)) {
+                $this->assertNull($cacheEngine->get('kept-list'), 'The 1s TTL must still apply');
+            }
+        } else {
+            $this->markTestIncomplete('Does not support atomic operations or it is native');
+        }
+    }
+
+    /**
+     * An expired key is an absent key. FileSystem only notices the expiry when the key is read,
+     * so an atomic operation arriving first carried on from the value that should be gone.
+     *
+     * @param BaseCacheEngine $cacheEngine
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    #[DataProvider('CachePoolProvider')]
+    public function testAtomicOperationsStartOverOnAnExpiredKey(BaseCacheEngine $cacheEngine)
+    {
+        $this->cacheEngine = $cacheEngine;
+
+        if ($cacheEngine->isAvailable() && ($cacheEngine instanceof AtomicOperationInterface)) {
+            $cacheEngine->increment('expired-counter', 7, 1);
+            $cacheEngine->increment('expired-counter-no-ttl', 7, 1);
+            $cacheEngine->add('expired-list', 'x', 1);
+            sleep(2);
+
+            $this->assertEquals(1, $cacheEngine->increment('expired-counter', 1, 30));
+            $this->assertEquals(1, $cacheEngine->increment('expired-counter-no-ttl'));
+            $this->assertEquals(['y'], $cacheEngine->add('expired-list', 'y', 30));
+            $this->assertEquals(1, $cacheEngine->get('expired-counter-no-ttl'), 'The new counter has no expiry');
+        } else {
+            $this->markTestIncomplete('Does not support atomic operations or it is native');
+        }
+    }
+
+    /**
+     * The session belongs to the application, not to the cache. clear() used to call
+     * session_destroy(), which took the login and everything else stored there along with it.
+     */
+    public function testSessionClearOnlyRemovesItsOwnEntries()
+    {
+        $cache = new SessionCacheEngine('mine');
+        $other = new SessionCacheEngine('theirs');
+
+        $cache->set('key', 'value', 30);
+        $other->set('key', 'other value');
+        $_SESSION['user'] = 'logged in';
+
+        $this->assertTrue($cache->clear());
+
+        $this->assertFalse($cache->has('key'));
+        $this->assertSame([], array_filter(array_keys($_SESSION), fn($name) => str_starts_with($name, 'mine-')));
+        $this->assertEquals('other value', $other->get('key'));
+        $this->assertEquals('logged in', $_SESSION['user']);
+
+        $other->clear();
+        unset($_SESSION['user']);
     }
 }

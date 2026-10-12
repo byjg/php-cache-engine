@@ -225,10 +225,7 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
     }
 
     /**
-     * @throws NotFoundExceptionInterface
-     * @throws InvalidArgumentException
      * @throws RedisException
-     * @throws ContainerExceptionInterface
      */
     #[\Override]
     public function clear(): bool
@@ -239,7 +236,9 @@ class RedisCacheEngine extends BaseCacheEngine implements AtomicOperationInterfa
         do {
             $keys = $this->redis->scan($iterator, 'cache:*');
             foreach($keys as $key) {
-                $this->delete(substr($key, 6));
+                // What scan() returns is the stored key. Going back through delete() would look
+                // it up in the PSR-11 container, which only knows the names the application uses.
+                $this->redis->del($key);
             }
         } while($iterator !== 0);
         return true;

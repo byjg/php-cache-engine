@@ -26,11 +26,13 @@ A powerful, versatile cache implementation providing both PSR-6 and PSR-16 inter
 - **PSR-11 container support** - Retrieve cache keys via dependency container
 - **Logging capabilities** - PSR-3 compatible logging of cache operations
 
-## Quick Start
+## Installation
 
 ```bash
 composer require "byjg/cache-engine"
 ```
+
+## Quick Start
 
 ```php
 // PSR-16 Simple Cache
@@ -65,7 +67,6 @@ $value = $item->get();
 | [RedisCacheEngine](docs/class-redis-cache-engine.md)                | Redis-based caching                                     |
 | [SessionCacheEngine](docs/class-session-cache-engine.md)            | PHP session-based caching                               |
 | [TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                | Tmpfs-based caching                                     |
-| [ShmopCacheEngine](docs/class-shmop-cache-engine.md)                | Shared memory caching (deprecated)                      |
 | [KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql) | S3-Like or CloudflareKV storage (separate package)      |
 
 ### Advanced Features
@@ -77,11 +78,10 @@ $value = $item->get();
 
 ## Running Tests
 
+```bash
+docker compose up -d
+vendor/bin/phpunit
 ```
-vendor/bin/phpunit --stderr
-```
-
-**Note:** The `--stderr` parameter is required for SessionCacheEngine tests to run properly.
 
 ----
 [Open source ByJG](https://opensource.byjg.com)

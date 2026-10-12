@@ -7,7 +7,6 @@ use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr16\FileSystemCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Cache\Psr16\SessionCacheEngine;
-use ByJG\Cache\Psr16\ShmopCacheEngine;
 use ByJG\Cache\Psr16\TmpfsCacheEngine;
 use PHPUnit\Framework\TestCase;
 
@@ -39,9 +38,6 @@ abstract class TestBase extends TestCase
             ],
             'Tmpfs'    => [
                 new TmpfsCacheEngine()
-            ],
-            'ShmopCache'    => [
-                new ShmopCacheEngine()
             ],
             'SessionCache'  => [
                 new SessionCacheEngine()

@@ -9,7 +9,6 @@ use ByJG\Cache\Psr16\TmpfsCacheEngine;
 use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\Cache\Psr16\RedisCacheEngine;
 use ByJG\Cache\Psr16\SessionCacheEngine;
-use ByJG\Cache\Psr16\ShmopCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
 use Psr\Log\LoggerInterface;
 
@@ -34,14 +33,6 @@ class Factory
     {
         return new CachePool(
             new FileSystemCacheEngine($prefix, $path, $logger, $createPath),
-            $bufferSize
-        );
-    }
-
-    public static function createShmopPool(array $config = [], int $bufferSize = 10, ?LoggerInterface $logger = null): CachePool
-    {
-        return new CachePool(
-            new ShmopCacheEngine($config, $logger),
             $bufferSize
         );
     }

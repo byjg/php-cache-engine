@@ -19,6 +19,9 @@ concurrent `increment()` calls on Memcached ended at **8** instead of 20, and tw
 |------|--------------|-------------|-------------|
 | **Redis atomic operations** | `INCR`/`RPUSH` + separate `EXPIRE` | Lua scripts (`EVAL`) | `increment()`, `decrement()` and `add()` are now single scripts so the value and its TTL cannot be split apart. **Requires Lua scripting to be enabled on the Redis server**; some managed offerings restrict `EVAL`. |
 | **Redis `add()` TTL** | `$ttl` accepted and silently ignored | `$ttl` applied | A list built with `add($key, $value, 60)` now actually expires. Code that relied on the list living forever despite passing a TTL will see it expire. |
+| **`ShmopCacheEngine` removed** | `ShmopCacheEngine`, `Factory::createShmopPool()` | removed | Deprecated since 5.0 in favour of `TmpfsCacheEngine`, which keeps the data in RAM the same way. The `ext-shmop` suggestion is gone with it. |
+| **Session `clear()`** | `session_destroy()` | removes only the entries of the engine's prefix | `SessionCacheEngine::clear()` destroyed the whole session — the login and everything else the application kept there. It now unsets only its own `<prefix>-*` entries. Code that used it to end the session must call `session_destroy()` itself. |
+| **FileSystem atomic operations without a TTL** | dropped the expiry of the key | keep it | `increment()`, `decrement()` and `add()` called without a TTL made a key that had an expiry permanent. They now leave the expiry alone, as Redis does. |
 | **FileSystem atomic TTL** | raw `$ttl` written as the expiry timestamp | converted with `addToNow()` | `increment($key, 1, 60)` wrote `60` into the expiry file — a moment in 1970 — so the entry was already expired when written. It now means 60 seconds from now, and the value survives as intended. |
 
 ## New Features
@@ -58,8 +61,11 @@ if (!$cache instanceof \ByJG\Cache\CompareAndSwapInterface) {
 - New [Compare and Swap](docs/compare-and-swap.md) guide, including a worked lock example and an
   explicit section on what the interface does *not* give you (no fairness, no reentrancy, the TTL
   is still a guess).
-- [Atomic Operations](docs/atomic-operations.md) now documents the TTL semantics and what happens
-  when `add()` is called on a key previously written by `set()`.
+- [Atomic Operations](docs/atomic-operations.md) now documents the TTL semantics — including what
+  each engine does when the TTL is omitted on a key that already has one — the return values, and
+  what happens when `add()` is called on a key previously written by `set()`.
+- Documented what was public but unexplained: `isAvailable()`, the `CachePool` buffer
+  (`$bufferSize`, `getBufferSize()`, `setBufferSize()`) and `GarbageCollectorInterface::getTtl()`.
 
 ## Bug Fixes
 
@@ -116,6 +122,36 @@ It went unnoticed because in practice something else — `isAvailable()`, `get()
 always ran first and left the connection open. A regression test now exercises each entry point on
 an instance that has never been touched.
 
+### Memcached: TTL ignored on a counter that already existed
+
+`increment()` and `decrement()` only applied the TTL on the call that created the key. Passing one
+for a counter that was already there did nothing, so the counter kept its old expiry — or none.
+Redis and FileSystem applied it on every call. Memcached now does too, with a `touch()` right after
+the increment.
+
+### FileSystem: atomic operations carried on from an expired value
+
+An expired entry is only removed when it is read. `increment()`, `decrement()` and `add()` arriving
+first read the stale file and continued from it — a counter that expired at 7 answered 8. An
+expired entry is now treated as absent and the operation starts over.
+
+### `clear()`, `collectGarbage()` and `isAvailable()` failed with a PSR-11 container
+
+With `withKeysFromContainer()` set, these died with `Key '...' not found in container`:
+
+- `RedisCacheEngine::clear()` deleted every scanned key through `delete()`, which looked the stored
+  key up in the container.
+- `FileSystemCacheEngine` (and `TmpfsCacheEngine`) built the `*` pattern of `clear()` and
+  `collectGarbage()`, and the probe path of `isAvailable()`, through the same lookup.
+
+They act on the whole engine and no longer go through the container.
+
+### Session: `has()` did not start the session
+
+`SessionCacheEngine::has()` read `$_SESSION` without starting the session, unlike `get()`, `set()`
+and `delete()`. Called first in a request it always answered `false`, and called right after
+`clear()` it still saw the entries that had just been destroyed.
+
 ### FileSystem: expiry dropped outside the lock
 
 `putContents()` deleted the `.ttl` file before acquiring the lock, leaving the value briefly
@@ -128,8 +164,10 @@ delete now happens under the lock.
   rejection and the stale-owner-versus-new-owner case.
 - `tests/ConcurrencyTest.php` — forks twenty real processes at a synchronised barrier. Sequential
   tests cannot prove atomicity; these fail against 6.x and pass on 7.0.
-- A TTL regression test added to `tests/CachePSR16Test.php` covering every engine that implements
-  `AtomicOperationInterface`.
+- TTL regression tests added to `tests/CachePSR16Test.php` covering every engine that implements
+  `AtomicOperationInterface`, for a new key and for one that already exists.
+- `clear()`, `collectGarbage()` and `isAvailable()` are tested on every engine with a PSR-11
+  container set.
 
 Note for anyone writing similar tests: forked children inherit the parent's Memcached socket and
 close it as they exit, killing the parent's connection. Reconnect in the parent before asserting.
@@ -169,7 +207,26 @@ $cache->add('my-key', 'value');         // never expires, as 6.x behaved
 These were broken and returned already-expired entries, so working code is unlikely to depend on
 them. If you worked around the bug by omitting the TTL, you can now pass it.
 
-### Step 5: Adopt compare-and-swap where you were hand-rolling a lock
+### Step 5: Replace `ShmopCacheEngine`
+
+```php
+// Before
+$cache = new \ByJG\Cache\Psr16\ShmopCacheEngine();
+$pool = \ByJG\Cache\Factory::createShmopPool();
+
+// After
+$cache = new \ByJG\Cache\Psr16\TmpfsCacheEngine();
+$pool = \ByJG\Cache\Factory::createTmpfsCachePool();
+```
+
+The `max-size` and `default-permission` options have no equivalent; entries are files in `/dev/shm`.
+
+### Step 6: Review any use of `SessionCacheEngine::clear()`
+
+It no longer destroys the session. If you relied on that to log the user out, call
+`session_destroy()` yourself.
+
+### Step 7: Adopt compare-and-swap where you were hand-rolling a lock
 
 If you have code shaped like this, replace it — it has a race between the two calls:
 

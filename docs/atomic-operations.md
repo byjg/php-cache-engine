@@ -28,32 +28,56 @@ These operations read and modify a value in one step. If what you need instead i
 write — "store this only if the key is free", "delete this only if it is still mine" — see
 [Compare and Swap](compare-and-swap.md).
 
-All three operations accept an optional TTL, expressed in seconds from now (or as a `DateInterval`),
-and apply it as part of the same operation.
+## TTL
 
-## Increment
-
-The increment operation is used to increment a value by a given number.
+All three operations accept an optional TTL as the last argument, expressed in seconds from now (or
+as a `DateInterval`). When you pass one, it is applied on every call, whether the call creates the
+key or finds it already there:
 
 ```php
 <?php
 /** @var \ByJG\Cache\AtomicOperationInterface $cache */
-$cache->increment('my-key', 1);
+$cache->increment('my-key', 1, 60); // 'my-key' expires 60 seconds from now
+```
+
+Redis and FileSystem write the value and the expiry in one step. Memcached does so when the call
+creates the key; on a counter that already exists the expiry is a second command right after the
+increment.
+
+When you **omit** the TTL, the key keeps the expiry it already has. A key that has already expired
+counts as absent: the operation starts over from an empty value and the new key has no expiry.
+
+:::caution MemcachedEngine and add()
+`add()` on Memcached is the exception: called without a TTL on a list that has one, it removes the
+expiry. Memcached has to be given an expiration on every write and offers no way to read the time
+a key has left. Pass the TTL on every `add()` if the list has to expire.
+:::
+
+## Increment
+
+The increment operation is used to increment a value by a given number. A key that does not exist
+starts at zero. It returns the new value.
+
+```php
+<?php
+/** @var \ByJG\Cache\AtomicOperationInterface $cache */
+$newValue = $cache->increment('my-key', 1);
 ```
 
 ## Decrement
 
-The decrement operation is used to decrement a value by a given number.
+The decrement operation is used to decrement a value by a given number. It returns the new value.
 
 ```php
 <?php
 /** @var \ByJG\Cache\AtomicOperationInterface $cache */
-$cache->decrement('my-key', 1);
+$newValue = $cache->decrement('my-key', 1);
 ```
 
 ## Add
 
-The add operation is used to add a value to a list in the cache.
+The add operation is used to add a value to a list in the cache. It returns the whole list after
+the append.
 
 ```php
 <?php

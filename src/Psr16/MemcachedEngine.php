@@ -241,6 +241,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         $this->seed($fixKey, 0, $ttl);
 
         $result = $this->memCached->increment($fixKey, $value);
+        $this->refreshTtl($fixKey, $ttl);
         $this->logger->info("[Memcached] Increment '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->error("[Memcached] Increment '$key' failed with status " . $this->memCached->getResultCode());
@@ -264,6 +265,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         $this->seed($fixKey, 0, $ttl);
 
         $result = $this->memCached->decrement($fixKey, $value);
+        $this->refreshTtl($fixKey, $ttl);
         $this->logger->info("[Memcached] Decrement '$key' result " . $this->memCached->getResultCode());
         if ($this->memCached->getResultCode() !== Memcached::RES_SUCCESS) {
             $this->logger->error("[Memcached] Decrement '$key' failed with status " . $this->memCached->getResultCode());
@@ -286,6 +288,23 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
         $ttl = $this->convertToSeconds($ttl);
 
         $this->memCached->add($fixKey, $initial, is_null($ttl) ? 0 : $ttl);
+    }
+
+    /**
+     * Apply the TTL to a counter that already existed.
+     *
+     * seed() only sets the expiry on the call that creates the key, and Memcached's
+     * increment/decrement leave it alone. Without this a TTL passed for an existing counter was
+     * ignored. It is a second command, but a process dying before it leaves the previous expiry in
+     * place rather than none at all.
+     */
+    private function refreshTtl(string $fixKey, DateInterval|int|null $ttl): void
+    {
+        $ttl = $this->convertToSeconds($ttl);
+
+        if (!empty($ttl)) {
+            $this->memCached->touch($fixKey, $ttl);
+        }
     }
 
     /**

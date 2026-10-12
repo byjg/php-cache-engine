@@ -24,8 +24,7 @@
   },
   "suggest": {
     "ext-memcached": "*",
-    "ext-redis": "*",
-    "ext-shmop": "*"
+    "ext-redis": "*"
   },
   "provide": {
     "psr/cache-implementation": "1.0",
