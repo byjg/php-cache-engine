@@ -105,15 +105,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         return true;
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws InvalidArgumentException
-     */
     #[Override]
     public function isAvailable(): bool
     {
-        return is_writable(dirname($this->fixKey('test')));
+        return is_writable($this->path);
     }
 
     /**
@@ -123,8 +118,15 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      */
     protected function fixKey(string $key): string
     {
-        $key = $this->getKeyFromContainer($key);
+        return $this->fileName($this->getKeyFromContainer($key));
+    }
 
+    /**
+     * The file behind a key that is already final. clear() and collectGarbage() match every entry
+     * with a '*' pattern, which is not a cache key and must not be looked up in the container.
+     */
+    protected function fileName(string $key): string
+    {
         return $this->path . '/'
             . $this->prefix
             . '-' . preg_replace("/[\/\\\]/", "#", $key)
@@ -135,14 +137,11 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
      * Wipes clean the entire cache's keys.
      *
      * @return bool True on success and false on failure.
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws InvalidArgumentException
      */
     #[Override]
     public function clear(): bool
     {
-        $patternKey = $this->fixKey('*');
+        $patternKey = $this->fileName('*');
         $list = glob($patternKey);
         foreach ($list as $file) {
             if (file_exists($file)) {
@@ -169,13 +168,8 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     public function has(string $key): bool
     {
         $fileKey = $this->fixKey($key);
-        $fileTtl = null;
         if (file_exists($fileKey)) {
-            if (file_exists("$fileKey.ttl")) {
-                $fileTtl = intval($this->getContents("$fileKey.ttl"));
-            }
-
-            if (!empty($fileTtl) && time() >= $fileTtl) {
+            if ($this->isExpired($fileKey)) {
                 $this->logger->info("[Filesystem cache] File too old. Ignoring '$key'");
                 $this->delete($key);
 
@@ -186,6 +180,17 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         }
 
         return false;
+    }
+
+    protected function isExpired(string $fileKey): bool
+    {
+        if (!file_exists("$fileKey.ttl")) {
+            return false;
+        }
+
+        $fileTtl = intval($this->getContents("$fileKey.ttl"));
+
+        return !empty($fileTtl) && time() >= $fileTtl;
     }
 
     protected function getContents(string $fileKey, mixed $default = null): mixed
@@ -211,11 +216,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     {
         $returnValue = true;
 
-        if (file_exists("$fileKey.ttl")) {
-            unlink("$fileKey.ttl");
-        }
-
         if (is_null($value)) {
+            if (file_exists("$fileKey.ttl")) {
+                unlink("$fileKey.ttl");
+            }
             if (file_exists($fileKey)) {
                 unlink($fileKey);
             }
@@ -226,13 +230,22 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
         $waitIfLocked = 1;
         $lock = flock($fo, LOCK_EX, $waitIfLocked);
         try {
+            // An expired entry is only removed when somebody reads it, so an atomic operation can
+            // get here first. It has to start over, not carry on from a value that is gone.
+            $expired = $this->isExpired($fileKey);
+
+            // Expiry is dropped and rewritten under the lock. Doing it before acquiring the lock
+            // left the value briefly immortal, and a reader arriving in that window saw a key that
+            // should already have expired. An atomic operation called without a TTL keeps the
+            // expiry the entry already has.
+            $keepExpiry = !is_null($operation) && is_null($ttl) && !$expired;
+            if (!$keepExpiry && file_exists("$fileKey.ttl")) {
+                unlink("$fileKey.ttl");
+            }
+
             if (!is_null($operation)) {
-                if (!file_exists($fileKey)) {
-                    $currentValue = 0;
-                } else {
-                    $content = file_get_contents($fileKey);
-                    $currentValue = !empty($content) ? unserialize($content) : $content;
-                }
+                $content = $expired ? '' : file_get_contents($fileKey);
+                $currentValue = !empty($content) ? unserialize($content) : 0;
                 $value = $returnValue = $operation($currentValue, $value);
             }
             file_put_contents($fileKey, serialize($value));
@@ -250,7 +263,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function collectGarbage()
     {
-        $patternKey = $this->fixKey('*');
+        $patternKey = $this->fileName('*');
         $list = glob("$patternKey.ttl");
         foreach ($list as $file) {
             $fileTtl = intval($this->getContents($file));
@@ -279,7 +292,10 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function increment(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
-        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+        // addToNow() is what turns a relative TTL into the absolute timestamp the .ttl file holds.
+        // Passing the raw $ttl through wrote "60" as the expiry, i.e. a moment in 1970, so any
+        // counter created with a TTL was already expired by the time it was written.
+        return $this->putContents($this->fixKey($key), $value, $this->addToNow($ttl), function ($currentValue, $value) {
             return intval($currentValue) + $value;
         });
     }
@@ -287,7 +303,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function decrement(string $key, int $value = 1, DateInterval|int|null $ttl = null): int
     {
-        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+        return $this->putContents($this->fixKey($key), $value, $this->addToNow($ttl), function ($currentValue, $value) {
             return intval($currentValue) - $value;
         });
     }
@@ -295,7 +311,7 @@ class FileSystemCacheEngine extends BaseCacheEngine implements GarbageCollectorI
     #[Override]
     public function add(string $key, $value, DateInterval|int|null $ttl = null): array
     {
-        return $this->putContents($this->fixKey($key), $value, $ttl, function ($currentValue, $value) {
+        return $this->putContents($this->fixKey($key), $value, $this->addToNow($ttl), function ($currentValue, $value) {
             if (empty($currentValue)) {
                 return [$value];
             }

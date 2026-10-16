@@ -100,13 +100,24 @@ class SessionCacheEngine extends BaseCacheEngine
     #[\Override]
     public function clear(): bool
     {
-        session_destroy();
+        $this->checkSession();
+
+        // Only what this engine wrote. The session also carries whatever else the application
+        // keeps there, and other engines with their own prefix.
+        foreach (array_keys($_SESSION ?? []) as $keyName) {
+            if (str_starts_with((string)$keyName, $this->prefix . '-')) {
+                unset($_SESSION[$keyName]);
+            }
+        }
+
         return true;
     }
 
     #[\Override]
     public function has(string $key): bool
     {
+        $this->checkSession();
+
         $keyName = $this->keyName($key);
 
         if (isset($_SESSION[$keyName])) {

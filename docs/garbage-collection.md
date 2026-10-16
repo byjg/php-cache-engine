@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 13
 ---
 
 # Garbage Collection
@@ -14,7 +14,11 @@ is based on best effort, meaning an expired key is removed only when you try to 
 If the cache engine has a low hit rate, it is recommended to run a garbage collection process
 to prevent the cache from growing indefinitely.
 
-The classes that implement the `GarbageCollectorInterface` have the method `collectGarbage()`.
+The classes that implement the `GarbageCollectorInterface` have two methods:
+
+- `collectGarbage()` removes every expired key;
+- `getTtl(string $key): ?int` returns the moment the key expires, as a Unix timestamp, or `null`
+  when the key has no expiry (or does not exist).
 
 **Engines that support garbage collection:**
 - FileSystemCacheEngine
@@ -27,6 +31,8 @@ The classes that implement the `GarbageCollectorInterface` have the method `coll
 <?php
 /** @var \ByJG\Cache\GarbageCollectorInterface $cache */
 $cache->collectGarbage();
+
+$expiresAt = $cache->getTtl('my-key'); // e.g. 1791849600, or null
 ```
 
 :::caution Performance Warning
