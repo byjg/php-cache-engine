@@ -46,7 +46,7 @@ class CachePSR16Test extends TestBase
             $item = $cacheEngine->get('chave');
             $this->assertNull($item);
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -87,7 +87,7 @@ class CachePSR16Test extends TestBase
             $this->assertNull($items['chave1']);
             $this->assertNull($items['chave2']);
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -124,7 +124,7 @@ class CachePSR16Test extends TestBase
                 $this->assertFalse($cacheEngine->has('chave2'));
             }
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -157,7 +157,7 @@ class CachePSR16Test extends TestBase
             $item = $cacheEngine->get('chave');
             $this->assertNull($item);
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -195,7 +195,7 @@ class CachePSR16Test extends TestBase
             $item = $cacheEngine->get('chave');
             $this->assertNull($item);
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -237,7 +237,7 @@ class CachePSR16Test extends TestBase
             $item = $cacheEngine->getMultiple(['chave', 'chave2', 'chave3']);
             $this->assertEquals($empty, $item);
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -255,7 +255,7 @@ class CachePSR16Test extends TestBase
             $cacheEngine->withKeysFromContainer(new BasicContainer());
             $cacheEngine->set("abc", "30");
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -282,7 +282,7 @@ class CachePSR16Test extends TestBase
             $this->assertTrue($cacheEngine->has("container-key"));
             $this->assertEquals("something", $cacheEngine->get("container-key"));
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -315,7 +315,7 @@ class CachePSR16Test extends TestBase
             $this->assertNull($cacheEngine->getTtl('chave')); // Should be deleted
             $this->assertFalse($cacheEngine->has('chave'));
         } else {
-            $this->markTestIncomplete('Does not support garbage collector or it is native');
+            $this->markTestSkipped('Does not support garbage collector or it is native');
         }
     }
 
@@ -337,7 +337,7 @@ class CachePSR16Test extends TestBase
             $this->assertEquals(15, $cacheEngine->increment('chave'));
             $this->assertEquals(15, $cacheEngine->get('chave'));
         } else {
-            $this->markTestIncomplete('Does not support atomic increment or it is native');
+            $this->markTestSkipped('Does not support atomic increment or it is native');
         }
     }
 
@@ -359,7 +359,7 @@ class CachePSR16Test extends TestBase
             $this->assertEquals(5, $cacheEngine->decrement('chave'));
             $this->assertEquals(5, $cacheEngine->get('chave'));
         } else {
-            $this->markTestIncomplete('Does not support atomic decrement or it is native');
+            $this->markTestSkipped('Does not support atomic decrement or it is native');
         }
     }
 
@@ -396,7 +396,7 @@ class CachePSR16Test extends TestBase
 
 
         } else {
-            $this->markTestIncomplete('Does not support atomic add or it is native');
+            $this->markTestSkipped('Does not support atomic add or it is native');
         }
     }
 
@@ -449,7 +449,7 @@ class CachePSR16Test extends TestBase
             $this->assertNull($cacheEngine->get('expiring-counter'), 'A 1s TTL must have elapsed');
             $this->assertNull($cacheEngine->get('expiring-list'), 'A 1s TTL must have elapsed');
         } else {
-            $this->markTestIncomplete('Does not support atomic operations or it is native');
+            $this->markTestSkipped('Does not support atomic operations or it is native');
         }
     }
 
@@ -476,7 +476,7 @@ class CachePSR16Test extends TestBase
             $this->assertNull($cacheEngine->get('existing-up'), 'A 1s TTL must have elapsed');
             $this->assertNull($cacheEngine->get('existing-down'), 'A 1s TTL must have elapsed');
         } else {
-            $this->markTestIncomplete('Does not support atomic operations or it is native');
+            $this->markTestSkipped('Does not support atomic operations or it is native');
         }
     }
 
@@ -500,7 +500,7 @@ class CachePSR16Test extends TestBase
             $this->assertTrue($cacheEngine->clear());
             $this->assertFalse($cacheEngine->has("test-key"));
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -522,7 +522,7 @@ class CachePSR16Test extends TestBase
             $cacheEngine->collectGarbage();
             $this->assertNull($cacheEngine->getTtl("test-key"));
         } else {
-            $this->markTestIncomplete('Does not support garbage collector or it is native');
+            $this->markTestSkipped('Does not support garbage collector or it is native');
         }
     }
 
@@ -556,7 +556,7 @@ class CachePSR16Test extends TestBase
                 $this->assertNull($cacheEngine->get('kept-list'), 'The 1s TTL must still apply');
             }
         } else {
-            $this->markTestIncomplete('Does not support atomic operations or it is native');
+            $this->markTestSkipped('Does not support atomic operations or it is native');
         }
     }
 
@@ -583,7 +583,7 @@ class CachePSR16Test extends TestBase
             $this->assertEquals(['y'], $cacheEngine->add('expired-list', 'y', 30));
             $this->assertEquals(1, $cacheEngine->get('expired-counter-no-ttl'), 'The new counter has no expiry');
         } else {
-            $this->markTestIncomplete('Does not support atomic operations or it is native');
+            $this->markTestSkipped('Does not support atomic operations or it is native');
         }
     }
 

@@ -42,7 +42,7 @@ class CachePSR6Test extends TestBase
             $item = $object->getItem('chave');
             $this->assertFalse($item->isHit());
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -86,7 +86,7 @@ class CachePSR6Test extends TestBase
             $this->assertFalse($items[0]->isHit());
             $this->assertFalse($items[1]->isHit());
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -133,7 +133,7 @@ class CachePSR6Test extends TestBase
                 $item = $object->getItem('chave');
                 $this->assertFalse($item->isHit());
             } else {
-                $this->markTestIncomplete('Object is not fully functional');
+                $this->markTestSkipped('Object is not fully functional');
             }
         }
     }
@@ -171,7 +171,7 @@ class CachePSR6Test extends TestBase
             $item = $object->getItem('chave');
             $this->assertFalse($item->isHit());
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 }
