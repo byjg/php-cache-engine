@@ -14,6 +14,8 @@ The constructor expects a string with the server and port.
 $server = 'localhost:5678'
 ```
 
+When `$server` is `null` it defaults to `127.0.0.1:6379`; a server without a port uses `6379`.
+
 ## PSR-16 Constructor
 
 ```php
