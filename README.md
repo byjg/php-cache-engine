@@ -67,7 +67,6 @@ $value = $item->get();
 | [RedisCacheEngine](docs/class-redis-cache-engine.md)                | Redis-based caching                                     |
 | [SessionCacheEngine](docs/class-session-cache-engine.md)            | PHP session-based caching                               |
 | [TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                | Tmpfs-based caching                                     |
-| [KeyValueCacheEngine](https://github.com/byjg/php-anydataset-nosql) | S3-Like or CloudflareKV storage (separate package)      |
 
 ### Advanced Features
 - [Atomic Operations](docs/atomic-operations.md)
