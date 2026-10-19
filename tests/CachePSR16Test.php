@@ -610,4 +610,15 @@ class CachePSR16Test extends TestBase
         $other->clear();
         unset($_SESSION['user']);
     }
+
+    /**
+     * The logger argument was untyped and anything that was not a LoggerInterface was silently
+     * replaced by a NullLogger, hiding the mistake. It is now typed like every other engine.
+     */
+    public function testMemcachedRejectsALoggerOfTheWrongType()
+    {
+        $this->expectException(\TypeError::class);
+        /** @psalm-suppress InvalidArgument */
+        new MemcachedEngine(null, 'not-a-logger');
+    }
 }

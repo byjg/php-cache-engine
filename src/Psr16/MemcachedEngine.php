@@ -33,7 +33,7 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
 
     protected ?array $options = null;
 
-    public function __construct(?array $servers = null, $logger = null, ?array $options = null)
+    public function __construct(?array $servers = null, ?LoggerInterface $logger = null, ?array $options = null)
     {
         $this->servers = (array)$servers;
         if (is_null($servers)) {
@@ -42,8 +42,8 @@ class MemcachedEngine extends BaseCacheEngine implements AtomicOperationInterfac
             ];
         }
 
-        $this->logger = $logger instanceof LoggerInterface ? $logger : null;
-        if (is_null($this->logger)) {
+        $this->logger = $logger;
+        if (is_null($logger)) {
             $this->logger = new NullLogger();
         }
 

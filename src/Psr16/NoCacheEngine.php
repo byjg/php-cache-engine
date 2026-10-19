@@ -54,24 +54,6 @@ class NoCacheEngine extends BaseCacheEngine
         return true;
     }
 
-    /**
-     * Lock resource before set it.
-     * @param string $key
-     */
-    public function lock(string $key): void
-    {
-        return;
-    }
-
-    /**
-     * UnLock resource after set it
-     * @param string $key
-     */
-    public function unlock(string $key): void
-    {
-        return;
-    }
-
     #[\Override]
     public function isAvailable(): bool
     {

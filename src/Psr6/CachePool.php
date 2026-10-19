@@ -218,7 +218,7 @@ class CachePool implements CacheItemPoolInterface
     public function save(CacheItemInterface $item): bool
     {
         if (!($item instanceof CacheItem)) {
-            throw new InvalidArgumentException('The cache item must be an implementation of \ByJG\Cache\Psr\CacheItem');
+            throw new InvalidArgumentException('The cache item must be an implementation of ' . CacheItem::class);
         }
         
         if ($item->getExpiresInSecs() < 1) {

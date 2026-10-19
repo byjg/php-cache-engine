@@ -23,6 +23,8 @@ concurrent `increment()` calls on Memcached ended at **8** instead of 20, and tw
 | **Session `clear()`** | `session_destroy()` | removes only the entries of the engine's prefix | `SessionCacheEngine::clear()` destroyed the whole session — the login and everything else the application kept there. It now unsets only its own `<prefix>-*` entries. Code that used it to end the session must call `session_destroy()` itself. |
 | **FileSystem atomic operations without a TTL** | dropped the expiry of the key | keep it | `increment()`, `decrement()` and `add()` called without a TTL made a key that had an expiry permanent. They now leave the expiry alone, as Redis does. |
 | **FileSystem atomic TTL** | raw `$ttl` written as the expiry timestamp | converted with `addToNow()` | `increment($key, 1, 60)` wrote `60` into the expiry file — a moment in 1970 — so the entry was already expired when written. It now means 60 seconds from now, and the value survives as intended. |
+| **`NoCacheEngine::lock()` / `unlock()` removed** | public no-op methods | removed | No interface declared them and no other engine had them, so nothing could call them through an abstraction. Code calling them directly on a `NoCacheEngine` must drop the call. |
+| **`MemcachedEngine` logger argument** | untyped; a non-`LoggerInterface` value silently became a `NullLogger` | `?LoggerInterface` | Matches the other engines. Passing anything other than a logger or `null` now throws `TypeError` instead of quietly disabling logging. |
 
 ## New Features
 
@@ -157,6 +159,18 @@ and `delete()`. Called first in a request it always answered `false`, and called
 `putContents()` deleted the `.ttl` file before acquiring the lock, leaving the value briefly
 immortal — a reader arriving in that window saw an entry that should already have expired. The
 delete now happens under the lock.
+
+### PSR-6: `save()` named a class that does not exist
+
+Saving an item that is not a `ByJG\Cache\Psr6\CacheItem` threw an exception asking for
+`\ByJG\Cache\Psr\CacheItem`, a namespace that does not exist. The message now names the real
+class.
+
+### Memcached: a wrong logger was swallowed
+
+`MemcachedEngine::__construct()` took `$logger` untyped and replaced anything that was not a
+`LoggerInterface` with a `NullLogger`, so a mistake there silently turned logging off. The argument
+is now typed `?LoggerInterface`, as in every other engine (see Breaking Changes).
 
 ## Testing
 
