@@ -46,6 +46,20 @@ $cacheEngine = new \ByJG\Cache\Psr16\FileSystemCacheEngine();
 $cacheEngine->delete($key);
 ```
 
+## Check if the engine is available
+
+Every engine implements `CacheAvailabilityInterface`. `isAvailable()` tells whether the engine can
+be used right now: the PHP extension is loaded and the server answers (Redis, Memcached), the
+directory is writable (FileSystem, Tmpfs), the session can be started (Session).
+
+```php
+<?php
+$cacheEngine = new \ByJG\Cache\Psr16\RedisCacheEngine('localhost:6379');
+if (!$cacheEngine->isAvailable()) {
+    $cacheEngine = new \ByJG\Cache\Psr16\NoCacheEngine();
+}
+```
+
 ## Clear all cache
 
 ```php

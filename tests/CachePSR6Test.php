@@ -2,9 +2,12 @@
 
 namespace Tests;
 
+use ByJG\Cache\Exception\InvalidArgumentException as CacheInvalidArgumentException;
+use ByJG\Cache\Psr16\ArrayCacheEngine;
 use ByJG\Cache\Psr16\BaseCacheEngine;
 use ByJG\Cache\Psr6\CachePool;
 use DateInterval;
+use DateTimeInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -42,7 +45,7 @@ class CachePSR6Test extends TestBase
             $item = $object->getItem('chave');
             $this->assertFalse($item->isHit());
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -86,7 +89,7 @@ class CachePSR6Test extends TestBase
             $this->assertFalse($items[0]->isHit());
             $this->assertFalse($items[1]->isHit());
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
     }
 
@@ -133,7 +136,7 @@ class CachePSR6Test extends TestBase
                 $item = $object->getItem('chave');
                 $this->assertFalse($item->isHit());
             } else {
-                $this->markTestIncomplete('Object is not fully functional');
+                $this->markTestSkipped('Object is not fully functional');
             }
         }
     }
@@ -171,7 +174,27 @@ class CachePSR6Test extends TestBase
             $item = $object->getItem('chave');
             $this->assertFalse($item->isHit());
         } else {
-            $this->markTestIncomplete('Object is not fully functional');
+            $this->markTestSkipped('Object is not fully functional');
         }
+    }
+
+    /**
+     * The message used to name a namespace that does not exist (\ByJG\Cache\Psr\CacheItem).
+     */
+    public function testSaveRejectsAForeignCacheItemNamingTheRealClass()
+    {
+        $foreignItem = new class implements \Psr\Cache\CacheItemInterface {
+            public function getKey(): string { return 'key'; }
+            public function get(): mixed { return null; }
+            public function isHit(): bool { return false; }
+            public function set(mixed $value): static { return $this; }
+            public function expiresAt(?DateTimeInterface $expiration): static { return $this; }
+            public function expiresAfter(int|\DateInterval|null $time): static { return $this; }
+        };
+
+        $this->expectException(CacheInvalidArgumentException::class);
+        $this->expectExceptionMessage('The cache item must be an implementation of ByJG\Cache\Psr6\CacheItem');
+
+        (new CachePool(new ArrayCacheEngine()))->save($foreignItem);
     }
 }

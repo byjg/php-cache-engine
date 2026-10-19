@@ -37,3 +37,30 @@ $pool->deleteItem('mykey');
 <?php
 $pool = new \ByJG\Cache\Psr6\CachePool(new \ByJG\Cache\Psr16\RedisCacheEngine());
 ```
+
+## The buffer
+
+`CachePool` keeps the last items it read or saved in memory, so asking for the same key again in
+the same request does not go back to the storage engine. `$bufferSize` is how many items it keeps
+(default 10); when the buffer is full the oldest item is dropped. Set it to `0` to disable the
+buffer and always read from the engine.
+
+Every `Factory::create*Pool()` method except `createNullPool()` and `createTmpfsCachePool()`
+accepts `$bufferSize`, and so does the `CachePool` constructor:
+
+```php
+<?php
+$pool = new \ByJG\Cache\Psr6\CachePool(new \ByJG\Cache\Psr16\RedisCacheEngine(), 50);
+
+$pool->setBufferSize(0);         // disable the buffer
+$size = $pool->getBufferSize();  // 0
+```
+
+## Check if the engine is available
+
+```php
+<?php
+if (!$pool->isAvailable()) {
+    // The underlying engine cannot be used (extension missing, server down, ...)
+}
+```

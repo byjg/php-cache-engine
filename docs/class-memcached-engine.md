@@ -18,6 +18,8 @@ $servers = [
 ];
 ```
 
+When `$servers` is `null` it defaults to `['127.0.0.1:11211']`; a server without a port uses `11211`.
+
 You can also pass Memcached client options (no need to pass a Memcached instance). Options can be provided as an associative array where the keys are Memcached option constants or their string names:
 
 ```php

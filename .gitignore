@@ -7,3 +7,4 @@ config/cacheconfig.php
 .phpunit.result.cache
 /phpunit.xml.dist.bak
 /.claude/settings.local.json
+.vscode
