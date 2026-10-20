@@ -124,7 +124,7 @@ is still a guess: a slow owner can have its lock expire while it is still workin
 will correctly refuse that owner's release, but the work has already run twice. If you need
 guarantees beyond "exactly one winner per acquisition", you want a real lock manager.
 
-## Why not FileSystemCacheEngine {#why-not-filesystemcacheengine}
+## Why not FileSystemCacheEngine
 
 The file system is not a reliable substrate for mutual exclusion, and this engine does not pretend
 otherwise. Use Redis or Memcached.
