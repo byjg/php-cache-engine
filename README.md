@@ -5,7 +5,7 @@ tags: [php, databases, cache]
 
 # Cache Engine
 
-PSR-6 and PSR-16 caching over memory, files, Redis or Memcached, with the atomic operations a distributed lock needs.
+PSR-6 and PSR-16 caching over memory, files, Redis or Memcached, extended with atomic increment, decrement and compare-and-swap.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
@@ -17,26 +17,32 @@ PSR-6 and PSR-16 caching over memory, files, Redis or Memcached, with the atomic
 
 ## Why
 
-A cache is easy until two processes use it at the same time. Checking `has()` and then
-calling `set()` leaves a gap where another process can write, so both believe they own the
-key, and most cache libraries offer nothing better.
+PSR-16 and PSR-6 cover get, set and delete, and stop there. A counter, a rate limit or a
+lock needs more: with only `get()` and `set()`, two processes read the same value and one
+update is lost, and checking `has()` before `set()` lets both believe they own a key.
 
-Cache Engine gives the same engines both standard interfaces (PSR-16 and PSR-6), and adds
-the operations the storage can do in one indivisible step:
+Cache Engine implements both standards and extends them with the operations the storage
+can do in one indivisible step:
 
 ```php
 $cache = new RedisCacheEngine('redis-host');
 
-if ($cache->setIfAbsent('lock:report', $token, 60)) {   // exactly one caller gets true
+$hits = $cache->increment('hits:home', 1, 60);           // atomic counter, with a TTL
+$cache->decrement('stock:sku-42');                        // never loses an update
+
+if ($cache->setIfAbsent('lock:report', $token, 60)) {    // exactly one caller gets true
     // ... only this process runs
-    $cache->deleteIfEquals('lock:report', $token);      // release only our own lock
+    $cache->deleteIfEquals('lock:report', $token);       // release only our own lock
 }
 ```
 
-- **Correct locks on Redis and Memcached.** `setIfAbsent()`, `deleteIfEquals()` and
-  `expireIfEquals()` compare and write atomically; engines that cannot guarantee it do not
-  offer them. [byjg/resilience](https://github.com/byjg/php-resilience) builds its
-  distributed mutex on them.
+- **Atomic operations beyond PSR.** `increment()`, `decrement()` and `add()` (append to a
+  list) read and modify the value in one step, on Redis, Memcached and the file system
+  (`AtomicOperationInterface`).
+- **Correct locks.** `setIfAbsent()`, `deleteIfEquals()` and `expireIfEquals()` compare and
+  write atomically on Redis and Memcached (`CompareAndSwapInterface`); engines that cannot
+  guarantee it do not offer them. [byjg/resilience](https://github.com/byjg/php-resilience)
+  builds its distributed mutex on them.
 - **Change the storage, keep the code.** Memory, file system, Redis, Memcached or the
   no-op engine behind the same interfaces.
 
