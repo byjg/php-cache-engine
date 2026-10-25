@@ -5,7 +5,7 @@ tags: [php, databases, cache]
 
 # Cache Engine
 
-A powerful, versatile cache implementation providing both PSR-6 and PSR-16 interfaces with support for multiple storage drivers.
+PSR-6 and PSR-16 caching over memory, files, Redis or Memcached, with the atomic operations a distributed lock needs.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-cache-engine/actions/workflows/phpunit.yml)
@@ -14,6 +14,31 @@ A powerful, versatile cache implementation providing both PSR-6 and PSR-16 inter
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-cache-engine/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-cache-engine.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-cache-engine.svg)](https://github.com/byjg/php-cache-engine/releases/)
+
+## Why
+
+A cache is easy until two processes use it at the same time. Checking `has()` and then
+calling `set()` leaves a gap where another process can write, so both believe they own the
+key, and most cache libraries offer nothing better.
+
+Cache Engine gives the same engines both standard interfaces (PSR-16 and PSR-6), and adds
+the operations the storage can do in one indivisible step:
+
+```php
+$cache = new RedisCacheEngine('redis-host');
+
+if ($cache->setIfAbsent('lock:report', $token, 60)) {   // exactly one caller gets true
+    // ... only this process runs
+    $cache->deleteIfEquals('lock:report', $token);      // release only our own lock
+}
+```
+
+- **Correct locks on Redis and Memcached.** `setIfAbsent()`, `deleteIfEquals()` and
+  `expireIfEquals()` compare and write atomically; engines that cannot guarantee it do not
+  offer them. [byjg/resilience](https://github.com/byjg/php-resilience) builds its
+  distributed mutex on them.
+- **Change the storage, keep the code.** Memory, file system, Redis, Memcached or the
+  no-op engine behind the same interfaces.
 
 ## Key Features
 
