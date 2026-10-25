@@ -1,5 +1,6 @@
 ---
 sidebar_key: cache-engine
+sidebar_category: infrastructure
 tags: [php, databases, cache]
 ---
 
