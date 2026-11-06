@@ -99,6 +99,7 @@ $value = $item->get();
 | [RedisCacheEngine](docs/class-redis-cache-engine.md)                | Redis-based caching                                     |
 | [SessionCacheEngine](docs/class-session-cache-engine.md)            | PHP session-based caching                               |
 | [TmpfsCacheEngine](docs/class-tmpfs-cache-engine.md)                | Tmpfs-based caching                                     |
+| [PhpFileCacheEngine](docs/class-php-file-cache-engine.md)           | PHP files read through OPcache, for entries written once (a DI container) |
 
 ### Advanced Features
 - [Atomic Operations](docs/atomic-operations.md)

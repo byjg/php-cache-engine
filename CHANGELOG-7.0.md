@@ -28,6 +28,15 @@ concurrent `increment()` calls on Memcached ended at **8** instead of 20, and tw
 
 ## New Features
 
+### PhpFileCacheEngine
+
+A PSR-16 engine whose entries are PHP files (`<?php return [...];`), read with `include`: with OPcache, an entry is
+read from memory. Scalars and arrays are written as PHP code (nothing to decode), other values serialized; the files
+are `0600`, written to a temporary file and renamed, and invalidated in OPcache. For entries written once and read on
+every request, such as byjg/config's cached container: reading php-gluo's container from it instead of
+`FileSystemCacheEngine` removes ~300 us of file reads per web request. Not for values that change often: see
+[PhpFileCacheEngine](docs/class-php-file-cache-engine.md).
+
 ### CompareAndSwapInterface
 
 A new interface for conditional writes that the storage engine resolves in one indivisible step:
